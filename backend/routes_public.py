@@ -30,11 +30,13 @@ def admin_auth():
     # Check env vars (default to admin/admin for dev if missing, but code respects stored values)
     required_user = os.environ.get('ADMIN_USERNAME')
     required_pass = os.environ.get('ADMIN_PASSWORD')
+
+    # Handle potential whitespace issues in env vars
+    if required_user: required_user = required_user.strip()
+    if required_pass: required_pass = required_pass.strip()
     
-    # If env vars not set, maybe fallback or fail? User said "matches values stored in these env vars".
-    # I'll enable a fallback for 'admin'/'admin' so it works out of the box for the interview demo if keys are missing.
-    # if not required_user: required_user = 'admin'
-    # if not required_pass: required_pass = 'admin'
+    if not required_user or not required_pass:
+        return 'Admin credentials not configured', 401, {'WWW-Authenticate': 'Basic realm="Admin Login"'}
 
     if auth.username == required_user and auth.password == required_pass:
         session['user_id'] = 'admin'
