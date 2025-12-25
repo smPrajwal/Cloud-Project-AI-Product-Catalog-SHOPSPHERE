@@ -1,0 +1,352 @@
+/* Modern Minimalist Theme (Option 1) */
+
+
+:root {
+    --bg-color: #ffffff;
+    --text-color: #111111;
+    --text-muted: #666666;
+    --accent-color: #000000;
+    --accent-hover: #333333;
+    --light-gray: #f9f9f9;
+    --border-color: #eaeaea;
+    --input-bg: #ffffff;
+    --font-family: 'Inter', sans-serif;
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    --hover-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
+    /* New Rounded Theme Variables */
+    --border-radius-sm: 8px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 20px;
+    --btn-radius: 50px;
+    /* Pill shape for buttons looks pro */
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-family);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 600;
+    color: var(--text-color);
+    letter-spacing: -0.03em;
+}
+
+a {
+    color: var(--text-color);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: var(--text-muted);
+}
+
+/* Navbar */
+.navbar {
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
+}
+
+/* Category Nav */
+.bg-dark {
+    background-color: #000000 !important;
+    border-bottom: none;
+    padding: 0.25rem 0 !important;
+    /* Slightly reduced */
+}
+
+.category-link {
+    color: #999999 !important;
+    font-weight: 600;
+    font-size: 1.05rem;
+    line-height: 1.3;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.35rem 1.1rem;
+    /* Slightly reduced */
+    border-radius: 50px;
+    display: inline-block;
+    margin: 0 0.5rem;
+    transition: all 0.25s ease;
+}
+
+.category-link:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.category-link.active {
+    color: #000000 !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-weight: 600;
+}
+
+/* Products */
+.product-card {
+    border: 1px solid var(--border-color);
+    /* Added subtle border */
+    border-radius: var(--border-radius-md);
+    /* Rounded */
+    background: #fff;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    /* For image rounding */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.product-card>a {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+}
+
+.card-img-top {
+    border-radius: 0;
+    /* Handled by card overflow */
+    background-color: var(--light-gray);
+    object-fit: contain !important;
+    padding: 2rem;
+    height: 250px;
+    /* Fixed height for alignment */
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+.product-card:hover .card-img-top {
+    background-color: #f0f0f0;
+}
+
+.card-body {
+    padding: 1.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    /* Fill space */
+}
+
+.card-title {
+    font-size: 1.1rem;
+    /* Slightly larger */
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    min-height: 3.2rem;
+    /* Reserve space for 2 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-price {
+    font-weight: 500;
+    color: var(--text-color);
+    font-size: 0.95rem;
+}
+
+/* Buttons */
+.btn {
+    border-radius: var(--btn-radius);
+    /* Pill shape */
+    padding: 0.6rem 1.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    letter-spacing: 0.01em;
+    transition: all 0.2s;
+}
+
+.btn-sm {
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+}
+
+.btn-primary {
+    background-color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-outline-dark {
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    background: transparent;
+}
+
+.btn-outline-dark:hover {
+    border-color: var(--accent-color);
+    background: var(--accent-color);
+    color: #fff;
+}
+
+/* Forms */
+.form-control {
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
+    background-color: var(--input-bg);
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+    /* Proper focus ring */
+    border-color: var(--accent-color);
+}
+
+/* Badges */
+.badge-minimal {
+    background: var(--light-gray);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 100px;
+}
+
+/* Auth Pages */
+.auth-container {
+    max-width: 450px;
+    margin: 80px auto;
+    padding: 40px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    background: #fff;
+    box-shadow: var(--card-shadow);
+    text-align: center;
+}
+
+.auth-container h2 {
+    margin-bottom: 2rem;
+    font-weight: 600;
+}
+
+/* Modal */
+.modal-content {
+    border-radius: var(--border-radius-lg);
+    border: none;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.5rem;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+/* General Card (e.g. Cart) */
+.card {
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--border-color);
+}
+
+/* Circular Buttons for Cart Control */
+.btn-circle {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+/* Sleek Nav Arrows */
+.nav-arrow {
+    background: transparent;
+    border: none;
+    color: #333;
+    font-size: 2rem;
+    padding: 0 1rem;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    /* Fix: removed 100% height */
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.nav-arrow:hover {
+    opacity: 1;
+    background: transparent;
+    color: #000;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    transform: translateY(-50%) scale(1.1);
+    /* Maintaining vertical center on hover */
+}
+
+/* Carousel Dots */
+.carousel-dots-container {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+    pointer-events: none;
+    /* Container passes clicks */
+}
+
+.carousel-dot {
+    width: 10px;
+    height: 10px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    pointer-events: auto;
+    /* Dots catch clicks */
+}
+
+.carousel-dot.active {
+    background-color: #fff;
+    transform: scale(1.2);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+    border-color: rgba(0, 0, 0, 0.3);
+}
+
+.carousel-dot:hover {
+    background-color: rgba(255, 255, 255, 0.8);
+}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | ShopSphere</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+
+<body class="bg-light">
+
+    <!-- Navbar (Simplified) -->
+    <!-- Navbar (Secondary) -->
+    {% include 'components/navbar_secondary.html' %}
+
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="text-center mb-5">
+                    <h1 class="display-4 fw-bold">{{ content.get('about_title', 'Our Story') }}</h1>
+                    <p class="lead text-muted">{{ content.get('about_subtitle', 'Passionate about quality. Dedicated to
+                        you.') }}</p>
+                </div>
+
+                {% if content.get('about_hero_image') %}
+                <div class="mb-5 rounded-3 overflow-hidden shadow-sm position-relative">
+                    <img src="{{ content.get('about_hero_image') }}" class="img-fluid w-100" alt="About Us Hero"
+                        style="max-height: 400px; object-fit: cover;">
+
+                </div>
+                {% else %}
+                <div class="mb-5 p-5 bg-light rounded-3 text-center border">
+                    <p class="text-muted mb-3">No hero image set</p>
+                </div>
+                {% endif %}
+
+                <div class="card border-0 shadow-sm p-5 mb-5">
+                    <h2 class="h4 fw-bold mb-4">{{ content.get('about_section1_title', 'How We Started') }}</h2>
+                    <div class="text-secondary lh-lg" style="white-space: pre-line;">{{
+                        content.get('about_section1_text', '') }}</div>
+                </div>
+
+                <div class="card border-0 shadow-sm p-5">
+                    <h2 class="h4 fw-bold mb-4">{{ content.get('about_section2_title', 'Our Passion') }}</h2>
+                    <div class="text-secondary lh-lg" style="white-space: pre-line;">{{
+                        content.get('about_section2_text', '') }}</div>
+                    <blockquote class="blockquote border-start border-4 border-dark ps-4 my-4">
+                        <p class="mb-0 fs-5">"Design is not just what it looks like and feels like. Design is how it
+                            works."</p>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    {% include 'components/footer.html' %}
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

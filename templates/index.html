@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopSphere</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/styles.css?v=2">
+    <!-- Optimize Font Loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <!-- Header -->
+    <header class="sticky-top bg-white shadow-sm">
+        <!-- Main Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+            <div class="container">
+                <a class="navbar-brand fw-bold fs-2" href="/">ShopSphere</a>
+                <div class="d-flex align-items-center">
+                    {% if session.get('is_admin') %}
+                    <button class="btn btn-outline-dark btn-sm me-5" onclick="openAddModal()">
+                        + Add Product
+                    </button>
+
+                    </a>
+                    {% endif %}
+
+                    <div class="me-3">
+                        <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Search..."
+                            onkeyup="searchProducts()"
+                            style="font-size: 1.1rem; padding: 0.35rem 0.65rem; height: 34px;">
+                    </div>
+
+                    <div class="ms-4 d-flex align-items-center">
+
+                        {% if session.get('is_admin') %}
+                        <a href="/logout" class="btn btn-sm btn-outline-danger me-3">Exit as Admin</a>
+                        <span class="me-3 fs-6 fw-medium">Hi, {{ session.get('username') }}</span>
+                        <!-- Admin Menu -->
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-sm btn-outline-secondary ms-2 border rounded-3 d-flex align-items-center justify-content-center"
+                                type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false"
+                                style="width: 40px; height: 40px; padding: 0;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                                    class="bi bi-list" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd"
+                                        d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
+                                </svg>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="userMenu">
+                                <li><a class="dropdown-item" href="/">Home</a></li>
+                                <li><a class="dropdown-item" href="/about">About Us</a></li>
+                            </ul>
+                        </div>
+                        {% else %}
+                        <a href="/admin-auth" class="btn btn-sm btn-outline-dark me-3">Admin</a>
+                        <!-- Guest Menu -->
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-sm btn-outline-secondary ms-2 border rounded-3 d-flex align-items-center justify-content-center"
+                                type="button" id="guestMenu" data-bs-toggle="dropdown" aria-expanded="false"
+                                style="width: 40px; height: 40px; padding: 0;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                                    class="bi bi-list" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd"
+                                        d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
+                                </svg>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="guestMenu">
+                                <li><a class="dropdown-item" href="/">Home</a></li>
+                                <li><a class="dropdown-item" href="/about">About Us</a></li>
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Category Navbar -->
+        <div class="container-fluid mt-3" style="width: 98%;">
+            <div class="bg-dark text-white py-2 rounded-3 d-flex justify-content-center overflow-auto shadow-sm">
+                <a href="#" class="category-link active text-decoration-none" data-tag=""
+                    onclick="loadProducts('')">All</a>
+                <a href="#" class="category-link text-decoration-none" data-tag="tech"
+                    onclick="loadProducts('tech')">Electronics</a>
+                <a href="#" class="category-link text-decoration-none" data-tag="fashion"
+                    onclick="loadProducts('fashion')">Fashion</a>
+                <a href="#" class="category-link text-decoration-none" data-tag="kitchen"
+                    onclick="loadProducts('kitchen')">Kitchen</a>
+                <a href="#" class="category-link text-decoration-none" data-tag="lifestyle"
+                    onclick="loadProducts('lifestyle')">Lifestyle</a>
+                <a href="#" class="category-link text-decoration-none" data-tag="office"
+                    onclick="loadProducts('office')">Office</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Advertisement Carousel -->
+    <div class="container-fluid px-3 mt-3 mb-0">
+        <div class="position-relative">
+
+            <div id="promoCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+                <div class="carousel-inner rounded-4 shadow-lg overflow-hidden" style="height: 200px;">
+                    {% for ad in ads %}
+                    <div class="carousel-item {{ 'active' if loop.first else '' }}" style="height: 100%;">
+                        <div class="d-flex align-items-center justify-content-between h-100 px-5"
+                            style="background: {{ ad['gradient'] }};">
+                            <div class="text-white">
+                                <span class="badge bg-warning text-dark mb-2">{{ ad['badge'] }}</span>
+                                <h2 class="fw-bold mb-2">{{ ad['title'] }}</h2>
+                                <p class="mb-3 opacity-75">{{ ad['subtitle'] }}</p>
+                                <button class="btn btn-light btn-sm fw-bold px-4"
+                                    onclick="loadProducts('{{ ad['category'] }}')">{{ ad['button_text']
+                                    }}</button>
+                            </div>
+                            <div class="d-none d-md-block">
+                                {% if ad['image_url'] %}
+                                <img src="{{ ad['image_url'] }}" class="rounded-3 shadow"
+                                    style="height: 160px; object-fit: cover;">
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <!-- Navigation Buttons -->
+                <button class="carousel-control-prev" type="button" data-bs-target="#promoCarousel" data-bs-slide="prev"
+                    style="width: 50px; height: 50px; top: 50%; transform: translateY(-50%); left: 10px; background: rgba(255,255,255,0.9); border-radius: 50%; opacity: 1;">
+                    <span class="carousel-control-prev-icon" aria-hidden="true" style="filter: invert(1);"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#promoCarousel" data-bs-slide="next"
+                    style="width: 50px; height: 50px; top: 50%; transform: translateY(-50%); right: 10px; background: rgba(255,255,255,0.9); border-radius: 50%; opacity: 1;">
+                    <span class="carousel-control-next-icon" aria-hidden="true" style="filter: invert(1);"></span>
+                </button>
+                <!-- Indicators -->
+                <div class="carousel-indicators" style="bottom: 10px;">
+                    {% for ad in ads %}
+                    <button type="button" data-bs-target="#promoCarousel" data-bs-slide-to="{{ loop.index0 }}"
+                        class="{{ 'active' if loop.first else '' }}"
+                        style="width: 30px; height: 4px; border-radius: 2px;"></button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container pt-4 pb-5">
+        <div class="row" id="productGrid">
+            <!-- Products will be injected here by JS -->
+            <div class="col-12 text-center mt-5">
+                <div class="spinner-border text-dark" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div class="modal fade" id="addProductModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productModalTitle">New Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addProductForm">
+
+                        <!-- Admin auth handled by session now -->
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" id="pName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Actual Price (Original)</label>
+                            <input type="number" class="form-control" id="pOriginalPrice" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Discounted Price</label>
+                            <input type="number" class="form-control" id="pPrice" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Product Images</label>
+                            <!-- Existing Images Area -->
+
+
+                            <input type="file" class="form-control" id="pImages" multiple accept="image/*">
+                            <div class="form-text">Select multiple images if needed. First image will be the thumbnail.
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="pDesc" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tags (comma separated)</label>
+                            <input type="text" class="form-control" id="pTags" placeholder="minimal, featured, new">
+                        </div>
+                        <button type="submit" class="btn btn-dark d-block mx-auto w-50" id="modalSubmitBtn">Create
+                            Product</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <!-- Footer -->
+    {% include 'components/footer.html' %}
+
+
+
+    <!-- Scripts -->
+    <script>
+        const IS_ADMIN = {{ 'true' if session.get('is_admin') else 'false' }};
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/main.js?v=7"></script>
+    {% if session.get('is_admin') %}
+    <script src="/static/js/admin.js?v=2"></script>
+    {% endif %}
+    <script>
+        // Init load
+        document.addEventListener('DOMContentLoaded', () => loadProducts());
+    </script>
+</body>
+
+</html>

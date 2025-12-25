@@ -1,0 +1,50 @@
+<nav class="navbar navbar-expand-lg border-bottom-0">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-2" href="/">ShopSphere</a>
+
+        <!-- Right: Cart & User Menu -->
+        <div class="d-flex align-items-center ms-auto">
+            <a href="javascript:history.back()" class="btn btn-link text-dark text-decoration-none me-2">← Back</a>
+
+
+            {% if session.get('is_admin') %}
+            <a href="/logout" class="btn btn-sm btn-outline-danger me-3">Exit as Admin</a>
+            <span class="me-3 fs-6 fw-medium">Hi, {{ session.get('username') }}</span>
+            <div class="dropdown">
+                <button
+                    class="btn btn-sm btn-outline-secondary ms-2 border rounded-3 d-flex align-items-center justify-content-center"
+                    type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false"
+                    style="width: 40px; height: 40px; padding: 0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                        class="bi bi-list" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
+                    </svg>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="userMenu">
+                    <li><a class="dropdown-item" href="/">Home</a></li>
+                    <li><a class="dropdown-item" href="/about">About Us</a></li>
+                </ul>
+            </div>
+            {% else %}
+            <a href="/admin-auth" class="btn btn-sm btn-outline-dark me-3">Admin</a>
+            <div class="dropdown">
+                <button
+                    class="btn btn-sm btn-outline-secondary ms-2 border rounded-3 d-flex align-items-center justify-content-center"
+                    type="button" id="guestMenu" data-bs-toggle="dropdown" aria-expanded="false"
+                    style="width: 40px; height: 40px; padding: 0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                        class="bi bi-list" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
+                    </svg>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="guestMenu">
+                    <li><a class="dropdown-item" href="/">Home</a></li>
+                    <li><a class="dropdown-item" href="/about">About Us</a></li>
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</nav>
