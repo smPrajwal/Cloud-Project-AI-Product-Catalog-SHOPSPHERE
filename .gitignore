@@ -1,0 +1,6 @@
+venv_win/
+venv_linux/
+__pycache__/
+*.pyc
+.env
+product_catalog.db

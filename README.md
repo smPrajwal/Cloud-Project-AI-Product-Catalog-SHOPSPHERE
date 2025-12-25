@@ -8,16 +8,11 @@ This application provides a clean, responsive UI for browsing products, submitti
 ## How to Run Locally
 
 ```bash
-# 1. Create venv
-python3 -m venv venv
-# Windows: venv\Scripts\activate
-# Linux/Mac: source venv/bin/activate
+# Windows
+run
 
-# 2. Install dependencies
-pip install -r requirements.txt
-
-# 3. Run App
-python app.py
+# Linux / Mac
+./run.sh
 ```
 
 Access at: http://localhost:5000
