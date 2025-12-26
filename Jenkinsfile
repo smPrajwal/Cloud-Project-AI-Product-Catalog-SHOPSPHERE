@@ -1,27 +1,59 @@
 pipeline {
     agent any
-
     stages {
-        stage('Checkout') {
+        stage('Testing') {
             steps {
-                checkout scm
+                sh '''
+                    set -e
+
+                    echo "Testing Started"
+
+                    python3 -m compileall .
+
+                    test -d static
+                    test -d templates
+                    test -d backend
+                    test -f app.py
+                    test -f startup.sh
+                    test -f requirements.txt
+
+                    echo "All Checks passed in Testing!"
+                '''
             }
         }
-        
-        stage('Unit Test') {
+        stage('Testing') {
             steps {
-                // Trivial placeholder for interview demo
-                echo 'Running unit tests...'
-                // sh 'python3 -m pytest' // if tests existed
-                echo 'No tests found (Skipped)'
+                
             }
         }
-        
-        stage('Package') {
+        stage('Testing') {
             steps {
-                echo 'Packaging application...'
-                // Simple zip of the required artifacts
-                sh 'zip -r artifact.zip app.py templates/ static/ requirements.txt'
+                
+            }
+        }
+        stage('Testing') {
+            steps {
+                
+            }
+        }
+        stage('Testing') {
+            steps {
+                
+            }
+        }
+        stage('Testing') {
+            steps {
+                
+            }
+        }
+        stage('Testing') {
+            steps {
+                
+            }
+        }
+        stage('Testing') {
+            steps {
+                
             }
         }
     }

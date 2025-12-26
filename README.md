@@ -7,13 +7,13 @@ This application provides a clean, responsive UI for browsing products, submitti
 
 ## How to Run Locally
 
-```bash
+venv activation:
+
 # Windows
-run
+venv_win\Scripts\python app.py
 
 # Linux / Mac
-./run.sh
-```
+venv_linux/bin/python app.py
 
 Access at: http://localhost:5000
 
