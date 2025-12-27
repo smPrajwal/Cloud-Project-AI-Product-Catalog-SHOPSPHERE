@@ -11,8 +11,7 @@ pipeline {
     stages {
         stage('Testing') {
             when {
-                expression {params.Run_type == 'Clone and Package (CI)' ||
-                params.Run_type == 'Full Pipeline (CICD)'}
+                expression {params.Run_type != 'Deploy Infrastructure and Application (CD)'}
             }
             steps {
                 echo "Testing Started..."
@@ -34,8 +33,7 @@ pipeline {
 
         stage('Packaging') {
             when {
-                expression {params.Run_type == 'Clone and Package (CI)' ||
-                params.Run_type == 'Full Pipeline (CICD)'}
+                expression {params.Run_type != 'Deploy Infrastructure and Application (CD)'}
             }
             steps {
                 sh '''
@@ -47,49 +45,52 @@ pipeline {
 
         stage('Push to Artifacts') {
             when {
-                expression {params.Run_type == 'Clone and Package (CI)' ||
-                params.Run_type == 'Full Pipeline (CICD)'}
+                expression {params.Run_type != 'Deploy Infrastructure and Application (CD)'}
             }
             steps {
                 archiveArtifacts artifacts: 'project1_shopsphere.zip'
                 echo "Artifact has been pushed"
             }
         }
-        stage('Provision & Fetch') {
-            when {
-                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' ||
-                params.Run_type == 'Full Pipeline (CICD)'}
-            }
-            parallel {
-                stage('Creating Resources using Terraform') {
-                    steps {
-                        input message: 'Approve to deploy the Infrastructure and Application'
-                        sh '''
-                            echo "In 'Creating Resources using Terraform' Stage"
-                        '''
-                    }
-                }
 
-                stage('Pull from Artifacts') {
-                    when {
-                        expression {params.Run_type == 'Deploy Infrastructure and Application (CD)'}
-                    }
-                    steps {
-                        copyArtifacts(
-                        projectName: env.JOB_NAME,
-                        selector: lastSuccessful(),
-                        filter: 'project1_shopsphere.zip'
-                        )
-                        echo "Pulled the Artifact"
-                    }
-                }
+        stage('Manual Approval') {
+            when {
+                expression {params.Run_type != 'Clone and Package (CI)'}
+            }
+            steps {
+                input message: 'Approve to deploy the Infrastructure and Application'
+            }
+        }
+
+        stage('Creating Resources using Terraform') {
+            when {
+                expression {params.Run_type != 'Clone and Package (CI)'}
+            }
+            steps {
+                sh '''
+                    echo "In 'Creating Resources using Terraform' Stage"
+                '''
+            }
+        }
+
+        stage('Pull from Artifacts') {
+            when {
+                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)'}
+            }
+            steps {
+                copyArtifacts(
+                projectName: env.JOB_NAME,
+                selector: lastSuccessful(),
+                filter: 'project1_shopsphere.zip'
+                )
+                sh 'test -f project1_shopsphere.zip'
+                echo "Pulled the Artifact"
             }
         }
 
         stage('Configuration and Deployment using Ansible') {
             when {
-                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' ||
-                params.Run_type == 'Full Pipeline (CICD)'}
+                expression {params.Run_type != 'Clone and Package (CI)'}
             }
             steps {
                 sh '''
@@ -100,20 +101,19 @@ pipeline {
 
         stage('Smoke Testing') {
             when {
-                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' ||
-                params.Run_type == 'Full Pipeline (CICD)'}
+                expression {params.Run_type != 'Clone and Package (CI)'}
             }
             steps {
                 echo "Smoke Test Started..."
                 // sh '''
                 //     set -e
-                //     URL="${VM_URL}"
+                //     URL="${env.VM_URL}"
 
                 //     curl --fail --max-time 10 "$URL/health"
 
-                //     curl -s "$URL" | grep -q "ShopSphere"
+                //     curl -s --max-time 10 "$URL" | grep -q "ShopSphere"
                 // '''
-                echo "SMOKE TEST PASSED: Website is LIVE and working!"
+                // echo "SMOKE TEST PASSED: Website is LIVE and working!"
 
                 // //Sleeping for the mentioned amount of time
                 // echo "Sleeping for amount of time, before destroying all the Terraform resources"
@@ -123,29 +123,26 @@ pipeline {
     }
     post {
         always {
+            def body = ""
             script {
                 env.VM_URL = sh(
                     script: 'echo "<Add URL here>"',
                     returnStdout: true
                 ).trim()
-                def body = "\$DEFAULT_CONTENT"
-                if (
-                    (params.Run_type == 'Deploy Infrastructure and Application (CD)' ||
-                     params.Run_type == 'Full Pipeline (CICD)') &&
-                    currentBuild.currentResult == 'SUCCESS'
-                ) {
+                body = '$DEFAULT_CONTENT'
+                if (params.Run_type != 'Clone and Package (CI)' && currentBuild.currentResult == 'SUCCESS') {
                     body += """
-                        <br/>
-                        Click here to access the application: 
-                        <a href="${env.VM_URL}">Open application</a>
+                    <br/>
+                    Click here to access the application: 
+                    <a href="${env.VM_URL}">Open application</a>
                     """
                 }
-                emailext (
-                    subject: '$DEFAULT_SUBJECT',
-                    body: body,
-                    mimeType: 'text/html'
-                )
             }
+            emailext (
+                subject: '$DEFAULT_SUBJECT',
+                body: body,
+                mimeType: 'text/html'
+            )
             cleanWs()
             echo "Workspace cleaned."
         }
