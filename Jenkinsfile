@@ -123,13 +123,12 @@ pipeline {
     }
     post {
         always {
-            def body = ""
             script {
                 env.VM_URL = sh(
                     script: 'echo "<Add URL here>"',
                     returnStdout: true
                 ).trim()
-                body = '$DEFAULT_CONTENT'
+                def body = '$DEFAULT_CONTENT'
                 if (params.Run_type != 'Clone and Package (CI)' && currentBuild.currentResult == 'SUCCESS') {
                     body += """
                     <br/>
@@ -137,12 +136,12 @@ pipeline {
                     <a href="${env.VM_URL}">Open application</a>
                     """
                 }
+                emailext (
+                    subject: '$DEFAULT_SUBJECT',
+                    body: body,
+                    mimeType: 'text/html'
+                )
             }
-            emailext (
-                subject: '$DEFAULT_SUBJECT',
-                body: body,
-                mimeType: 'text/html'
-            )
             cleanWs()
             echo "Workspace cleaned."
         }
