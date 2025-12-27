@@ -36,7 +36,8 @@ pipeline {
             steps {
                 echo "------------------------------------ Started Packaging!... -------------------------------"
                 sh '''
-                    zip -r project1_shopsphere.zip app.py startup.sh abc.txt backend database static templates
+                    zip -r project1_shopsphere.zip app.py startup.sh backend database static templates
+                    test -f project1_shopsphere.zip
                 '''
                 echo "-------------------- Packaging Completed: Application has been Packaged! -----------------"
             }
