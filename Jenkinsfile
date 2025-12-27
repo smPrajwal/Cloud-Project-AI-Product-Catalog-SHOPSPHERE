@@ -24,7 +24,7 @@ pipeline {
                     test -f app.py
                     test -f startup.sh
                     test -f requirements.txt
-                    test -f testfile.py
+                    test -f testfile
                 '''
                 echo "----------------------- Testing Completed: All Checks passed in Testing! -----------------"
             }
