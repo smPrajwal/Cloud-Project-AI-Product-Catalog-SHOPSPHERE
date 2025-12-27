@@ -80,7 +80,7 @@ pipeline {
             steps {
                 copyArtifacts(
                 projectName: env.JOB_NAME,
-                selector: lastSuccessful(),
+                selector: successful(),
                 filter: 'project1_shopsphere.zip'
                 )
                 sh 'test -f project1_shopsphere.zip'
