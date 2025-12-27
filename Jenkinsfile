@@ -14,7 +14,7 @@ pipeline {
                 expression {params.Run_type != 'Deploy Infrastructure and Application (CD)'}
             }
             steps {
-                echo "Testing Started..."
+                echo "Testing Started!..."
                 sh '''
                     set -e
 
