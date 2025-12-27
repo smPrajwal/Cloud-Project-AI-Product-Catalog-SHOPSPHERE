@@ -137,6 +137,7 @@ pipeline {
                     """
                 }
                 emailext (
+                    to: '$DEFAULT_RECIPIENTS',
                     subject: '$DEFAULT_SUBJECT',
                     body: body,
                     mimeType: 'text/html'
