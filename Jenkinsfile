@@ -18,7 +18,7 @@ pipeline {
                 sh '''
                     set -e
 
-                    python3 -m compileall -f -q . || exit 1
+                    python3 -m compileall -f -q -e .
 
                     test -d static
                     test -d templates
