@@ -154,8 +154,8 @@ pipeline {
                     mimeType: 'text/html'
                 )
             }
-            cleanWs()
-            echo "--------- Workspace cleaned!!! ---------"
+            // cleanWs()
+            // echo "--------- Workspace cleaned!!! ---------"
         }
     }
 }
