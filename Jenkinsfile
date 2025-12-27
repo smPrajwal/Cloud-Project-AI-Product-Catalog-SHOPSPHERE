@@ -14,7 +14,7 @@ pipeline {
                 expression {params.Run_type != 'Deploy Infrastructure and Application (CD)'}
             }
             steps {
-                echo "Testing Started!..."
+                echo "-------------------------------------- Started Testing!... -------------------------------"
                 sh '''
                     set -e
 
@@ -27,7 +27,7 @@ pipeline {
                     test -f startup.sh
                     test -f requirements.txt
                 '''
-                echo "All Checks passed in Testing!"
+                echo "----------------------- Testing Completed: All Checks passed in Testing! -----------------"
             }
         }
 
@@ -36,10 +36,11 @@ pipeline {
                 expression {params.Run_type != 'Deploy Infrastructure and Application (CD)'}
             }
             steps {
+                echo "------------------------------------ Started Packaging!... -------------------------------"
                 sh '''
                     zip -r project1_shopsphere.zip app.py startup.sh backend database static templates
                 '''
-                echo "Application has been Packaged!"
+                echo "-------------------- Packaging Completed: Application has been Packaged! -----------------"
             }
         }
 
@@ -48,8 +49,9 @@ pipeline {
                 expression {params.Run_type != 'Deploy Infrastructure and Application (CD)'}
             }
             steps {
+                echo "----------------------- Started Archiving to Jenkins Artifact!... ------------------------"
                 archiveArtifacts artifacts: 'project1_shopsphere.zip'
-                echo "Artifact has been pushed!"
+                echo "-------------------- Archiving Completed: Artifact has been pushed! ----------------------"
             }
         }
 
@@ -58,7 +60,9 @@ pipeline {
                 expression {params.Run_type != 'Clone and Package (CI)'}
             }
             steps {
+                echo "-------------------------- Waiting for manual approval!... -------------------------------"
                 input message: 'Approve to deploy the Infrastructure and Application'
+                echo "--------------------- Approval Completed: Successfully Approved! -------------------------"
             }
         }
 
@@ -67,9 +71,11 @@ pipeline {
                 expression {params.Run_type != 'Clone and Package (CI)'}
             }
             steps {
+                echo "--------------- Started Building the Infrastructure using Terraform!... ------------------"
                 sh '''
                     echo "In 'Creating Resources using Terraform' Stage!"
                 '''
+                echo "--------- Infrastructure Building Completed: Infrastructure is built and ready! ----------"
             }
         }
 
@@ -78,13 +84,14 @@ pipeline {
                 expression {params.Run_type == 'Deploy Infrastructure and Application (CD)'}
             }
             steps {
+                echo "------------------------ Started pulling the Artifact!... --------------------------------"
                 copyArtifacts(
                 projectName: env.JOB_NAME,
                 selector: lastWithArtifacts(),
                 filter: 'project1_shopsphere.zip'
                 )
                 sh 'test -f project1_shopsphere.zip'
-                echo "Pulled the Artifact!"
+                echo "----------- Pulled the Artifact: The Artifact is ready in the workspace! -----------------"
             }
         }
 
@@ -93,9 +100,11 @@ pipeline {
                 expression {params.Run_type != 'Clone and Package (CI)'}
             }
             steps {
+                echo "------------------- Started to Configure the Servers!... ---------------------------------"
                 sh '''
                     echo "In 'Configuration and Deployment using Ansible' Stage!"
                 '''
+                echo "---------- Configuration Completed: The Servers are configured and ready! ----------------"
             }
         }
 
@@ -104,7 +113,7 @@ pipeline {
                 expression {params.Run_type != 'Clone and Package (CI)'}
             }
             steps {
-                echo "Smoke Test Started!..."
+                echo "------------------------- Started Smoke Testing!... --------------------------------------"
                 // sh '''
                 //     set -e
                 //     URL="${env.VM_URL}"
@@ -118,6 +127,7 @@ pipeline {
                 // //Sleeping for the mentioned amount of time
                 // echo "Sleeping for amount of time, before destroying all the Terraform resources"
                 // sleep time: 10, unit: 'MINUTES'
+                echo "--------- Smoke Testing Completed: The application is LIVE and working! ------------------"
             }
         }
     }
