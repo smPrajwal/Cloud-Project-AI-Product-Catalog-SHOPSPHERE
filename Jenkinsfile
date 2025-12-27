@@ -156,7 +156,7 @@ pipeline {
                 )
             }
             cleanWs()
-            echo "Workspace cleaned."
+            echo "--------- Workspace cleaned!!! ---------"
         }
     }
 }
