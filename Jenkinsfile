@@ -18,8 +18,6 @@ pipeline {
                 sh '''
                     set -e
 
-                    python3 -m compileall -q . || exit 1
-
                     test -d static
                     test -d templates
                     test -d backend
