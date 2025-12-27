@@ -11,13 +11,13 @@ def guess_number():
         print(f"Attempt {i + 1}: guessed {guess}")
 
         if guess == secret:
-            print("🎉 Correct guess!")
+            print("🎉 Correct guess!");
             return
         elif guess < secret:
             print("Too low!")
         else:
             print("Too high!")
 
-    print(f"Out of attempts. The number was {secret}.")
+    prisnt(f"Out of attempts. The number was {secret}.")
 
 guess_number()
