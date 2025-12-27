@@ -39,7 +39,7 @@ pipeline {
                 sh '''
                     zip -r project1_shopsphere.zip app.py startup.sh backend database static templates
                 '''
-                echo "Application has been Packaged"
+                echo "Application has been Packaged!"
             }
         }
 
@@ -49,7 +49,7 @@ pipeline {
             }
             steps {
                 archiveArtifacts artifacts: 'project1_shopsphere.zip'
-                echo "Artifact has been pushed"
+                echo "Artifact has been pushed!"
             }
         }
 
@@ -68,7 +68,7 @@ pipeline {
             }
             steps {
                 sh '''
-                    echo "In 'Creating Resources using Terraform' Stage"
+                    echo "In 'Creating Resources using Terraform' Stage!"
                 '''
             }
         }
@@ -84,7 +84,7 @@ pipeline {
                 filter: 'project1_shopsphere.zip'
                 )
                 sh 'test -f project1_shopsphere.zip'
-                echo "Pulled the Artifact"
+                echo "Pulled the Artifact!"
             }
         }
 
@@ -94,7 +94,7 @@ pipeline {
             }
             steps {
                 sh '''
-                    echo "In 'Configuration and Deployment using Ansible' Stage"
+                    echo "In 'Configuration and Deployment using Ansible' Stage!"
                 '''
             }
         }
@@ -104,7 +104,7 @@ pipeline {
                 expression {params.Run_type != 'Clone and Package (CI)'}
             }
             steps {
-                echo "Smoke Test Started..."
+                echo "Smoke Test Started!..."
                 // sh '''
                 //     set -e
                 //     URL="${env.VM_URL}"
