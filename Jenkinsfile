@@ -140,6 +140,8 @@ pipeline {
                     to: '$DEFAULT_RECIPIENTS',
                     subject: '$DEFAULT_SUBJECT',
                     body: body,
+                    attachLog: true, 
+                    compressLog: true,
                     mimeType: 'text/html'
                 )
             }
