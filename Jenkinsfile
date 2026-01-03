@@ -21,9 +21,11 @@ pipeline {
                     test -d static
                     test -d templates
                     test -d backend
+                    test -d database
                     test -f app.py
                     test -f startup.sh
-                    test -f requirements.txt
+                    test -f requirements_backend.txt
+                    test -f requirements_frontend.txt
                 '''
                 echo "----------------------- Testing Completed: All Checks passed in Testing! -----------------"
             }
