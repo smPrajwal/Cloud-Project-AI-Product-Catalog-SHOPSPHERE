@@ -38,8 +38,11 @@ pipeline {
             steps {
                 echo "------------------------------------ Started Packaging!... -------------------------------"
                 sh '''
-                    zip -r project1_shopsphere.zip app.py startup.sh backend database static templates
-                    test -f project1_shopsphere.zip
+                    zip -r project1_shopsphere_frontend.zip app.py startup.sh requirements_frontend.txt frontend_pkg shared_pkg templates static
+                    zip -r project1_shopsphere_backend.zip app.py startup.sh requirements_backend.txt backend_pkg shared_pkg database
+                    test -f project1_shopsphere_frontend.zip
+                    test -f project1_shopsphere_backend.zip
+
                 '''
                 echo "-------------------- Packaging Completed: Application has been Packaged! -----------------"
             }
@@ -51,7 +54,7 @@ pipeline {
             }
             steps {
                 echo "----------------------- Started Archiving to Jenkins Artifact!... ------------------------"
-                archiveArtifacts artifacts: 'project1_shopsphere.zip'
+                archiveArtifacts artifacts: 'project1_shopsphere_frontend.zip, project1_shopsphere_backend.zip'
                 echo "-------------------- Archiving Completed: Artifact has been pushed! ----------------------"
             }
         }
@@ -89,9 +92,12 @@ pipeline {
                 copyArtifacts(
                 projectName: env.JOB_NAME,
                 selector: lastWithArtifacts(),
-                filter: 'project1_shopsphere.zip'
+                filter: 'project1_shopsphere_frontend.zip, project1_shopsphere_backend.zip'
                 )
-                sh 'test -f project1_shopsphere.zip'
+                sh '''
+                    test -f project1_shopsphere_frontend.zip
+                    test -f project1_shopsphere_backend.zip
+                '''
                 echo "----------- Pulled the Artifact: The Artifact is ready in the workspace! -----------------"
             }
         }

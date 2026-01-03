@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, session
 from database.db import get_db
-from .utils import analyze_sentiment
+from shared_pkg.utils import analyze_sentiment
 
 api_bp = Blueprint('api', __name__)
 

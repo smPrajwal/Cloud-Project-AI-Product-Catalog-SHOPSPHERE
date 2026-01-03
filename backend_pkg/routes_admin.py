@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 import time
 from database.db import get_db
-from .utils import upload_product_image
+from shared_pkg.utils import upload_product_image
 
 admin_bp = Blueprint('admin', __name__)
 

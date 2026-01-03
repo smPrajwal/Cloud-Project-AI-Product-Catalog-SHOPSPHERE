@@ -2,7 +2,7 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from database.db import init_db, close_connection
-from backend.utils import format_indian_currency
+from shared_pkg.utils import format_indian_currency
 
 app = Flask(__name__)
 CORS(app) # Allow Frontend to talk to Backend
@@ -18,7 +18,7 @@ app.jinja_env.filters['indian_format'] = format_indian_currency
 
 # 1. Try Loading UI (Frontend)
 try:
-    from backend.routes_ui import ui_bp
+    from frontend_pkg.routes_ui import ui_bp
     app.register_blueprint(ui_bp)
     print("LOG: Loaded UI (Frontend)")
 except ImportError:
@@ -28,11 +28,11 @@ except Exception as e:
 
 # 2. Try Loading API (Backend)
 try:
-    from backend.routes_api import api_bp
+    from backend_pkg.routes_api import api_bp
     app.register_blueprint(api_bp)
     
     # 3. Only Load Admin if API is present (Backend Only)
-    from backend.routes_admin import admin_bp
+    from backend_pkg.routes_admin import admin_bp
     app.register_blueprint(admin_bp)
     
     print("LOG: Loaded API & Admin (Backend)")
