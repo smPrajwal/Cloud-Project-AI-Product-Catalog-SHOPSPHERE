@@ -20,7 +20,9 @@ pipeline {
 
                     test -d static
                     test -d templates
-                    test -d backend
+                    test -d backend_pkg
+                    test -d frontend_pkg
+                    test -d shared_pkg
                     test -d database
                     test -f app.py
                     test -f startup.sh
