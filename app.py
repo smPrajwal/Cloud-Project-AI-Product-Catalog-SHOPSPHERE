@@ -1,11 +1,8 @@
 import os
 from flask import Flask
 from flask_cors import CORS
-# Trigger reload
 from database.db import init_db, close_connection
 from backend.utils import format_indian_currency
-from backend.routes_admin import admin_bp
-from backend.routes_public import common_bp
 
 app = Flask(__name__)
 CORS(app) # Allow Frontend to talk to Backend
@@ -17,15 +14,42 @@ DB_FILE = 'database/product_catalog.db'
 # Register Filters
 app.jinja_env.filters['indian_format'] = format_indian_currency
 
-# Register Blueprints
-app.register_blueprint(common_bp)
-app.register_blueprint(admin_bp)
+# --- Conditional Loading for Decoupling ---
+
+# 1. Try Loading UI (Frontend)
+try:
+    from backend.routes_ui import ui_bp
+    app.register_blueprint(ui_bp)
+    print("LOG: Loaded UI (Frontend)")
+except ImportError:
+    print("LOG: UI Module not found - Running in Headless Mode")
+except Exception as e:
+    print(f"LOG: UI Load Error: {e}")
+
+# 2. Try Loading API (Backend)
+try:
+    from backend.routes_api import api_bp
+    app.register_blueprint(api_bp)
+    
+    # 3. Only Load Admin if API is present (Backend Only)
+    from backend.routes_admin import admin_bp
+    app.register_blueprint(admin_bp)
+    
+    print("LOG: Loaded API & Admin (Backend)")
+except ImportError:
+    print("LOG: API Module not found - Running in Frontend-Only Mode")
+except Exception as e:
+    print(f"LOG: API Load Error: {e}")
+
 
 # Register Teardown
 app.teardown_appcontext(close_connection)
 
 # Ensure DB and migrations are applied on every start (idempotent)
-init_db(app)
+try:
+    init_db(app)
+except Exception:
+    print("LOG: DB Init skipped (Likely Frontend Server)")
 
 if __name__ == '__main__':
     debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'

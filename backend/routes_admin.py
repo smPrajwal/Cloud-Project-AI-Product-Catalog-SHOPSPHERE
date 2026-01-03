@@ -25,16 +25,25 @@ def add_product():
     db.commit()
     return jsonify({'success': True, 'data': {'id': product_id}, 'message': 'Product created'}), 201
 
-@admin_bp.route('/api/products/<int:id>/image', methods=['POST'])
-def add_product_image(id):
+@admin_bp.route('/api/products/<id_or_slug>/image', methods=['POST'])
+def add_product_image(id_or_slug):
     if not session.get('is_admin'):
         return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+
+    db = get_db()
+    # Resolve ID
+    if str(id_or_slug).isdigit():
+        id = id_or_slug
+    else:
+        search = '%' + '%'.join(id_or_slug.split('-')) + '%'
+        product = db.execute('SELECT id FROM products WHERE LOWER(name) LIKE LOWER(?)', (search,)).fetchone()
+        if not product: return jsonify({'success': False, 'error': 'Product not found'}), 404
+        id = product['id']
 
     file = request.files.get('file')
     if not file:
         return jsonify({'success': False, 'error': 'No file provided'}), 400
 
-    db = get_db()
     product = db.execute('SELECT * FROM products WHERE id = ?', (id,)).fetchone()
     
     if not product:

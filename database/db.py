@@ -2,7 +2,7 @@ import sqlite3
 import os
 from flask import g
 import time
-import pyodbc
+
 
 DB_FILE = 'database/product_catalog.db'
 
@@ -11,6 +11,7 @@ def get_db():
     if db is None:
         # 1. Try Azure SQL (if env var exists)
         if os.environ.get('AZURE_SQL_CONN'):
+            import pyodbc
             # Retry loop for Azure Free Tier (It sleeps when idle)
             for attempt in range(3):
                 try:

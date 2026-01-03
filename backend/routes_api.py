@@ -1,90 +1,12 @@
-from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
-import os
-import re
-import time
+from flask import Blueprint, request, jsonify, session
 from database.db import get_db
-from .utils import get_footer_settings, analyze_sentiment
+from .utils import analyze_sentiment
 
-common_bp = Blueprint('common', __name__)
+api_bp = Blueprint('api', __name__)
 
+# --- Products API ---
 
-@common_bp.route('/')
-def index():
-    print("LOG: Accessing index page")
-    db = get_db()
-    ads = db.execute('SELECT * FROM advertisements ORDER BY id').fetchall()
-    footer = get_footer_settings()
-    return render_template('index.html', ads=ads, footer=footer)
-
-@common_bp.route('/health')
-def health_check():
-    return jsonify({'status': 'ok'}), 200
-
-
-@common_bp.route('/admin-auth')
-def admin_auth():
-    auth = request.authorization
-    if not auth or not auth.username or not auth.password:
-        return 'Could not verify', 401, {'WWW-Authenticate': 'Basic realm="Admin Login"'}
-    
-    # Check env vars (default to admin/admin for dev if missing, but code respects stored values)
-    required_user = os.environ.get('ADMIN_USERNAME')
-    required_pass = os.environ.get('ADMIN_PASSWORD')
-
-    # Handle potential whitespace issues in env vars
-    if required_user: required_user = required_user.strip()
-    if required_pass: required_pass = required_pass.strip()
-    
-    if not required_user or not required_pass:
-        return 'Admin credentials not configured', 401, {'WWW-Authenticate': 'Basic realm="Admin Login"'}
-
-    if auth.username == required_user and auth.password == required_pass:
-        session['user_id'] = 'admin'
-        session['username'] = 'admin'
-        session['is_admin'] = True
-        return redirect(url_for('common.index'))
-    
-    return 'Could not verify', 401, {'WWW-Authenticate': 'Basic realm="Admin Login"'}
-
-@common_bp.route('/logout')
-def logout():
-    print(f"LOG: User logout: {session.get('username')}")
-    session.clear()
-    return redirect(url_for('common.index'))
-
-# --- About & Footer Public ---
-@common_bp.route('/about')
-def about():
-    print("LOG: Accessing About Page")
-    db = get_db()
-    settings = db.execute('SELECT key, value FROM site_settings WHERE key LIKE "about_%"').fetchall()
-    content = {row['key']: row['value'] for row in settings}
-    footer = get_footer_settings()
-    return render_template('about.html', content=content, footer=footer)
-
-
-
-# --- Products Public ---
-@common_bp.route('/product/<slug>')
-def product_detail(slug):
-    print(f"LOG: Viewing product: {slug}")
-    db = get_db()
-    
-    if slug.isdigit():
-        product = db.execute('SELECT id FROM products WHERE id = ?', (slug,)).fetchone()
-    else:
-        search = '%' + '%'.join(slug.split('-')) + '%'
-        product = db.execute('SELECT id FROM products WHERE LOWER(name) LIKE LOWER(?)', (search,)).fetchone()
-    
-    if not product:
-        return "Product not found", 404
-    
-    product_id = product['id']
-    
-    footer = get_footer_settings()
-    return render_template('product.html', product_id=product_id, footer=footer)
-
-@common_bp.route('/api/products', methods=['GET'])
+@api_bp.route('/api/products', methods=['GET'])
 def get_products():
     print(f"LOG: API Get Products. Query: {request.args.get('q')}, Tag: {request.args.get('tag')}")
     query = request.args.get('q')
@@ -98,7 +20,6 @@ def get_products():
     params = []
     
     if query:
-        # Simple search across Name, Desc, and Tags
         search_term = f'%{query}%'
         sql += " AND (name LIKE ? OR description LIKE ? OR id IN (SELECT product_id FROM product_tags WHERE tag_name LIKE ?))"
         params.extend([search_term, search_term, search_term])
@@ -113,7 +34,6 @@ def get_products():
     cursor = db.execute(sql, params)
     rows = cursor.fetchall()
     
-    # 2. Batch fetch tags (Optimization)
     products = []
     if rows:
         ids = [row['id'] for row in rows]
@@ -121,7 +41,6 @@ def get_products():
         tags_query = f"SELECT product_id, tag_name FROM product_tags WHERE product_id IN ({placeholders})"
         t_rows = db.execute(tags_query, ids).fetchall()
         
-        # Group tags by product_id
         tags_map = {}
         for t in t_rows:
             if t['product_id'] not in tags_map: tags_map[t['product_id']] = []
@@ -140,15 +59,24 @@ def get_products():
         
     return jsonify(products)
 
-@common_bp.route('/api/products/<int:id>', methods=['GET'])
-def get_product_details(id):
-    print(f"LOG: API Get Product Details {id}")
+@api_bp.route('/api/products/<id_or_slug>', methods=['GET'])
+def get_product_details(id_or_slug):
+    print(f"LOG: API Get Product Details {id_or_slug}")
     db = get_db()
-    p_cursor = db.execute('SELECT * FROM products WHERE id = ?', (id,))
-    product = p_cursor.fetchone()
+    
+    # Handle Slug vs ID
+    product = None
+    if str(id_or_slug).isdigit():
+        product = db.execute('SELECT * FROM products WHERE id = ?', (id_or_slug,)).fetchone()
+    else:
+        # Slug search
+        search = '%' + '%'.join(id_or_slug.split('-')) + '%'
+        product = db.execute('SELECT * FROM products WHERE LOWER(name) LIKE LOWER(?)', (search,)).fetchone()
     
     if not product:
         return jsonify({'error': 'Not found'}), 404
+    
+    id = product['id'] # Resolved ID
     
     t_cursor = db.execute('SELECT tag_name FROM product_tags WHERE product_id = ?', (id,))
     tags = [row['tag_name'] for row in t_cursor.fetchall()]
@@ -167,32 +95,34 @@ def get_product_details(id):
         'reviews': reviews
     })
 
+@api_bp.route('/api/products/<id_or_slug>/reviews', methods=['POST'])
+def add_review(id_or_slug):
+    db = get_db()
+    # Resolve ID
+    if str(id_or_slug).isdigit():
+        id = id_or_slug
+    else:
+        search = '%' + '%'.join(id_or_slug.split('-')) + '%'
+        product = db.execute('SELECT id FROM products WHERE LOWER(name) LIKE LOWER(?)', (search,)).fetchone()
+        if not product: return jsonify({'error': 'Product not found'}), 404
+        id = product['id']
 
-
-
-@common_bp.route('/api/products/<int:id>/reviews', methods=['POST'])
-def add_review(id):
     data = request.json
     reviewer = data.get('reviewer', '')
     text = data.get('review_text', '')
     
-    if not reviewer:
-        return jsonify({'error': 'Review reviewer is required'}), 400
-    
-    if not text:
-        return jsonify({'error': 'Review text is required'}), 400
+    if not reviewer or not text:
+        return jsonify({'error': 'Missing data'}), 400
 
     sentiment = analyze_sentiment(text)
     
-    db = get_db()
     cursor = db.execute('INSERT INTO reviews (product_id, reviewer, review_text, sentiment_score, sentiment_label) VALUES (?, ?, ?, ?, ?)',
                (id, reviewer, text, sentiment['score'], sentiment['label']))
     db.commit()
     
     return jsonify({'message': 'Review added', 'sentiment': sentiment, 'id': cursor.lastrowid})
 
-
-@common_bp.route('/api/reviews/<int:id>', methods=['DELETE'])
+@api_bp.route('/api/reviews/<int:id>', methods=['DELETE'])
 def delete_review(id):
     if not session.get('is_admin'):
          return jsonify({'error': 'Admins only'}), 403
@@ -203,9 +133,19 @@ def delete_review(id):
     
     return jsonify({'message': 'Review deleted'})
 
-@common_bp.route('/api/products/<int:id>/recommendations', methods=['GET'])
-def get_recommendations(id):
+@api_bp.route('/api/products/<id_or_slug>/recommendations', methods=['GET'])
+def get_recommendations(id_or_slug):
     db = get_db()
+    
+    # Resolve ID if slug is passed
+    if str(id_or_slug).isdigit():
+        id = id_or_slug
+    else:
+        search = '%' + '%'.join(id_or_slug.split('-')) + '%'
+        product = db.execute('SELECT id FROM products WHERE LOWER(name) LIKE LOWER(?)', (search,)).fetchone()
+        if not product: return jsonify([])
+        id = product['id']
+
     tags_cursor = db.execute('SELECT tag_name FROM product_tags WHERE product_id = ?', (id,))
     current_tags = [row['tag_name'] for row in tags_cursor.fetchall()]
     
@@ -236,5 +176,3 @@ def get_recommendations(id):
         })
         
     return jsonify(recs)
-
-
