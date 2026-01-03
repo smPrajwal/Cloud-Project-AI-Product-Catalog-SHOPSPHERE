@@ -1,5 +1,6 @@
 import os
 from flask import Flask
+from flask_cors import CORS
 # Trigger reload
 from database.db import init_db, close_connection
 from backend.utils import format_indian_currency
@@ -7,6 +8,7 @@ from backend.routes_admin import admin_bp
 from backend.routes_public import common_bp
 
 app = Flask(__name__)
+CORS(app) # Allow Frontend to talk to Backend
 
 # Configuration
 app.secret_key = os.environ.get('FLASK_SECRET', 'super_secret_key_for_demo')

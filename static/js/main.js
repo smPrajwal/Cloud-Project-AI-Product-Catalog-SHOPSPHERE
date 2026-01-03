@@ -1,5 +1,9 @@
-// Minimal JS helpers
-const API_BASE = '/api/products';
+// Cloud-Friendly API URL
+var API_URL = "/api";
+if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    API_URL = "http://YOUR_BACKEND_IP/api";
+}
+const API_BASE = API_URL + "/products";
 
 // Convert product name to URL slug (e.g. "Wireless Headphones" -> "wireless-headphones")
 function toSlug(name) { return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, ''); }
@@ -168,7 +172,7 @@ async function submitReview(event) {
     }
 
     try {
-        const res = await fetch(`/api/products/${PRODUCT_ID}/reviews`, {
+        const res = await fetch(`${API_URL}/products/${PRODUCT_ID}/reviews`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ reviewer: name, review_text: text })
@@ -224,7 +228,7 @@ async function deleteReview(id, event) {
     if (event) event.preventDefault();
 
     try {
-        const res = await fetch(`/api/reviews/${id}`, { method: 'DELETE' });
+        const res = await fetch(`${API_URL}/reviews/${id}`, { method: 'DELETE' });
         if (res.ok) {
             // Dynamic Remove
             if (event && event.target) {

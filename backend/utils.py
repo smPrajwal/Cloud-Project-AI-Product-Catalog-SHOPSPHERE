@@ -43,33 +43,27 @@ def analyze_sentiment(text):
 
 def upload_product_image(file, slug):
     filename = f"product_{slug}.jpg"
-    
-    # 1. Save Locally (Safe Write)
     local_path = os.path.join(UPLOAD_FOLDER, filename)
-    try:
-        with open(local_path, "wb") as f:
-            f.write(file.read())
-    except Exception as e:
-        print(f"File Write Error: {e}")
-        return None, None
-
-    # 2. Azure Upload (Optional)
-    blob_name = None
-    if os.environ.get('USE_AZURE_BLOB') == 'true':
+    
+    # 1. Save Local (Always needed for temp or local mode)
+    with open(local_path, "wb") as f:
+        f.write(file.read())
+        
+    # 2. Cloud Logic (Simple Check)
+    if os.environ.get('CLOUD_ENV'):
         try:
+            # Simple Azure Upload
             from azure.storage.blob import BlobServiceClient
-            conn_str = os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
-            if conn_str:
-                client = BlobServiceClient.from_connection_string(conn_str)
-                blob = client.get_blob_client(container="product-images", blob=filename)
-                with open(local_path, "rb") as data:
-                    blob.upload_blob(data, overwrite=True)
-                print(f"LOG: Uploaded blob {filename}")
-                return blob.url, filename
-        except Exception as e:
-            print(f"Azure Upload Failed: {e}")
+            conn = os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
+            client = BlobServiceClient.from_connection_string(conn)
+            client.get_blob_client("product-images", filename).upload_blob(open(local_path, "rb"), overwrite=True)
             
-    # Default: Return local path
+            # Simple URL Return
+            return f"https://{client.account_name}.blob.core.windows.net/product-images/{filename}", filename
+        except Exception as e:
+            print("Cloud Upload Error:", e)
+
+    # 3. Local URL
     return f"/{local_path}".replace("\\", "/"), None
 
 
