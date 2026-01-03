@@ -1,5 +1,5 @@
 import os
-from database.db import get_db
+
 
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -94,6 +94,7 @@ from functools import lru_cache
 @lru_cache(maxsize=1)
 def get_footer_settings():
     """Helper to get footer settings from database"""
+    from database.db import get_db
     db = get_db()
     settings = db.execute('SELECT key, value FROM site_settings WHERE key LIKE "footer_%"').fetchall()
     return {row['key']: row['value'] for row in settings}
