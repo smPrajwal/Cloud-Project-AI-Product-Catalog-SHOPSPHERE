@@ -1,4 +1,4 @@
-default_loc            = "South India"
+default_loc            = "new location"
 rg_name                = "Project_ShopSphere"
 sa_name                = "shopspheresa"
 sa_account_tier        = "Standard"
