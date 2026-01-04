@@ -44,4 +44,3 @@ resource "azurerm_storage_account" "main_sa" {
     project    = "ShopSphere"
     managed_by = "terraform"
   }
-}
