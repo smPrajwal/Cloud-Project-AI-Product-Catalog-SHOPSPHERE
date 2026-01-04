@@ -2,6 +2,7 @@ pipeline {
     agent any
     environment {
         VM_URL = ''
+        TF_TOKEN_app_terraform_io = credentials('tfc-token')
     }
     parameters {
         choice(name: 'Run_type',
