@@ -33,7 +33,7 @@ resource "azurerm_resource_group" "main_rg" {
 }
 
 resource "azurerm_storage_account" "main_sa" {
-  name                            =    var.sa_name
+  name                            = var.sa_name
   resource_group_name             = local.default_rg
   location                        = var.default_loc
   account_tier                    = var.sa_account_tier
