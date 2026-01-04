@@ -38,9 +38,10 @@ resource "azurerm_storage_account" "main_sa" {
   location                        = var.default_loc
   account_tier                    = var.sa_account_tier
   account_replication_type        = var.sa_replication_type
-  access_tier                     = var.sa_access_tier
+  access_tier                     = var.this_variable_does_not_exist
   allow_nested_items_to_be_public = var.sa_allow_public_access
   tags = {
     project    = "ShopSphere"
     managed_by = "terraform"
   }
+}
