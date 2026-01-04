@@ -9,7 +9,7 @@ terraform {
   cloud {
     organization = "Practice_and_Project"
     workspaces {
-      name = var.sa_access_tier
+      name = "Azure_Cloud_Project"
     }
   }
 }
