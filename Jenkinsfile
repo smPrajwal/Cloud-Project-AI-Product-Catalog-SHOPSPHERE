@@ -18,6 +18,7 @@ pipeline {
                 sh '''
                     set -e
 
+                    test -d Azure_Terraform
                     test -d static
                     test -d templates
                     test -d backend_pkg
@@ -79,7 +80,12 @@ pipeline {
             steps {
                 echo "--------------- Started Building the Infrastructure using Terraform!... ------------------"
                 sh '''
-                    echo "In 'Creating Resources using Terraform' Stage!"
+                    cd Azure_Terraform
+                    terraform init -input=false
+                    terraform fmt -check
+                    terraform validate
+                    terraform plan
+                    terraform apply -auto-approve
                 '''
                 echo "--------- Infrastructure Building Completed: Infrastructure is built and ready! ----------"
             }
