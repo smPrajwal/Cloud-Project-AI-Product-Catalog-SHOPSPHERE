@@ -33,15 +33,15 @@ resource "azurerm_resource_group" "main_rg" {
 }
 
 resource "azurerm_storage_account" "main_sa" {
-  name = var.sa_name
-  resource_group_name = local.default_rg
-  location = var.default_loc
-  account_tier = var.sa_account_tier
-  account_replication_type = var.sa_replication_type
-  access_tier = var.sa_access_tier
+  name                            = var.sa_name
+  resource_group_name             = local.default_rg
+  location                        = var.default_loc
+  account_tier                    = var.sa_account_tier
+  account_replication_type        = var.sa_replication_type
+  access_tier                     = var.sa_access_tier
   allow_nested_items_to_be_public = var.sa_allow_public_access
   tags = {
-    project     = "ShopSphere"
-    managed_by  = "terraform"
+    project    = "ShopSphere"
+    managed_by = "terraform"
   }
 }
