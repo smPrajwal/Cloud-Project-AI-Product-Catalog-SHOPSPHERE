@@ -4,4 +4,4 @@ __pycache__/
 *.pyc
 .env
 product_catalog.db
-./Azure_Terraform/.terraform/
+Azure_Terraform/.terraform/
