@@ -39,3 +39,28 @@ variable "sa_allow_public_access" {
   default     = false
   type        = bool
 }
+
+variable "vnet_name" {
+  description = "This represents the VNet name"
+  default     = "ss_main_vnet"
+  type        = string
+}
+
+variable "vnet_cidr" {
+  description = "This represents the VNet CIDR"
+  default     = "10.0.0.0/16"
+  type        = string
+}
+
+variable "subnet_details" {
+  description = "This contains all the necessary details related to the subnet and all are mandatory fields"
+  type = map(object({
+    access          = string
+    cidr            = string
+    role            = string
+    contains_vmss   = bool
+    nsg_priority    = number
+    nsg_port        = string
+    nsg_source_cidr = string
+  }))
+}

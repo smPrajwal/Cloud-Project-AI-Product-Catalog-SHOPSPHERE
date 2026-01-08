@@ -32,6 +32,16 @@ resource "azurerm_resource_group" "main_rg" {
   }
 }
 
+module "network_core" {
+  source = "./modules/network_core"
+
+  default_loc    = var.default_loc
+  default_rg     = local.default_rg
+  vnet_name      = var.vnet_name
+  vnet_cidr      = var.vnet_cidr
+  subnet_details = var.subnet_details
+}
+
 resource "azurerm_storage_account" "main_sa" {
   name                            = var.sa_name
   resource_group_name             = local.default_rg
