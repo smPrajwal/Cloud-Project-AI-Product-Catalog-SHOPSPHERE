@@ -23,7 +23,7 @@ subnet_details = {
     role            = "frontend"
     contains_vmss   = true
     nsg_priority    = 100
-    nsg_port        = "80"
+    nsg_port        = "8000"
     nsg_source_cidr = "*"
   }
   "private-be" = {
@@ -32,7 +32,7 @@ subnet_details = {
     role            = "backend"
     contains_vmss   = true
     nsg_priority    = 100
-    nsg_port        = "*"
+    nsg_port        = "8000"
     nsg_source_cidr = "10.0.1.0/24"
   }
   "private-db" = {

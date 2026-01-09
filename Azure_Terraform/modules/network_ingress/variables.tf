@@ -1,7 +1,9 @@
 variable "default_loc" {}
 variable "default_rg" {}
-variable "vnet_name" {}
-variable "vnet_cidr" {}
+variable "subnet_ids" {
+  description = "This holds all the subnet IDs"
+  type = map(string)
+}
 variable "subnet_details" {
   type = map(object({
     access = string

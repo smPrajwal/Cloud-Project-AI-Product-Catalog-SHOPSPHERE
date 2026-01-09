@@ -42,6 +42,15 @@ module "network_core" {
   subnet_details = var.subnet_details
 }
 
+module "network_ingress" {
+  source = "./modules/network_ingress"
+
+  default_loc    = var.default_loc
+  default_rg     = local.default_rg
+  subnet_details = var.subnet_details
+  subnet_ids     = module.network_core.subnet_ids
+}
+
 resource "azurerm_storage_account" "main_sa" {
   name                            = var.sa_name
   resource_group_name             = local.default_rg
