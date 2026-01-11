@@ -8,37 +8,45 @@ resource "azurerm_virtual_network" "vnet" {
 resource "azurerm_subnet" "subnet" {
   for_each = var.subnet_details
 
+  depends_on = [
+    azurerm_virtual_network.vnet
+  ]
+
   name = "subnet-${each.key}"
   resource_group_name = var.default_rg
   virtual_network_name = local.default_vnet
   address_prefixes = [each.value.cidr]
 }
 
-resource "azurerm_network_security_group" "nsg" {
+resource "azurerm_network_security_group" "subnet-nsg" {
   for_each = var.subnet_details
-  name = "${each.key}-nsg"
+  name = "${each.key}-subnet-nsg"
   location = var.default_loc
   resource_group_name = var.default_rg
 }
 
-resource "azurerm_network_security_rule" "inbound" {
+resource "azurerm_network_security_rule" "subnet-nsg-rule" {
   for_each = var.subnet_details
+  
+  depends_on = [
+    azurerm_network_security_group.subnet-nsg
+  ]
 
-  name = "${each.key}-nsg-rule"
-  priority = each.value.nsg_priority
+  name = "${each.key}-subnet-nsg-rule"
+  priority = each.value.sub_nsg_priority
   direction = "Inbound"
   access = "Allow"
   protocol = "Tcp"
   source_port_range = "*"
-  destination_port_range = each.value.nsg_port
-  source_address_prefix = each.value.nsg_source_cidr
+  destination_port_range = "*"
+  source_address_prefix = each.value.sub_nsg_source_cidr
   destination_address_prefix = "*"
   resource_group_name = var.default_rg
-  network_security_group_name = azurerm_network_security_group.nsg[each.key].name
+  network_security_group_name = azurerm_network_security_group.subnet-nsg[each.key].name
 }
 
 resource "azurerm_subnet_network_security_group_association" "subnet-nsg-assoc" {
   for_each = var.subnet_details
   subnet_id = azurerm_subnet.subnet[each.key].id
-  network_security_group_id = azurerm_network_security_group.nsg[each.key].id
+  network_security_group_id = azurerm_network_security_group.subnet-nsg[each.key].id
 }

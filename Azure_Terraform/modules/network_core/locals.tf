@@ -1,3 +1,3 @@
 locals {
-  default_vnet = resource.azurerm_virtual_network.vnet.name
+  default_vnet = azurerm_virtual_network.vnet.name
 }

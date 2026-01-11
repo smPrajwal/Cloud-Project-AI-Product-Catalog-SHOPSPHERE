@@ -16,12 +16,14 @@ terraform {
 
 provider "azurerm" {
   features {
-
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
   }
 }
 
 locals {
-  default_rg = resource.azurerm_resource_group.main_rg.name
+  default_rg = azurerm_resource_group.main_rg.name
 }
 
 resource "azurerm_resource_group" "main_rg" {
@@ -40,6 +42,8 @@ module "network_core" {
   vnet_name      = var.vnet_name
   vnet_cidr      = var.vnet_cidr
   subnet_details = var.subnet_details
+
+  depends_on = [azurerm_resource_group.main_rg]
 }
 
 module "network_ingress" {
@@ -49,6 +53,28 @@ module "network_ingress" {
   default_rg     = local.default_rg
   subnet_details = var.subnet_details
   subnet_ids     = module.network_core.subnet_ids
+
+  depends_on = [
+    azurerm_resource_group.main_rg,
+    module.network_core
+  ]
+}
+
+module "compute_VM" {
+  source = "./modules/compute_VM"
+
+  default_loc         = var.default_loc
+  default_rg          = local.default_rg
+  vm_un               = var.vm_un
+  vm_pwd              = var.vm_pwd
+  subnet_ids          = module.network_core.subnet_ids
+  lb_backend_pool_ids = module.network_ingress.lb_backend_pool_ids
+  subnet_details      = var.subnet_details
+
+  depends_on = [
+    module.network_core,
+    module.network_ingress
+  ]
 }
 
 resource "azurerm_storage_account" "main_sa" {

@@ -8,8 +8,9 @@ variable "subnet_details" {
     cidr = string
     role = string
     contains_vmss = bool
-    nsg_priority = number
-    nsg_port = string
-    nsg_source_cidr = string
+    sub_nsg_priority = number
+    sub_nsg_source_cidr = string
+    vm_nsg_priority    = number
+    vm_nsg_source_cidr = string
   }))
 }

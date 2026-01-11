@@ -52,15 +52,27 @@ variable "vnet_cidr" {
   type        = string
 }
 
+variable "vm_un" {
+  description = "This will hold the username of VMs"
+  default     = "admin"
+  type        = string
+}
+
+variable "vm_pwd" {
+  description = "This will hold the password of VMs"
+  type        = string
+}
+
 variable "subnet_details" {
   description = "This contains all the necessary details related to the subnet and all are mandatory fields"
   type = map(object({
-    access          = string
-    cidr            = string
-    role            = string
-    contains_vmss   = bool
-    nsg_priority    = number
-    nsg_port        = string
-    nsg_source_cidr = string
+    access              = string
+    cidr                = string
+    role                = string
+    contains_vmss       = bool
+    sub_nsg_priority    = number
+    sub_nsg_source_cidr = string
+    vm_nsg_priority     = number
+    vm_nsg_source_cidr  = string
   }))
 }
