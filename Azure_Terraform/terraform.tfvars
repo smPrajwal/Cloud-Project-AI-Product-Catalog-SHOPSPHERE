@@ -1,8 +1,8 @@
-default_loc = "UK South"
+default_loc = "centralindia"
 
 rg_name = "Project_ShopSphere"
 
-sa_name = "shopsphereappsa12"
+sa_name = "shopsphereappsa123"
 
 sa_account_tier = "Standard"
 

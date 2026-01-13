@@ -22,10 +22,6 @@ provider "azurerm" {
   }
 }
 
-locals {
-  default_rg = azurerm_resource_group.main_rg.name
-}
-
 resource "azurerm_resource_group" "main_rg" {
   name     = var.rg_name
   location = var.default_loc
@@ -38,48 +34,36 @@ module "network_core" {
   source = "./modules/network_core"
 
   default_loc    = var.default_loc
-  default_rg     = local.default_rg
+  default_rg     = azurerm_resource_group.main_rg.name
   vnet_name      = var.vnet_name
   vnet_cidr      = var.vnet_cidr
   subnet_details = var.subnet_details
-
-  depends_on = [azurerm_resource_group.main_rg]
 }
 
 module "network_ingress" {
   source = "./modules/network_ingress"
 
   default_loc    = var.default_loc
-  default_rg     = local.default_rg
+  default_rg     = azurerm_resource_group.main_rg.name
   subnet_details = var.subnet_details
   subnet_ids     = module.network_core.subnet_ids
-
-  depends_on = [
-    azurerm_resource_group.main_rg,
-    module.network_core
-  ]
 }
 
 module "compute_VM" {
   source = "./modules/compute_VM"
 
   default_loc         = var.default_loc
-  default_rg          = local.default_rg
+  default_rg          = azurerm_resource_group.main_rg.name
   vm_un               = var.vm_un
   vm_pwd              = var.vm_pwd
   subnet_ids          = module.network_core.subnet_ids
   lb_backend_pool_ids = module.network_ingress.lb_backend_pool_ids
   subnet_details      = var.subnet_details
-
-  depends_on = [
-    module.network_core,
-    module.network_ingress
-  ]
 }
 
 resource "azurerm_storage_account" "main_sa" {
   name                            = var.sa_name
-  resource_group_name             = local.default_rg
+  resource_group_name             = azurerm_resource_group.main_rg.name
   location                        = var.default_loc
   account_tier                    = var.sa_account_tier
   account_replication_type        = var.sa_replication_type
@@ -90,3 +74,4 @@ resource "azurerm_storage_account" "main_sa" {
     managed_by = "terraform"
   }
 }
+
