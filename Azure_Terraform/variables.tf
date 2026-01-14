@@ -54,12 +54,21 @@ variable "vnet_cidr" {
 
 variable "vm_un" {
   description = "This will hold the username of VMs"
-  default     = "admin"
   type        = string
 }
 
 variable "vm_pwd" {
   description = "This will hold the password of VMs"
+  type        = string
+}
+
+variable "db_un" {
+  description = "This will hold the username of SQL Server"
+  type        = string
+}
+
+variable "db_pwd" {
+  description = "This will hold the password of SQL Server"
   type        = string
 }
 

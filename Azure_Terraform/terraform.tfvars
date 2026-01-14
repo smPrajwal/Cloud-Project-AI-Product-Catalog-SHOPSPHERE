@@ -20,6 +20,10 @@ vm_un = "prajwalsm"
 
 vm_pwd = "P@$$w0rd1234"
 
+db_un = "prajwalsm"
+
+db_pwd = "P@$$w0rd1234"
+
 subnet_details = {
   "public-fe" = {
     access              = "public"

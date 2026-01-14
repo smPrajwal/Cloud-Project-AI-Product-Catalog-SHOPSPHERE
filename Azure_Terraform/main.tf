@@ -61,6 +61,18 @@ module "compute_VM" {
   subnet_details      = var.subnet_details
 }
 
+module "database" {
+  source = "./modules/database"
+
+  default_loc    = var.default_loc
+  default_rg     = azurerm_resource_group.main_rg.name
+  db_un          = var.db_un
+  db_pwd         = var.db_pwd
+  vnet_id        = module.network_core.vnet_id
+  subnet_ids     = module.network_core.subnet_ids
+  subnet_details = var.subnet_details
+}
+
 resource "azurerm_storage_account" "main_sa" {
   name                            = var.sa_name
   resource_group_name             = azurerm_resource_group.main_rg.name
