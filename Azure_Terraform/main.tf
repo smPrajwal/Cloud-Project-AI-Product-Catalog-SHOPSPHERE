@@ -84,3 +84,22 @@ module "storage" {
   sa_access_tier         = var.sa_access_tier
   sa_allow_public_access = var.sa_allow_public_access
 }
+
+module "azure_ai" {
+  source = "./modules/azure_ai"
+
+  default_loc = var.default_loc
+  default_rg  = azurerm_resource_group.main_rg.name
+}
+
+module "azure_functions" {
+  source = "./modules/azure_functions"
+
+  default_loc     = var.default_loc
+  default_rg      = azurerm_resource_group.main_rg.name
+  azure_sql_conn  = module.database.azure_sql_conn
+  vision_endpoint = module.azure_ai.vision_endpoint
+  vision_key      = module.azure_ai.vision_key
+  storage_account = module.storage.storage_account
+}
+

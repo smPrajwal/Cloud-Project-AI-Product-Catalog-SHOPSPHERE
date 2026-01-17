@@ -5,3 +5,12 @@ __pycache__/
 .env
 product_catalog.db
 Azure_Terraform/.terraform/
+Azure_Function/bin/
+Azure_Function/obj/
+Azure_Function/*.dll
+Azure_Function/*.pdb
+Azure_Function/*.deps.json
+Azure_Function/extensions.*
+Azure_Function/*.csproj
+Azure_Function/local.settings.json
+microsoft.gpg
