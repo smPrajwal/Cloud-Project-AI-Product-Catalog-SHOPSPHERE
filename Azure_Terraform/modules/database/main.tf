@@ -29,14 +29,10 @@ resource "azurerm_private_dns_zone_virtual_network_link" "dns-zone-vnet-link" {
 }
 
 resource "azurerm_private_endpoint" "db-endpoint" {
-  for_each = {
-    for k, v in var.subnet_details : k => v if v.role == "db-endpoint"
-  }
-
   name                = "db-endpoint"
   location            = var.default_loc
   resource_group_name = var.default_rg
-  subnet_id           = var.subnet_ids[each.key]
+  subnet_id           = var.subnet_ids["private-db"]
 
   private_service_connection {
     name                           = "sql-connection"
