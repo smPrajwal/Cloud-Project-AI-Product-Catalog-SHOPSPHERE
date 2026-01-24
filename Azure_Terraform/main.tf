@@ -76,13 +76,14 @@ module "database" {
 module "storage" {
   source = "./modules/storage"
 
-  default_loc            = var.default_loc
-  default_rg             = azurerm_resource_group.main_rg.name
-  sa_name                = var.sa_name
-  sa_account_tier        = var.sa_account_tier
-  sa_replication_type    = var.sa_replication_type
-  sa_access_tier         = var.sa_access_tier
-  sa_allow_public_access = var.sa_allow_public_access
+  default_loc              = var.default_loc
+  default_rg               = azurerm_resource_group.main_rg.name
+  sa_name                  = var.sa_name
+  sa_account_tier          = var.sa_account_tier
+  sa_replication_type      = var.sa_replication_type
+  sa_access_tier           = var.sa_access_tier
+  sa_allow_public_access   = var.sa_allow_public_access
+  code_blob_container_name = var.code_blob_container_name
 }
 
 module "azure_ai" {
@@ -102,6 +103,7 @@ module "azure_functions" {
   vision_key                             = module.azure_ai.vision_key
   storage_account                        = module.storage.storage_account
   application_insights_connection_string = module.monitoring_and_alerts.application_insights_connection_string
+  function_app_name                      = var.function_app_name
 }
 
 module "monitoring_and_alerts" {

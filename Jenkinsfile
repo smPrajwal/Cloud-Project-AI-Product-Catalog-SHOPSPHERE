@@ -3,10 +3,22 @@ pipeline {
     environment {
         VM_URL = ''
         TF_TOKEN_app_terraform_io = credentials('tfc-token')
+        AZURE_CLIENT_ID       = credentials('AZURE_CLIENT_ID')
+        AZURE_CLIENT_SECRET   = credentials('AZURE_CLIENT_SECRET')
+        AZURE_TENANT_ID       = credentials('AZURE_TENANT_ID')
+        AZURE_SUBSCRIPTION_ID = credentials('AZURE_SUBSCRIPTION_ID')
+        AZURE_VM_PASSWORD = credentials('vm_password')
+        AZURE_SQL_PASSWORD = credentials('db_password')
+        STORAGE_ACCOUNT_NAME = 'shopsphereappsa123'
+        CODE_CONTAINER_NAME = 'application_code'
+        AZURE_FUNCTIONAPP_NAME = 'azure-ai-function-app'
+        FRONTEND_APP_CODE = 'project1_shopsphere_frontend.zip'
+        BACKEND_APP_CODE = 'project1_shopsphere_backend.zip'
+        TERRAFORM_AND_FUNCTION_CODE = 'project1_shopsphere_azure_and_terraform_files.zip'
     }
     parameters {
         choice(name: 'Run_type',
-        choices: ['Clone and Package (CI)', 'Deploy Infrastructure and Application (CD)', 'Full Pipeline (CICD)'],
+        choices: ['Clone and Package (CI)', 'Deploy Infrastructure and Application (CD)', 'Full Pipeline (CICD)', 'De-provision Infrastructure and Application'],
         description: 'This is used to select the part of pipeline to run')
     }
     stages {
@@ -16,7 +28,7 @@ pipeline {
             }
             steps {
                 echo "-------------------------------------- Started Testing!... -------------------------------"
-                sh '''
+                sh """
                     set -e
 
                     test -d Azure_Terraform
@@ -30,7 +42,7 @@ pipeline {
                     test -f startup.sh
                     test -f requirements_backend.txt
                     test -f requirements_frontend.txt
-                '''
+                """
                 echo "----------------------- Testing Completed: All Checks passed in Testing! -----------------"
             }
         }
@@ -41,14 +53,15 @@ pipeline {
             }
             steps {
                 echo "------------------------------------ Started Packaging!... -------------------------------"
-                sh '''
-                    zip -r project1_shopsphere_frontend.zip app.py startup.sh requirements_frontend.txt frontend_pkg shared_pkg templates static
-                    zip -r project1_shopsphere_backend.zip app.py startup.sh requirements_backend.txt backend_pkg shared_pkg database
-                    test -f project1_shopsphere_frontend.zip
-                    test -f project1_shopsphere_backend.zip
-
-                '''
-                echo "-------------------- Packaging Completed: Application has been Packaged! -----------------"
+                sh """
+                    zip -r ${FRONTEND_APP_CODE} app.py startup.sh requirements_frontend.txt frontend_pkg shared_pkg templates static
+                    zip -r ${BACKEND_APP_CODE} app.py startup.sh requirements_backend.txt backend_pkg shared_pkg database
+                    zip -r ${TERRAFORM_AND_FUNCTION_CODE} Azure_Function Azure_Terraform
+                    test -f ${FRONTEND_APP_CODE}
+                    test -f ${BACKEND_APP_CODE}
+                    test -f ${TERRAFORM_AND_FUNCTION_CODE}
+                """
+                echo "-------------------- Packaging Completed: files have been Packaged! -----------------"
             }
         }
 
@@ -58,7 +71,7 @@ pipeline {
             }
             steps {
                 echo "----------------------- Started Archiving to Jenkins Artifact!... ------------------------"
-                archiveArtifacts artifacts: 'project1_shopsphere_frontend.zip, project1_shopsphere_backend.zip'
+                archiveArtifacts artifacts: "${FRONTEND_APP_CODE}, ${BACKEND_APP_CODE}, ${TERRAFORM_AND_FUNCTION_CODE}"
                 echo "-------------------- Archiving Completed: Artifact has been pushed! ----------------------"
             }
         }
@@ -74,24 +87,6 @@ pipeline {
             }
         }
 
-        stage('Creating Resources using Terraform') {
-            when {
-                expression {params.Run_type != 'Clone and Package (CI)'}
-            }
-            steps {
-                echo "--------------- Started Building the Infrastructure using Terraform!... ------------------"
-                sh '''
-                    cd Azure_Terraform
-                    terraform init -input=false
-                    terraform fmt -check
-                    terraform validate
-                    terraform plan
-                    terraform apply -auto-approve
-                '''
-                echo "--------- Infrastructure Building Completed: Infrastructure is built and ready! ----------"
-            }
-        }
-
         stage('Pull from Artifacts') {
             when {
                 expression {params.Run_type == 'Deploy Infrastructure and Application (CD)'}
@@ -101,26 +96,95 @@ pipeline {
                 copyArtifacts(
                 projectName: env.JOB_NAME,
                 selector: lastWithArtifacts(),
-                filter: 'project1_shopsphere_frontend.zip, project1_shopsphere_backend.zip'
+                filter: "${FRONTEND_APP_CODE}, ${BACKEND_APP_CODE}, ${TERRAFORM_AND_FUNCTION_CODE}"
                 )
-                sh '''
-                    test -f project1_shopsphere_frontend.zip
-                    test -f project1_shopsphere_backend.zip
-                '''
+                sh """
+                    test -f ${FRONTEND_APP_CODE}
+                    test -f ${BACKEND_APP_CODE}
+                    test -f ${TERRAFORM_AND_FUNCTION_CODE}
+                    unzip ${TERRAFORM_AND_FUNCTION_CODE}
+                """
                 echo "----------- Pulled the Artifact: The Artifact is ready in the workspace! -----------------"
             }
         }
 
-        stage('Configuration and Deployment using Ansible') {
+        stage('Azure Authentication using Service Principal') {
             when {
                 expression {params.Run_type != 'Clone and Package (CI)'}
             }
             steps {
-                echo "------------------- Started to Configure the Servers!... ---------------------------------"
-                sh '''
-                    echo "In 'Configuration and Deployment using Ansible' Stage!"
-                '''
-                echo "---------- Configuration Completed: The Servers are configured and ready! ----------------"
+                echo "------------ Authenticating with Azure using Azure Service Principal! --------------------"
+                sh """
+                    az login --service-principal \
+                    --username "$AZURE_CLIENT_ID" \
+                    --password "$AZURE_CLIENT_SECRET" \
+                    --tenant "$AZURE_TENANT_ID"
+
+                    az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+                """
+                echo "------- Authenticating completed: Successfully Authenticated with Azure! -----------------"
+            }
+        }
+
+        stage('Creating Resources using Terraform') {
+            when {
+                expression {params.Run_type != 'Clone and Package (CI)'}
+            }
+            steps {
+                echo "--------------- Started Building the Infrastructure using Terraform!... ------------------"
+                sh """
+                    cd Azure_Terraform
+                    terraform init -input=false
+                    terraform fmt -check
+                    terraform validate
+                    terraform plan
+                    terraform apply -auto-approve \
+                        -var="vm_pwd=${AZURE_VM_PASSWORD}" \
+                        -var="db_pwd=${AZURE_SQL_PASSWORD}" \
+                        -var="sa_name=${STORAGE_ACCOUNT_NAME}" \
+                        -var="code_blob_container_name=${CODE_CONTAINER_NAME}" \
+                        -var="function_app_name=${AZURE_FUNCTIONAPP_NAME}"
+                """
+                echo "--------- Infrastructure Building Completed: Infrastructure is built and ready! ----------"
+            }
+        }
+
+        stage('Copying the application code to Azure Blob') {
+            
+            steps {
+                echo " ---------------- Started pasting the application code to Azure Blob ---------------------"
+                sh """
+                    az storage blob upload \
+                    --account-name "$STORAGE_ACCOUNT_NAME" \
+                    --container-name "$CODE_CONTAINER_NAME" \
+                    --name frontend/${FRONTEND_APP_CODE} \
+                    --file ${FRONTEND_APP_CODE} \
+                    --overwrite
+
+                    az storage blob upload \
+                    --account-name "$STORAGE_ACCOUNT_NAME" \
+                    --container-name "$CODE_CONTAINER_NAME" \
+                    --name backend/${BACKEND_APP_CODE} \
+                    --file ${BACKEND_APP_CODE} \
+                    --overwrite       
+                """
+                echo "-------- Copy Completed: Application code has been copied to the Azure Blob --------------"
+            }
+        }
+
+        stage('Configuration and Deployment to Azure Function') {
+            when {
+                expression {params.Run_type != 'Clone and Package (CI)'}
+            }
+            steps {
+                echo "------------------- Started to Configure and deploy the code to Azure Function!... ---------------------------------"
+                sh """
+                    cd Azure_Function
+                    func azure functionapp publish ${AZURE_FUNCTIONAPP_NAME} --python
+                    echo "------ Testing Azure Function code Deployment ------"
+                    func azure functionapp list-functions ${AZURE_FUNCTIONAPP_NAME}
+                """
+                echo "---------- Azure Function Configuration Completed: The Azure function is ready to be triggered through Blob upload! ----------------"
             }
         }
 
@@ -130,20 +194,41 @@ pipeline {
             }
             steps {
                 echo "------------------------- Started Smoke Testing!... --------------------------------------"
-                // sh '''
+                // sh """
                 //     set -e
                 //     URL="${env.VM_URL}"
 
                 //     curl --fail --max-time 10 "$URL/health"
 
                 //     curl -s --max-time 10 "$URL" | grep -q "ShopSphere"
-                // '''
+                // """
                 // echo "SMOKE TEST PASSED: Website is LIVE and working!"
 
                 // //Sleeping for the mentioned amount of time
                 // echo "Sleeping for amount of time, before destroying all the Terraform resources"
                 // sleep time: 10, unit: 'MINUTES'
                 echo "--------- Smoke Testing Completed: The application is LIVE and working! ------------------"
+            }
+        }
+
+        stage('Removing the complete Infrastructure, Resources and Application, along with the Logout from Service Principal') {
+            when {
+                expression {params.Run_type == 'De-provision Infrastructure and Application'}
+            }
+            steps {
+                echo "------- Started Tear down of the complete Infrastructure and Application -----------------"
+                sh """
+                cd Azure_Terraform
+                terraform destroy -auto-approve \
+                    -var="vm_pwd=${AZURE_VM_PASSWORD}" \
+                    -var="db_pwd=${AZURE_SQL_PASSWORD}" \
+                    -var="sa_name=${STORAGE_ACCOUNT_NAME}" \
+                    -var="code_blob_container_name=${CODE_CONTAINER_NAME}" \
+                    -var="function_app_name=${AZURE_FUNCTIONAPP_NAME}"
+                echo "----- Signing-out from the Azure Service Principal -----"
+                az logout || true
+                """
+                echo "------- Infrastructure Tear down Completed: The Complete Infrastructure (with all the Resources) have been Cleaned-up and logged out from Service Principal -------"
             }
         }
     }
@@ -154,7 +239,12 @@ pipeline {
                     script: 'echo "<Add URL here>"',
                     returnStdout: true
                 ).trim()
-                def body = '$DEFAULT_CONTENT'
+                def body = """
+                <b> The Pipeline was executed using the below Parameter:<b><br/>
+                Run_type: ${params.Run_type}
+                <br/><br/>
+                $DEFAULT_CONTENT
+                """
                 if (params.Run_type != 'Clone and Package (CI)' && currentBuild.currentResult == 'SUCCESS') {
                     body += """
                     <br/>

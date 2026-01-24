@@ -1,7 +1,12 @@
 import os
 from flask import Flask
 from flask_cors import CORS
-from database.db import init_db, close_connection
+try:
+    from database.db import init_db, close_connection
+except ImportError:
+    # Frontend Mode (No Database)
+    def init_db(app): pass
+    def close_connection(e=None): pass
 from shared_pkg.utils import format_indian_currency
 
 app = Flask(__name__)

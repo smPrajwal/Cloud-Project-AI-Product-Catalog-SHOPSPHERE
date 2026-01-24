@@ -12,7 +12,7 @@ variable "rg_name" {
 
 variable "sa_name" {
   description = "This represents the default storage account name"
-  default     = "shopspheresa"
+  default     = "shopspheresa123"
   type        = string
 }
 
@@ -40,6 +40,12 @@ variable "sa_allow_public_access" {
   type        = bool
 }
 
+variable "code_blob_container_name" {
+  description = "This represents the default code blob container name"
+  default     = "application-code"
+  type        = string
+}
+
 variable "vnet_name" {
   description = "This represents the VNet name"
   default     = "ss_main_vnet"
@@ -60,6 +66,7 @@ variable "vm_un" {
 variable "vm_pwd" {
   description = "This will hold the password of VMs"
   type        = string
+  sensitive   = true
 }
 
 variable "db_un" {
@@ -69,6 +76,13 @@ variable "db_un" {
 
 variable "db_pwd" {
   description = "This will hold the password of SQL Server"
+  type        = string
+  sensitive   = true
+}
+
+variable "function_app_name" {
+  description = "This represents the default Azure Function App name"
+  default     = "azure-ai-function-app"
   type        = string
 }
 

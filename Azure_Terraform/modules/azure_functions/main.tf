@@ -8,7 +8,7 @@ resource "azurerm_service_plan" "azure_function_service_plan" {
 }
 
 resource "azurerm_linux_function_app" "azure_ai_function_app" {
-  name                = "azure-ai-function-app"
+  name                = var.function_app_name
   location            = var.default_loc
   resource_group_name = var.default_rg
 

@@ -12,17 +12,17 @@ sa_access_tier = "Hot"
 
 sa_allow_public_access = false
 
+code_blob_container_name = "application-code"
+
 vnet_name = "ss_main_vnet"
 
 vnet_cidr = "10.0.0.0/16"
 
 vm_un = "prajwalsm"
 
-vm_pwd = "P@$$w0rd1234"
-
 db_un = "prajwalsm"
 
-db_pwd = "P@$$w0rd1234"
+function_app_name = "azure-ai-function-app"
 
 subnet_details = {
   "public-fe" = {

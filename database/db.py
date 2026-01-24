@@ -89,6 +89,14 @@ def init_db(app):
             except Exception as e:
                 print(f"Azure DB Init Error (ignoring if tables exist): {e}")
 
+            # --- Automated Seeding (Integrated) ---
+            try:
+                from database.seed_data import seed_azure
+                # Pass the raw pyodbc connection
+                seed_azure(db.conn)
+            except Exception as e:
+                print(f"Automated Seeding Error: {e}")
+
         else:
             # --- SQLite Initialization ---
             # Products table
