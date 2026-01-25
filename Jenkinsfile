@@ -259,7 +259,7 @@ pipeline {
                         <b> The Pipeline was executed using the below Parameter:<b><br/>
                         Run_type: ${params.Run_type}
                         <br/><br/>
-                        $DEFAULT_CONTENT
+                        \$DEFAULT_CONTENT
                         ${extraContent}
                     """
                 )
