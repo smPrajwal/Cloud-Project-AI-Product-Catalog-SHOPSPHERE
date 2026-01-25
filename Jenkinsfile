@@ -137,7 +137,12 @@ pipeline {
                     terraform init -input=false
                     terraform fmt -check
                     terraform validate
-                    terraform plan
+                    terraform plan \
+                        -var="vm_pwd=${AZURE_VM_PASSWORD}" \
+                        -var="db_pwd=${AZURE_SQL_PASSWORD}" \
+                        -var="sa_name=${STORAGE_ACCOUNT_NAME}" \
+                        -var="code_blob_container_name=${CODE_CONTAINER_NAME}" \
+                        -var="function_app_name=${AZURE_FUNCTIONAPP_NAME}"
                     terraform apply -auto-approve \
                         -var="vm_pwd=${AZURE_VM_PASSWORD}" \
                         -var="db_pwd=${AZURE_SQL_PASSWORD}" \
