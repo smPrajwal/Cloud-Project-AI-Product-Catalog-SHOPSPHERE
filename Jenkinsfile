@@ -231,6 +231,7 @@ pipeline {
                 ]) {
                     sh """
                         cd Azure_Terraform
+                        terraform init -input=false
                         terraform destroy -auto-approve
                         echo "----- Signing-out from the Azure Service Principal -----"
                         az logout || true
