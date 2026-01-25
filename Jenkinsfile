@@ -14,7 +14,6 @@ pipeline {
         AZURE_FUNCTIONAPP_NAME = 'azure-ai-function-app'
         FRONTEND_APP_CODE = 'project1_shopsphere_frontend.zip'
         BACKEND_APP_CODE = 'project1_shopsphere_backend.zip'
-        TERRAFORM_AND_FUNCTION_CODE = 'project1_shopsphere_azure_and_terraform_files.zip'
     }
     parameters {
         choice(name: 'Run_type',
@@ -31,6 +30,7 @@ pipeline {
                 sh """
                     set -e
 
+                    test -d Azure_Function
                     test -d Azure_Terraform
                     test -d static
                     test -d templates
@@ -56,10 +56,8 @@ pipeline {
                 sh """
                     zip -r ${FRONTEND_APP_CODE} app.py startup.sh requirements_frontend.txt frontend_pkg shared_pkg templates static
                     zip -r ${BACKEND_APP_CODE} app.py startup.sh requirements_backend.txt backend_pkg shared_pkg database
-                    zip -r ${TERRAFORM_AND_FUNCTION_CODE} Azure_Function Azure_Terraform
                     test -f ${FRONTEND_APP_CODE}
                     test -f ${BACKEND_APP_CODE}
-                    test -f ${TERRAFORM_AND_FUNCTION_CODE}
                 """
                 echo "-------------------- Packaging Completed: files have been Packaged! -----------------"
             }
@@ -71,7 +69,7 @@ pipeline {
             }
             steps {
                 echo "----------------------- Started Archiving to Jenkins Artifact!... ------------------------"
-                archiveArtifacts artifacts: "${FRONTEND_APP_CODE}, ${BACKEND_APP_CODE}, ${TERRAFORM_AND_FUNCTION_CODE}"
+                archiveArtifacts artifacts: "${FRONTEND_APP_CODE}, ${BACKEND_APP_CODE}"
                 echo "-------------------- Archiving Completed: Artifact has been pushed! ----------------------"
             }
         }
@@ -84,27 +82,6 @@ pipeline {
                 echo "-------------------------- Waiting for manual approval!... -------------------------------"
                 input message: 'Approve to add/modify the Infrastructure and Application'
                 echo "--------------------- Approval Completed: Successfully Approved! -------------------------"
-            }
-        }
-
-        stage('Pull from Artifacts') {
-            when {
-                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)'}
-            }
-            steps {
-                echo "------------------------ Started pulling the Artifact!... --------------------------------"
-                copyArtifacts(
-                projectName: env.JOB_NAME,
-                selector: lastWithArtifacts(),
-                filter: "${FRONTEND_APP_CODE}, ${BACKEND_APP_CODE}, ${TERRAFORM_AND_FUNCTION_CODE}"
-                )
-                sh """
-                    test -f ${FRONTEND_APP_CODE}
-                    test -f ${BACKEND_APP_CODE}
-                    test -f ${TERRAFORM_AND_FUNCTION_CODE}
-                    unzip ${TERRAFORM_AND_FUNCTION_CODE}
-                """
-                echo "----------- Pulled the Artifact: The Artifact is ready in the workspace! -----------------"
             }
         }
 
@@ -123,6 +100,25 @@ pipeline {
                     az account set --subscription "$AZURE_SUBSCRIPTION_ID"
                 """
                 echo "------- Authenticating completed: Successfully Authenticated with Azure! -----------------"
+            }
+        }
+
+        stage('Pull from Artifacts') {
+            when {
+                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)'}
+            }
+            steps {
+                echo "------------------------ Started pulling the Artifact!... --------------------------------"
+                copyArtifacts(
+                projectName: env.JOB_NAME,
+                selector: lastWithArtifacts(),
+                filter: "${FRONTEND_APP_CODE}, ${BACKEND_APP_CODE}"
+                )
+                sh """
+                    test -f ${FRONTEND_APP_CODE}
+                    test -f ${BACKEND_APP_CODE}
+                """
+                echo "----------- Pulled the Artifact: The Artifact is ready in the workspace! -----------------"
             }
         }
 
