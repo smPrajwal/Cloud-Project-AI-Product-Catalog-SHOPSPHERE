@@ -132,24 +132,22 @@ pipeline {
             }
             steps {
                 echo "--------------- Started Building the Infrastructure using Terraform!... ------------------"
-                sh """
-                    cd Azure_Terraform
-                    terraform init -input=false
-                    terraform fmt -check
-                    terraform validate
-                    terraform plan \
-                        -var="vm_pwd=${AZURE_VM_PASSWORD}" \
-                        -var="db_pwd=${AZURE_SQL_PASSWORD}" \
-                        -var="sa_name=${STORAGE_ACCOUNT_NAME}" \
-                        -var="code_blob_container_name=${CODE_CONTAINER_NAME}" \
-                        -var="function_app_name=${AZURE_FUNCTIONAPP_NAME}"
-                    terraform apply -auto-approve \
-                        -var="vm_pwd=${AZURE_VM_PASSWORD}" \
-                        -var="db_pwd=${AZURE_SQL_PASSWORD}" \
-                        -var="sa_name=${STORAGE_ACCOUNT_NAME}" \
-                        -var="code_blob_container_name=${CODE_CONTAINER_NAME}" \
-                        -var="function_app_name=${AZURE_FUNCTIONAPP_NAME}"
-                """
+                withEnv([
+                    "TF_VAR_vm_pwd=${AZURE_VM_PASSWORD}",
+                    "TF_VAR_db_pwd=${AZURE_SQL_PASSWORD}",
+                    "TF_VAR_sa_name=${STORAGE_ACCOUNT_NAME}",
+                    "TF_VAR_code_blob_container_name=${CODE_CONTAINER_NAME}",
+                    "TF_VAR_function_app_name=${AZURE_FUNCTIONAPP_NAME}"
+                ]) {
+                    sh """
+                        cd Azure_Terraform
+                        terraform init -input=false
+                        terraform fmt -check
+                        terraform validate
+                        terraform plan
+                        terraform apply -auto-approve
+                    """
+                }
                 echo "--------- Infrastructure Building Completed: Infrastructure is built and ready! ----------"
             }
         }
@@ -224,17 +222,20 @@ pipeline {
             }
             steps {
                 echo "------- Started Tear down of the complete Infrastructure and Application -----------------"
-                sh """
-                cd Azure_Terraform
-                terraform destroy -auto-approve \
-                    -var="vm_pwd=${AZURE_VM_PASSWORD}" \
-                    -var="db_pwd=${AZURE_SQL_PASSWORD}" \
-                    -var="sa_name=${STORAGE_ACCOUNT_NAME}" \
-                    -var="code_blob_container_name=${CODE_CONTAINER_NAME}" \
-                    -var="function_app_name=${AZURE_FUNCTIONAPP_NAME}"
-                echo "----- Signing-out from the Azure Service Principal -----"
-                az logout || true
-                """
+                withEnv([
+                    "TF_VAR_vm_pwd=${AZURE_VM_PASSWORD}",
+                    "TF_VAR_db_pwd=${AZURE_SQL_PASSWORD}",
+                    "TF_VAR_sa_name=${STORAGE_ACCOUNT_NAME}",
+                    "TF_VAR_code_blob_container_name=${CODE_CONTAINER_NAME}",
+                    "TF_VAR_function_app_name=${AZURE_FUNCTIONAPP_NAME}"
+                ]) {
+                    sh """
+                        cd Azure_Terraform
+                        terraform destroy -auto-approve
+                        echo "----- Signing-out from the Azure Service Principal -----"
+                        az logout || true
+                    """
+                }
                 echo "------- Infrastructure Tear down Completed: The Complete Infrastructure (with all the Resources) have been Cleaned-up and logged out from Service Principal -------"
             }
         }
