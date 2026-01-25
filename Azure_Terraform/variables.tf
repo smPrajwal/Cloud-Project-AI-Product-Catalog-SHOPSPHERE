@@ -12,7 +12,7 @@ variable "rg_name" {
 
 variable "sa_name" {
   description = "This represents the default storage account name"
-  default     = "shopspheresa123"
+  default     = "shopspheresa"
   type        = string
 }
 

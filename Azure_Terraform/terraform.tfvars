@@ -2,7 +2,7 @@ default_loc = "centralindia"
 
 rg_name = "Project_ShopSphere"
 
-sa_name = "shopsphereappsa123"
+sa_name = "shopsphereappsa"
 
 sa_account_tier = "Standard"
 
