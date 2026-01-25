@@ -241,26 +241,27 @@ pipeline {
                     script: 'echo "<Add URL here>"',
                     returnStdout: true
                 ).trim()
-                def body = """
-                <b> The Pipeline was executed using the below Parameter:<b><br/>
-                Run_type: ${params.Run_type}
-                <br/><br/>
-                $DEFAULT_CONTENT
-                """
-                if (params.Run_type != 'Clone and Package (CI)' && currentBuild.currentResult == 'SUCCESS') {
-                    body += """
-                    <br/>
-                    Click here to access the application: 
-                    <a href="${env.VM_URL}">Open application</a>
+                def extraContent  = ""
+                if ((params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)') && currentBuild.currentResult == 'SUCCESS') {
+                    extraContent += """
+                        <br/>
+                        Click here to access the application: 
+                        <a href="${env.VM_URL}">Open application</a>
                     """
                 }
                 emailext (
                     to: '$DEFAULT_RECIPIENTS',
                     subject: '$DEFAULT_SUBJECT',
-                    body: body,
                     attachLog: true, 
                     compressLog: true,
-                    mimeType: 'text/html'
+                    mimeType: 'text/html',
+                    body: """
+                        <b> The Pipeline was executed using the below Parameter:<b><br/>
+                        Run_type: ${params.Run_type}
+                        <br/><br/>
+                        $DEFAULT_CONTENT
+                        ${extraContent}
+                    """
                 )
             }
             cleanWs()
