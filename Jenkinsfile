@@ -24,7 +24,7 @@ pipeline {
     stages {
         stage('Testing') {
             when {
-                expression {params.Run_type != 'Deploy Infrastructure and Application (CD)'}
+                expression {params.Run_type == 'Clone and Package (CI)' || params.Run_type == 'Full Pipeline (CICD)'}
             }
             steps {
                 echo "-------------------------------------- Started Testing!... -------------------------------"
@@ -49,7 +49,7 @@ pipeline {
 
         stage('Packaging') {
             when {
-                expression {params.Run_type != 'Deploy Infrastructure and Application (CD)'}
+                expression {params.Run_type == 'Clone and Package (CI)' || params.Run_type == 'Full Pipeline (CICD)'}
             }
             steps {
                 echo "------------------------------------ Started Packaging!... -------------------------------"
@@ -67,7 +67,7 @@ pipeline {
 
         stage('Push to Artifacts') {
             when {
-                expression {params.Run_type != 'Deploy Infrastructure and Application (CD)'}
+                expression {params.Run_type == 'Clone and Package (CI)' || params.Run_type == 'Full Pipeline (CICD)'}
             }
             steps {
                 echo "----------------------- Started Archiving to Jenkins Artifact!... ------------------------"
@@ -82,7 +82,7 @@ pipeline {
             }
             steps {
                 echo "-------------------------- Waiting for manual approval!... -------------------------------"
-                input message: 'Approve to deploy the Infrastructure and Application'
+                input message: 'Approve to add/modify the Infrastructure and Application'
                 echo "--------------------- Approval Completed: Successfully Approved! -------------------------"
             }
         }
@@ -110,7 +110,7 @@ pipeline {
 
         stage('Azure Authentication using Service Principal') {
             when {
-                expression {params.Run_type != 'Clone and Package (CI)'}
+                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)'}
             }
             steps {
                 echo "------------ Authenticating with Azure using Azure Service Principal! --------------------"
@@ -128,7 +128,7 @@ pipeline {
 
         stage('Creating Resources using Terraform') {
             when {
-                expression {params.Run_type != 'Clone and Package (CI)'}
+                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)'}
             }
             steps {
                 echo "--------------- Started Building the Infrastructure using Terraform!... ------------------"
@@ -150,7 +150,9 @@ pipeline {
         }
 
         stage('Copying the application code to Azure Blob') {
-            
+            when {
+                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)'}
+            }
             steps {
                 echo " ---------------- Started pasting the application code to Azure Blob ---------------------"
                 sh """
@@ -174,7 +176,7 @@ pipeline {
 
         stage('Configuration and Deployment to Azure Function') {
             when {
-                expression {params.Run_type != 'Clone and Package (CI)'}
+                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)'}
             }
             steps {
                 echo "------------------- Started to Configure and deploy the code to Azure Function!... ---------------------------------"
@@ -190,7 +192,7 @@ pipeline {
 
         stage('Smoke Testing') {
             when {
-                expression {params.Run_type != 'Clone and Package (CI)'}
+                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)'}
             }
             steps {
                 echo "------------------------- Started Smoke Testing!... --------------------------------------"
