@@ -1,7 +1,7 @@
+def APP_URL = ''
 pipeline {
     agent any
     environment {
-        APP_URL = ''
         TF_TOKEN_app_terraform_io = credentials('tfc-token')
         AZURE_CLIENT_ID       = credentials('AZURE_CLIENT_ID')
         AZURE_CLIENT_SECRET   = credentials('AZURE_CLIENT_SECRET')
@@ -149,7 +149,7 @@ pipeline {
                         script: 'cd Azure_Terraform && terraform output -raw application_public_ip',
                         returnStdout: true
                     ).trim()
-                    env.APP_URL = "http://${ip}:80"
+                    APP_URL = "http://${ip}:80"
                 }
                 echo "--------- Infrastructure Building Completed: Infrastructure is built and ready! ----------"
             }
@@ -252,7 +252,7 @@ pipeline {
                     extraContent += """
                         <br/>
                         Click here to access the application: 
-                        <a href="${env.APP_URL}">Open application</a>
+                        <a href="${APP_URL}">Open application</a>
                     """
                 }
                 emailext (
