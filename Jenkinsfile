@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        VM_URL = ''
+        APP_URL = ''
         TF_TOKEN_app_terraform_io = credentials('tfc-token')
         AZURE_CLIENT_ID       = credentials('AZURE_CLIENT_ID')
         AZURE_CLIENT_SECRET   = credentials('AZURE_CLIENT_SECRET')
@@ -21,7 +21,7 @@ pipeline {
         description: 'This is used to select the part of pipeline to run')
     }
     stages {
-        stage('Testing') {
+        stage('Pre-build Validation') {
             when {
                 expression {params.Run_type == 'Clone and Package (CI)' || params.Run_type == 'Full Pipeline (CICD)'}
             }
@@ -144,6 +144,17 @@ pipeline {
                         terraform apply -auto-approve
                     """
                 }
+                script {
+                    def ip = sh(
+                        script: 'cd Azure_Terraform && terraform output -raw application_public_ip',
+                        returnStdout: true
+                    ).trim()
+                    def port = sh(
+                        script: 'cd Azure_Terraform && terraform output -raw application_port',
+                        returnStdout: true
+                    ).trim()
+                    env.APP_URL = "http://${ip}:${port}"
+                }
                 echo "--------- Infrastructure Building Completed: Infrastructure is built and ready! ----------"
             }
         }
@@ -197,7 +208,7 @@ pipeline {
                 echo "------------------------- Started Smoke Testing!... --------------------------------------"
                 // sh """
                 //     set -e
-                //     URL="${env.VM_URL}"
+                //     URL="${env.APP_URL}"
 
                 //     curl --fail --max-time 10 "$URL/health"
 
@@ -240,16 +251,12 @@ pipeline {
     post {
         always {
             script {
-                env.VM_URL = sh(
-                    script: 'echo "<Add URL here>"',
-                    returnStdout: true
-                ).trim()
                 def extraContent  = ""
                 if ((params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)') && currentBuild.currentResult == 'SUCCESS') {
                     extraContent += """
                         <br/>
                         Click here to access the application: 
-                        <a href="${env.VM_URL}">Open application</a>
+                        <a href="${env.APP_URL}">Open application</a>
                     """
                 }
                 emailext (

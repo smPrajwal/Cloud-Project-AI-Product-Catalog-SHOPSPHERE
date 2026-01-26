@@ -7,3 +7,7 @@ output "lb_backend_pool_ids" {
 output "application_public_ip" {
   value = azurerm_public_ip.fe_lb_public_ip.ip_address
 }
+
+output "application_port" {
+  value = azurerm_lb_rule.lb_rule.frontend_port
+}
