@@ -149,11 +149,7 @@ pipeline {
                         script: 'cd Azure_Terraform && terraform output -raw application_public_ip',
                         returnStdout: true
                     ).trim()
-                    def port = sh(
-                        script: 'cd Azure_Terraform && terraform output -raw application_port',
-                        returnStdout: true
-                    ).trim()
-                    env.APP_URL = "http://${ip}:${port}"
+                    env.APP_URL = "http://${ip}:80"
                 }
                 echo "--------- Infrastructure Building Completed: Infrastructure is built and ready! ----------"
             }
