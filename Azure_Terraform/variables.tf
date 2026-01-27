@@ -99,13 +99,13 @@ variable "app_admin_pwd" {
 
 variable "frontend_code_blob_url" {
   description = "This represents the Frontend Code Blob URL"
-  default = "https://shopsphereappsa.blob.core.windows.net/application-code/frontend/project1_shopsphere_frontend.zip"
+  default     = "https://shopsphereappsa.blob.core.windows.net/application-code/frontend/project1_shopsphere_frontend.zip"
   type        = string
 }
 
 variable "backend_code_blob_url" {
   description = "This represents the Backend Code Blob URL"
-  default = "https://shopsphereappsa.blob.core.windows.net/application-code/backend/project1_shopsphere_backend.zip"
+  default     = "https://shopsphereappsa.blob.core.windows.net/application-code/backend/project1_shopsphere_backend.zip"
   type        = string
 }
 
