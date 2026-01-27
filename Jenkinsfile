@@ -230,6 +230,7 @@ pipeline {
             steps {
                 echo "------- Started Tear down of the complete Infrastructure and Application -----------------"
                 withEnv([
+                    "TF_VAR_app_admin_pwd=${SHOPSPHERE_APP_ADMIN_PWD}",
                     "TF_VAR_vm_pwd=${AZURE_VM_PASSWORD}",
                     "TF_VAR_db_pwd=${AZURE_SQL_PASSWORD}",
                     "TF_VAR_sa_name=${STORAGE_ACCOUNT_NAME}",
