@@ -62,8 +62,8 @@ module "compute_VM" {
   app_admin_un           = var.app_admin_un
   app_admin_pwd          = var.app_admin_pwd
   azure_sql_conn         = module.database.azure_sql_conn
-  frontend_code_blob_url = module.storage.frontend_code_blob_url
-  backend_code_blob_url  = module.storage.backend_code_blob_url
+  frontend_code_blob_url = var.frontend_code_blob_url
+  backend_code_blob_url  = var.backend_code_blob_url
   vision_endpoint        = module.azure_ai.vision_endpoint
   vision_key             = module.azure_ai.vision_key
   storage_account        = module.storage.storage_account

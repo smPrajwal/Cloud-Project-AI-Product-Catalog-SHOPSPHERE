@@ -135,7 +135,9 @@ pipeline {
                     "TF_VAR_db_pwd=${AZURE_SQL_PASSWORD}",
                     "TF_VAR_sa_name=${STORAGE_ACCOUNT_NAME}",
                     "TF_VAR_code_blob_container_name=${CODE_CONTAINER_NAME}",
-                    "TF_VAR_function_app_name=${AZURE_FUNCTIONAPP_NAME}"
+                    "TF_VAR_function_app_name=${AZURE_FUNCTIONAPP_NAME}",
+                    "TF_VAR_frontend_code_blob_url=https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${CODE_CONTAINER_NAME}/frontend/${FRONTEND_APP_CODE}",
+                    "TF_VAR_backend_code_blob_url=https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${CODE_CONTAINER_NAME}/backend/${BACKEND_APP_CODE}"
                 ]) {
                     sh """
                         cd Azure_Terraform

@@ -5,11 +5,3 @@ output "storage_account" {
   }
   sensitive = true
 }
-
-output "frontend_code_blob_url" {
-  value = azurerm_storage_blob.frontend_zip.url
-}
-
-output "backend_code_blob_url" {
-  value = azurerm_storage_blob.backend_zip.url
-}

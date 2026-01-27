@@ -33,10 +33,16 @@ runcmd:
   - chown -R ${vm_user}:${vm_user} /app
   - cd /app
 
-  # Download backend code
-  - curl -L "${backend_blob_url}" -o backend.zip
-  - unzip backend.zip
-  - rm backend.zip
+  # Wait for backend ZIP and download
+  - |
+    echo "Waiting for backend ZIP to be available..."
+    until curl -sf "${backend_blob_url}" -o /tmp/backend.zip; do
+      echo "Backend ZIP not available yet, retrying in 10 seconds..."
+      sleep 10
+    done
+
+  - unzip /tmp/backend.zip
+  - rm /tmp/backend.zip
 
   # Python setup
   - python3 -m venv venv

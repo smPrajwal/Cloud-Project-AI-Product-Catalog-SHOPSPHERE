@@ -32,10 +32,16 @@ runcmd:
   - chown -R ${vm_user}:${vm_user} /app
   - cd /app
 
-  # Download frontend code
-  - curl -L "${frontend_blob_url}" -o frontend.zip
-  - unzip frontend.zip
-  - rm frontend.zip
+  # Wait for frontend ZIP and download
+  - |
+    echo "Waiting for frontend ZIP to be available..."
+    until curl -sf "${frontend_blob_url}" -o /tmp/frontend.zip; do
+      echo "Frontend ZIP not available yet, retrying in 10 seconds..."
+      sleep 10
+    done
+
+  - unzip /tmp/frontend.zip
+  - rm /tmp/frontend.zip
 
   # Python setup
   - python3 -m venv venv

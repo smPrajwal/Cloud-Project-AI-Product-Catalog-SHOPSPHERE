@@ -97,6 +97,18 @@ variable "app_admin_pwd" {
   sensitive   = true
 }
 
+variable "frontend_code_blob_url" {
+  description = "This represents the Frontend Code Blob URL"
+  default = "https://shopsphereappsa.blob.core.windows.net/application-code/frontend/project1_shopsphere_frontend.zip"
+  type        = string
+}
+
+variable "backend_code_blob_url" {
+  description = "This represents the Backend Code Blob URL"
+  default = "https://shopsphereappsa.blob.core.windows.net/application-code/backend/project1_shopsphere_backend.zip"
+  type        = string
+}
+
 variable "subnet_details" {
   description = "This contains all the necessary details related to the subnet and all are mandatory fields"
   type = map(object({

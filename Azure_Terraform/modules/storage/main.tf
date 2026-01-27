@@ -19,17 +19,3 @@ resource "azurerm_storage_container" "application_code" {
   storage_account_id    = azurerm_storage_account.main_sa.id
   container_access_type = "private"
 }
-
-resource "azurerm_storage_blob" "frontend_zip" {
-  name                   = "frontend/project1_shopsphere_frontend.zip"
-  storage_account_name   = azurerm_storage_account.main_sa.name
-  storage_container_name = azurerm_storage_container.application_code.name
-  type                   = "Block"
-}
-
-resource "azurerm_storage_blob" "backend_zip" {
-  name                   = "backend/project1_shopsphere_backend.zip"
-  storage_account_name   = azurerm_storage_account.main_sa.name
-  storage_container_name = azurerm_storage_container.application_code.name
-  type                   = "Block"
-}
