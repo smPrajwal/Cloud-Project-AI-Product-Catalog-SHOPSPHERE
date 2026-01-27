@@ -1,7 +1,20 @@
 variable "default_loc" {}
 variable "default_rg" {}
 variable "vm_un" {}
-variable "vm_pwd" {}
+variable "azure_sql_conn" {}
+variable "app_admin_un" {}
+variable "frontend_code_blob_url" {}
+variable "backend_code_blob_url" {}
+variable "vision_endpoint" {}
+variable "vision_key" {
+  sensitive = true
+}
+variable "vm_pwd" {
+  sensitive = true
+}
+variable "app_admin_pwd" {
+  sensitive = true
+}
 variable "subnet_ids" {
   description = "This holds all the subnet IDs"
   type        = map(string)
@@ -9,6 +22,13 @@ variable "subnet_ids" {
 variable "lb_backend_pool_ids" {
   description = "This holds all the backend pool IDs"
   type        = map(string)
+}
+variable "storage_account" {
+  type = object({
+    name   = string
+    pa_key = string
+  })
+  sensitive = true
 }
 variable "subnet_details" {
   type = map(object({

@@ -52,13 +52,21 @@ module "network_ingress" {
 module "compute_VM" {
   source = "./modules/compute_VM"
 
-  default_loc         = var.default_loc
-  default_rg          = azurerm_resource_group.main_rg.name
-  vm_un               = var.vm_un
-  vm_pwd              = var.vm_pwd
-  subnet_ids          = module.network_core.subnet_ids
-  lb_backend_pool_ids = module.network_ingress.lb_backend_pool_ids
-  subnet_details      = var.subnet_details
+  default_loc            = var.default_loc
+  default_rg             = azurerm_resource_group.main_rg.name
+  vm_un                  = var.vm_un
+  vm_pwd                 = var.vm_pwd
+  subnet_ids             = module.network_core.subnet_ids
+  lb_backend_pool_ids    = module.network_ingress.lb_backend_pool_ids
+  subnet_details         = var.subnet_details
+  app_admin_un           = var.app_admin_un
+  app_admin_pwd          = var.app_admin_pwd
+  azure_sql_conn         = module.database.azure_sql_conn
+  frontend_code_blob_url = module.storage.frontend_code_blob_url
+  backend_code_blob_url  = module.storage.backend_code_blob_url
+  vision_endpoint        = module.azure_ai.vision_endpoint
+  vision_key             = module.azure_ai.vision_key
+  storage_account        = module.storage.storage_account
 }
 
 module "database" {

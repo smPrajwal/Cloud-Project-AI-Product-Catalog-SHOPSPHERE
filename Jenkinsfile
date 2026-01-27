@@ -3,6 +3,7 @@ pipeline {
     agent any
     environment {
         TF_TOKEN_app_terraform_io = credentials('tfc-token')
+        SHOPSPHERE_APP_ADMIN_PWD = credentials('ShopSphere_App_Admin_Password')
         AZURE_CLIENT_ID       = credentials('AZURE_CLIENT_ID')
         AZURE_CLIENT_SECRET   = credentials('AZURE_CLIENT_SECRET')
         AZURE_TENANT_ID       = credentials('AZURE_TENANT_ID')
@@ -129,6 +130,7 @@ pipeline {
             steps {
                 echo "--------------- Started Building the Infrastructure using Terraform!... ------------------"
                 withEnv([
+                    "TF_VAR_app_admin_pwd=${SHOPSPHERE_APP_ADMIN_PWD}",
                     "TF_VAR_vm_pwd=${AZURE_VM_PASSWORD}",
                     "TF_VAR_db_pwd=${AZURE_SQL_PASSWORD}",
                     "TF_VAR_sa_name=${STORAGE_ACCOUNT_NAME}",

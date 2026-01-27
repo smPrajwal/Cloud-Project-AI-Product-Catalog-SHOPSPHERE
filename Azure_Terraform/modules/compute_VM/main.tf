@@ -26,6 +26,11 @@ resource "azurerm_network_security_rule" "vm-nsg-rule" {
   network_security_group_name = azurerm_network_security_group.vm-nsg[each.key].name
 }
 
+resource "random_password" "flask_secret" {
+  length  = 64
+  special = true
+}
+
 resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
   for_each = {
     for k, v in var.subnet_details : k => v if v.contains_vmss
@@ -40,6 +45,27 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
   admin_username                  = var.vm_un
   admin_password                  = var.vm_pwd
   disable_password_authentication = false
+
+  custom_data = base64encode(
+    each.value.role == "frontend" ?
+    templatefile("${path.module}/frontend-cloud-init.yaml", {
+      flask_secret      = random_password.flask_secret.result
+      admin_username    = var.app_admin_un
+      admin_password    = var.app_admin_pwd
+      azure_sql_conn    = var.azure_sql_conn
+      frontend_blob_url = var.frontend_code_blob_url
+      vm_user           = var.vm_un
+    }) :
+    templatefile("${path.module}/backend-cloud-init.yaml", {
+      flask_secret        = random_password.flask_secret.result
+      azure_sql_conn      = var.azure_sql_conn
+      azure_ai_endpoint   = var.vision_endpoint
+      azure_ai_key        = var.vision_key
+      storage_conn_string = var.storage_account.pa_key
+      backend_blob_url    = var.backend_code_blob_url
+      vm_user             = var.vm_un
+    })
+  )
 
   source_image_reference {
     publisher = "Canonical"

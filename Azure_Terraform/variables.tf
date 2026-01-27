@@ -86,6 +86,17 @@ variable "function_app_name" {
   type        = string
 }
 
+variable "app_admin_un" {
+  description = "This will hold the username of ShopSphere Application Admin"
+  type        = string
+}
+
+variable "app_admin_pwd" {
+  description = "This will hold the password of ShopSphere Application Admin"
+  type        = string
+  sensitive   = true
+}
+
 variable "subnet_details" {
   description = "This contains all the necessary details related to the subnet and all are mandatory fields"
   type = map(object({

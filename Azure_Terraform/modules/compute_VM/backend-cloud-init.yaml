@@ -1,0 +1,49 @@
+#cloud-config
+
+write_files:
+  - path: /etc/environment
+    append: true
+    content: |
+      FLASK_SECRET=${flask_secret}
+      AZURE_SQL_CONN=${azure_sql_conn}
+      AZURE_AI_ENDPOINT=${azure_ai_endpoint}
+      AZURE_AI_KEY=${azure_ai_key}
+      AZURE_STORAGE_CONNECTION_STRING=${storage_conn_string}
+      CLOUD_ENV=true
+
+package_update: true
+packages:
+  - python3-pip
+  - python3-venv
+  - python3-dev
+  - unixodbc-dev
+  - gnupg2
+  - curl
+  - unzip
+
+runcmd:
+  # ODBC Driver 18
+  - curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+  - curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list > /etc/apt/sources.list.d/mssql-release.list
+  - apt-get update
+  - ACCEPT_EULA=Y apt-get install -y msodbcsql18
+
+  # App setup
+  - mkdir -p /app
+  - chown -R ${vm_user}:${vm_user} /app
+  - cd /app
+
+  # Download backend code
+  - curl -L "${backend_blob_url}" -o backend.zip
+  - unzip backend.zip
+  - rm backend.zip
+
+  # Python setup
+  - python3 -m venv venv
+  - . venv/bin/activate
+  - pip install --upgrade pip
+  - pip install -r requirements_backend.txt
+
+  # Start app
+  - chmod +x startup.sh
+  - ./startup.sh

@@ -22,6 +22,8 @@ vm_un = "prajwalsm"
 
 db_un = "prajwalsm"
 
+app_admin_un = "admin"
+
 function_app_name = "azure-ai-function-app"
 
 subnet_details = {

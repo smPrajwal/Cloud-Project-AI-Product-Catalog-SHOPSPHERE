@@ -14,3 +14,4 @@ Azure_Function/extensions.*
 Azure_Function/*.csproj
 Azure_Function/local.settings.json
 microsoft.gpg
+/Local_Notes.txt

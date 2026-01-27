@@ -1,7 +1,9 @@
 variable "default_loc" {}
 variable "default_rg" {}
 variable "db_un" {}
-variable "db_pwd" {}
+variable "db_pwd" {
+  sensitive = true
+}
 variable "vnet_id" {
   description = "This will hold the VNet ID"
   type        = string
