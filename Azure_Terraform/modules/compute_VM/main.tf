@@ -41,6 +41,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
   resource_group_name = var.default_rg
   sku                 = "Standard_B2s_v2"
   instances           = 1
+  upgrade_mode        = "Automatic"
 
   admin_username                  = var.vm_un
   admin_password                  = var.vm_pwd
