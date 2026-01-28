@@ -159,12 +159,12 @@ pipeline {
             }
         }
 
-        stage('Copying the application code to Azure Blob') {
+        stage('Uploading files to Azure Blob Container') {
             when {
                 expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)'}
             }
             steps {
-                echo " ---------------- Started pasting the application code to Azure Blob ---------------------"
+                echo " ---------------- Started uploading files to Azure Blob Container ---------------------"
                 sh """
                     az storage blob upload \
                     --account-name "$STORAGE_ACCOUNT_NAME" \
@@ -187,7 +187,7 @@ pipeline {
                     --source static/product_images \
                     --overwrite       
                 """
-                echo "-------- Copy Completed: Application code has been copied to the Azure Blob --------------"
+                echo "-------- Upload Completed: Files have been uploaded to the Azure Blob Container --------------"
             }
         }
 
