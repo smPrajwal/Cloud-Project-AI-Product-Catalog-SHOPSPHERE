@@ -11,6 +11,23 @@ write_files:
       AZURE_STORAGE_CONNECTION_STRING=${storage_conn_string}
       CLOUD_ENV=true
 
+  - path: /etc/systemd/system/flaskapp.service
+    content: |
+      [Unit]
+      Description=Gunicorn instance to serve Flask App
+      After=network.target
+
+      [Service]
+      User=${vm_user}
+      Group=${vm_user}
+      WorkingDirectory=/app
+      EnvironmentFile=/etc/environment
+      ExecStart=/app/venv/bin/gunicorn --bind=0.0.0.0 --timeout 600 app:app
+      Restart=always
+
+      [Install]
+      WantedBy=multi-user.target
+
 package_update: true
 packages:
   - python3-pip
@@ -50,6 +67,7 @@ runcmd:
   - pip install --upgrade pip
   - pip install -r requirements_backend.txt
 
-  # Start app
-  - chmod +x startup.sh
-  - ./startup.sh
+  # Start app (via SystemD)
+  - systemctl daemon-reload
+  - systemctl enable flaskapp
+  - systemctl start flaskapp
