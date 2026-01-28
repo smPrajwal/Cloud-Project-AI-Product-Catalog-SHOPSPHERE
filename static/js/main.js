@@ -39,46 +39,53 @@ async function loadProducts(query = '') {
     // Prevent API caching
     url += (url.includes('?') ? '&' : '?') + `_t=${new Date().getTime()}`;
 
-    const res = await fetch(url);
-    const products = await res.json();
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Failed to load products');
 
-    grid.innerHTML = products.map(p => {
-        let priceHtml = `₹${formatIndianCurrency(p.price)}`;
-        if (p.original_price && p.original_price > p.price) {
-            const discount = Math.round((1 - p.price / p.original_price) * 100);
-            priceHtml = `
-                <span class="text-danger fw-bold me-2">-${discount}%</span>
-                <span class="fw-bold fs-5">₹${formatIndianCurrency(p.price)}</span>
-                <span class="text-muted text-decoration-line-through ms-2 small">₹${formatIndianCurrency(p.original_price)}</span>
-            `;
-        } else {
-            priceHtml = `<span class="fw-bold fs-5">₹${formatIndianCurrency(p.price)}</span>`;
-        }
+        const products = await res.json();
 
-        let adminControls = '';
-        if (isAdmin) {
-            adminControls = `
-                <div class="mt-2 d-flex justify-content-center">
-                    <button class="btn btn-sm btn-outline-danger w-50" onclick="deleteProduct('${p.id}', event)">Delete</button>
-                </div>
-            `;
-        }
+        grid.innerHTML = products.map(p => {
+            let priceHtml = `₹${formatIndianCurrency(p.price)}`;
+            if (p.original_price && p.original_price > p.price) {
+                const discount = Math.round((1 - p.price / p.original_price) * 100);
+                priceHtml = `
+                    <span class="text-danger fw-bold me-2">-${discount}%</span>
+                    <span class="fw-bold fs-5">₹${formatIndianCurrency(p.price)}</span>
+                    <span class="text-muted text-decoration-line-through ms-2 small">₹${formatIndianCurrency(p.original_price)}</span>
+                `;
+            } else {
+                priceHtml = `<span class="fw-bold fs-5">₹${formatIndianCurrency(p.price)}</span>`;
+            }
 
-        return `
-        <div class="col-md-3 col-6 mb-4">
-            <div class="card product-card h-100">
-                <a href="/product/${toSlug(p.name)}" class="text-decoration-none">
-                    <img src="${p.thumbnail_url}" alt="${p.name}" loading="lazy" onload="this.style.opacity=1" style="display: block; width: 100%; height: 250px; object-fit: contain; background: #f9f9f9; padding: 1rem; opacity: 0;">
-                    <div class="card-body">
-                        <h5 class="card-title text-dark">${p.name}</h5>
-                        <div class="card-price mb-2">${priceHtml}</div>
-                        <div>${p.tags.map(t => `<span class="badge rounded-pill bg-light text-dark border me-1" style="font-weight:400">${t}</span>`).join('')}</div>
-                        ${adminControls}
+            let adminControls = '';
+            if (isAdmin) {
+                adminControls = `
+                    <div class="mt-2 d-flex justify-content-center">
+                        <button class="btn btn-sm btn-outline-danger w-50" onclick="deleteProduct('${p.id}', event)">Delete</button>
                     </div>
-                </a>
+                `;
+            }
+
+            return `
+            <div class="col-md-3 col-6 mb-4">
+                <div class="card product-card h-100">
+                    <a href="/product/${toSlug(p.name)}" class="text-decoration-none">
+                        <img src="${p.thumbnail_url}" alt="${p.name}" loading="lazy" onload="this.style.opacity=1" style="display: block; width: 100%; height: 250px; object-fit: contain; background: #f9f9f9; padding: 1rem; opacity: 0;">
+                        <div class="card-body">
+                            <h5 class="card-title text-dark">${p.name}</h5>
+                            <div class="card-price mb-2">${priceHtml}</div>
+                            <div>${p.tags.map(t => `<span class="badge rounded-pill bg-light text-dark border me-1" style="font-weight:400">${t}</span>`).join('')}</div>
+                            ${adminControls}
+                        </div>
+                    </a>
+                </div>
             </div>
-        </div>
-    `}).join('') || '<div class="col-12 text-center text-muted mt-5 pt-5"><p class="fs-5">No products found.</p></div>';
+        `}).join('') || '<div class="col-12 text-center text-muted mt-5 pt-5"><p class="fs-5">No products found.</p></div>';
+    } catch (error) {
+        console.error("Error loading products:", error);
+        grid.innerHTML = `<div class="col-12 text-center text-danger mt-5"><p>Failed to load products. Please try again later.</p></div>`;
+    }
 }
 
 function searchProducts() {

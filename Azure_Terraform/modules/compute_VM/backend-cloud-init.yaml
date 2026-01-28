@@ -63,9 +63,8 @@ runcmd:
 
   # Python setup
   - python3 -m venv venv
-  - . venv/bin/activate
-  - pip install --upgrade pip
-  - pip install -r requirements_backend.txt
+  - /app/venv/bin/pip install --upgrade pip
+  - /app/venv/bin/pip install -r requirements_backend.txt
 
   # Start app (via SystemD)
   - systemctl daemon-reload
