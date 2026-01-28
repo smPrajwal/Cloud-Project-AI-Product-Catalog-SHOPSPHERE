@@ -20,7 +20,25 @@ resource "azurerm_network_security_rule" "vm-nsg-rule" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "8000"
-  source_address_prefixes     = [each.value.vm_nsg_source_cidr, "AzureLoadBalancer"]
+  source_address_prefix       = each.value.vm_nsg_source_cidr
+  destination_address_prefix  = "*"
+  resource_group_name         = var.default_rg
+  network_security_group_name = azurerm_network_security_group.vm-nsg[each.key].name
+}
+
+resource "azurerm_network_security_rule" "allow-lb-probe" {
+  for_each = {
+    for k, v in var.subnet_details : k => v if v.contains_vmss
+  }
+
+  name                        = "${each.key}-allow-lb-probe"
+  priority                    = 150
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "*"
+  source_port_range           = "*"
+  destination_port_range      = "*"
+  source_address_prefix       = "AzureLoadBalancer"
   destination_address_prefix  = "*"
   resource_group_name         = var.default_rg
   network_security_group_name = azurerm_network_security_group.vm-nsg[each.key].name
