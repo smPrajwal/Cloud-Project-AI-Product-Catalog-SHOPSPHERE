@@ -40,4 +40,9 @@ resource "azurerm_private_endpoint" "db-endpoint" {
     subresource_names              = ["sqlServer"]
     is_manual_connection           = false
   }
+
+  private_dns_zone_group {
+    name                 = "default"
+    private_dns_zone_ids = [azurerm_private_dns_zone.db-dns-zone.id]
+  }
 }
