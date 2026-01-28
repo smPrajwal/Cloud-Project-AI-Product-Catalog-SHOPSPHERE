@@ -55,6 +55,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
       azure_sql_conn    = var.azure_sql_conn
       frontend_blob_url = var.frontend_code_blob_url
       vm_user           = var.vm_un
+      backend_lb_ip     = var.backend_lb_private_ip
     }) :
     templatefile("${path.module}/backend-cloud-init.yaml", {
       flask_secret        = random_password.flask_secret.result

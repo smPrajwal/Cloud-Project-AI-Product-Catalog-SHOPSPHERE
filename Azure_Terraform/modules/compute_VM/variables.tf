@@ -6,6 +6,7 @@ variable "app_admin_un" {}
 variable "frontend_code_blob_url" {}
 variable "backend_code_blob_url" {}
 variable "vision_endpoint" {}
+variable "backend_lb_private_ip" {}
 variable "vision_key" {
   sensitive = true
 }

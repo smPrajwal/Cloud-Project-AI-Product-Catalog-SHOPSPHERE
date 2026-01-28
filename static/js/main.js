@@ -1,8 +1,5 @@
 // Cloud-Friendly API URL
 var API_URL = "/api";
-if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    API_URL = "http://YOUR_BACKEND_IP/api";
-}
 const API_BASE = API_URL + "/products";
 
 // Convert product name to URL slug (e.g. "Wireless Headphones" -> "wireless-headphones")

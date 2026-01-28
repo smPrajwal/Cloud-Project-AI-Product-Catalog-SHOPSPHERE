@@ -32,6 +32,20 @@ def safe_get_about():
 
 # --- Routes ---
 
+@ui_bp.route('/api/<path:path>', methods=['GET', 'POST', 'DELETE'])
+def proxy(path):
+    import requests
+    backend_url = os.environ.get('BACKEND_API_URL', 'http://localhost:8000')
+    url = f"{backend_url}/api/{path}"
+    
+    # Forward the request
+    resp = requests.request(
+        method=request.method,
+        url=url,
+        json=request.get_json(silent=True)
+    )
+    return resp.content, resp.status_code
+
 @ui_bp.route('/')
 def index():
     print("LOG: Accessing index page (UI)")
