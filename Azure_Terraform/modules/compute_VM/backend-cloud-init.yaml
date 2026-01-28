@@ -22,7 +22,7 @@ write_files:
       Group=${vm_user}
       WorkingDirectory=/app
       EnvironmentFile=/etc/environment
-      ExecStart=/app/venv/bin/gunicorn --bind=0.0.0.0:8000 --timeout 600 app:app
+      ExecStart=/app/venv/bin/gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 4 app:app
       Restart=always
 
       [Install]
