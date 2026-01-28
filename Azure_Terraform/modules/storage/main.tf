@@ -17,5 +17,5 @@ resource "azurerm_storage_container" "product_images" {
 resource "azurerm_storage_container" "application_code" {
   name                  = var.code_blob_container_name
   storage_account_id    = azurerm_storage_account.main_sa.id
-  container_access_type = "private"
+  container_access_type = "blob"
 }

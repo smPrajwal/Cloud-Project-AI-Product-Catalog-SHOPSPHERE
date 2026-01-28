@@ -10,7 +10,7 @@ sa_replication_type = "LRS"
 
 sa_access_tier = "Hot"
 
-sa_allow_public_access = false
+sa_allow_public_access = true
 
 code_blob_container_name = "application-code"
 
@@ -35,7 +35,7 @@ subnet_details = {
     sub_nsg_priority    = 100
     sub_nsg_source_cidr = "Internet"
     vm_nsg_priority     = 100
-    vm_nsg_source_cidr  = "AzureLoadBalancer"
+    vm_nsg_source_cidr  = "*"
   }
   "private-be" = {
     access              = "private"
