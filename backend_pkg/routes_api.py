@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from database.db import get_db
 from shared_pkg.utils import analyze_sentiment
+import os
 
 api_bp = Blueprint('api', __name__)
 
@@ -28,8 +29,12 @@ def get_products():
         sql += " AND id IN (SELECT product_id FROM product_tags WHERE tag_name = ?)"
         params.append(tag)
         
-    sql += " LIMIT ? OFFSET ?"
-    params.extend([limit, offset])
+    if os.environ.get('AZURE_SQL_CONN'):
+        sql += " ORDER BY id OFFSET ? ROWS FETCH NEXT ? ROWS ONLY"
+        params.extend([offset, limit])
+    else:
+        sql += " LIMIT ? OFFSET ?"
+        params.extend([limit, offset])
     
     cursor = db.execute(sql, params)
     rows = cursor.fetchall()

@@ -4,12 +4,12 @@ write_files:
   - path: /etc/environment
     append: true
     content: |
-      FLASK_SECRET=${flask_secret}
-      AZURE_SQL_CONN=${azure_sql_conn}
-      ADMIN_USERNAME=${admin_username}
-      ADMIN_PASSWORD=${admin_password}
-      BACKEND_API_URL=http://${backend_lb_ip}:80
-      CLOUD_ENV=true
+      FLASK_SECRET="${flask_secret}"
+      AZURE_SQL_CONN="${azure_sql_conn}"
+      ADMIN_USERNAME="${admin_username}"
+      ADMIN_PASSWORD="${admin_password}"
+      BACKEND_API_URL="http://${backend_lb_ip}:80"
+      CLOUD_ENV="true"
 
   - path: /etc/systemd/system/flaskapp.service
     content: |

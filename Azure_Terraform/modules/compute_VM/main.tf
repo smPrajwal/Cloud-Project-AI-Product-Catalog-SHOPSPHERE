@@ -20,7 +20,7 @@ resource "azurerm_network_security_rule" "vm-nsg-rule" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "8000"
-  source_address_prefix       = each.value.vm_nsg_source_cidr
+  source_address_prefixes     = [each.value.vm_nsg_source_cidr, "AzureLoadBalancer"]
   destination_address_prefix  = "*"
   resource_group_name         = var.default_rg
   network_security_group_name = azurerm_network_security_group.vm-nsg[each.key].name
@@ -155,4 +155,3 @@ resource "azurerm_monitor_autoscale_setting" "vmss_autoscale" {
     }
   }
 }
-

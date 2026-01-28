@@ -4,31 +4,34 @@ import os
 ui_bp = Blueprint('ui', __name__)
 
 # --- Safe Helpers (Frontend Friendly) ---
+import requests
+
 def safe_get_ads():
     try:
-        from database.db import get_db
-        db = get_db()
-        return db.execute('SELECT * FROM advertisements ORDER BY id').fetchall()
+        backend_url = os.environ.get('BACKEND_API_URL', 'http://localhost:8000')
+        resp = requests.get(f"{backend_url}/api/advertisements", timeout=2)
+        if resp.ok: return resp.json()
     except:
-        return [] # Return empty if DB missing
+        pass
+    return []
 
 def safe_get_footer():
     try:
-        from database.db import get_db
-        db = get_db()
-        settings = db.execute('SELECT key, value FROM site_settings WHERE key LIKE "footer_%"').fetchall()
-        return {row['key']: row['value'] for row in settings}
+        backend_url = os.environ.get('BACKEND_API_URL', 'http://localhost:8000')
+        resp = requests.get(f"{backend_url}/api/settings/footer", timeout=2)
+        if resp.ok: return resp.json()
     except:
-        return {}
+        pass
+    return {}
 
 def safe_get_about():
     try:
-        from database.db import get_db
-        db = get_db()
-        settings = db.execute('SELECT key, value FROM site_settings WHERE key LIKE "about_%"').fetchall()
-        return {row['key']: row['value'] for row in settings}
+        backend_url = os.environ.get('BACKEND_API_URL', 'http://localhost:8000')
+        resp = requests.get(f"{backend_url}/api/settings/about", timeout=2)
+        if resp.ok: return resp.json()
     except:
-        return {}
+        pass
+    return {}
 
 # --- Routes ---
 

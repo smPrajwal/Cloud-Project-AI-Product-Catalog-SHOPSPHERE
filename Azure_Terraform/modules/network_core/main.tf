@@ -32,11 +32,12 @@ resource "azurerm_network_security_rule" "subnet-nsg-rule" {
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "*"
-  source_address_prefix       = each.value.sub_nsg_source_cidr
+  source_address_prefixes     = [each.value.sub_nsg_source_cidr, "AzureLoadBalancer"]
   destination_address_prefix  = "*"
   resource_group_name         = var.default_rg
   network_security_group_name = azurerm_network_security_group.subnet-nsg[each.key].name
 }
+
 
 resource "azurerm_subnet_network_security_group_association" "subnet-nsg-assoc" {
   for_each                  = var.subnet_details
