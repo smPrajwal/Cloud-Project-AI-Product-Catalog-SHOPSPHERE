@@ -55,7 +55,7 @@ pipeline {
             steps {
                 echo "------------------------------------ Started Packaging!... -------------------------------"
                 sh """
-                    zip -r ${FRONTEND_APP_CODE} app.py startup.sh requirements_frontend.txt frontend_pkg shared_pkg templates static
+                    zip -r ${FRONTEND_APP_CODE} app.py startup.sh requirements_frontend.txt frontend_pkg shared_pkg templates static -x "static/product_images*"
                     zip -r ${BACKEND_APP_CODE} app.py startup.sh requirements_backend.txt backend_pkg shared_pkg database
                     test -f ${FRONTEND_APP_CODE}
                     test -f ${BACKEND_APP_CODE}
@@ -178,6 +178,13 @@ pipeline {
                     --container-name "$CODE_CONTAINER_NAME" \
                     --name backend/${BACKEND_APP_CODE} \
                     --file ${BACKEND_APP_CODE} \
+                    --overwrite
+
+                    echo "Uploading Product Images..."
+                    az storage blob upload-batch \
+                    --account-name "$STORAGE_ACCOUNT_NAME" \
+                    --destination "product-images" \
+                    --source static/product_images \
                     --overwrite       
                 """
                 echo "-------- Copy Completed: Application code has been copied to the Azure Blob --------------"

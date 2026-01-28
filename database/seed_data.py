@@ -7,6 +7,17 @@ Automates initial data population for Products, Reviews, and Tags.
 def seed_azure(conn):
     try:
         cursor = conn.cursor()
+        
+        # Helper for Blob URL
+        import os
+        STORAGE_ACCOUNT = os.environ.get('STORAGE_ACCOUNT_NAME') 
+        # If we have a storage account, use Blob URL. Otherwise, use local static path.
+        IMG_BASE = f"https://{STORAGE_ACCOUNT}.blob.core.windows.net/product-images/" if STORAGE_ACCOUNT else "/static/product_images/"
+        
+        def get_img_url(filename):
+             # Extract filename from old static path if needed, or just append
+             name = filename.split('/')[-1]
+             return f"{IMG_BASE}{name}"
 
         # --- Embedded Seed Data ---
         SEED_DATA = {
@@ -1387,7 +1398,7 @@ def seed_azure(conn):
                 for p in SEED_DATA["products"]:
                     cursor.execute(
                         "INSERT INTO products (id, name, description, price, original_price, thumbnail_url) VALUES (?, ?, ?, ?, ?, ?)",
-                        (p["id"], p["name"], p["description"], p["price"], p["original_price"], p["thumbnail_url"])
+                        (p["id"], p["name"], p["description"], p["price"], p["original_price"], get_img_url(p["thumbnail_url"]))
                     )
                 cursor.execute("SET IDENTITY_INSERT products OFF")
                 print(f"Inserted {len(SEED_DATA['products'])} products.")

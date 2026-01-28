@@ -63,9 +63,10 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
       azure_sql_conn      = var.azure_sql_conn
       azure_ai_endpoint   = var.vision_endpoint
       azure_ai_key        = var.vision_key
-      storage_conn_string = var.storage_account.pa_key
-      backend_blob_url    = var.backend_code_blob_url
-      vm_user             = var.vm_un
+      storage_conn_string  = var.storage_account.pa_key
+      storage_account_name = var.storage_account.name
+      backend_blob_url     = var.backend_code_blob_url
+      vm_user              = var.vm_un
     })
   )
 

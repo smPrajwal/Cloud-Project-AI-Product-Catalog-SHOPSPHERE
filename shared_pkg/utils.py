@@ -1,7 +1,7 @@
 import os
 
 
-UPLOAD_FOLDER = 'static/uploads'
+UPLOAD_FOLDER = 'static/product_images'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Azure Stubs
