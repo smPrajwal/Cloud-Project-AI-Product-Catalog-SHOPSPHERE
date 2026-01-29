@@ -138,6 +138,12 @@ def delete_review(id):
     
     return jsonify({'message': 'Review deleted'})
 
+@api_bp.route('/api/ads', methods=['GET'])
+def get_ads():
+    db = get_db()
+    rows = db.execute('SELECT * FROM advertisements').fetchall()
+    return jsonify([dict(row) for row in rows])
+
 @api_bp.route('/api/products/<id_or_slug>/recommendations', methods=['GET'])
 def get_recommendations(id_or_slug):
     db = get_db()
@@ -156,22 +162,23 @@ def get_recommendations(id_or_slug):
     
     if not current_tags:
         return jsonify([])
-        
+    
+    # Simple query that works on both SQLite and Azure SQL
     placeholders = ','.join('?' * len(current_tags))
     sql = f'''
-        SELECT DISTINCT p.*, COUNT(pt.tag_name) as overlap
+        SELECT DISTINCT p.id, p.name, p.price, p.original_price, p.thumbnail_url
         FROM products p
         JOIN product_tags pt ON p.id = pt.product_id
         WHERE pt.tag_name IN ({placeholders}) AND p.id != ?
-        GROUP BY p.id
-        ORDER BY overlap DESC
-        LIMIT 5
     '''
     params = current_tags + [id]
     
     rec_cursor = db.execute(sql, params)
+    rows = rec_cursor.fetchall()
+    
+    # Limit to 5 results
     recs = []
-    for row in rec_cursor.fetchall():
+    for row in rows[:5]:
         recs.append({
             'id': row['id'],
             'name': row['name'],
