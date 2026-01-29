@@ -154,24 +154,31 @@ def get_ads():
 
 @api_bp.route('/api/products/<id_or_slug>/recommendations', methods=['GET'])
 def get_recommendations(id_or_slug):
-    db = get_db()
-    
-    # Resolve ID if slug is passed
-    if str(id_or_slug).isdigit():
-        id = id_or_slug
-    else:
-        search = '%' + '%'.join(id_or_slug.split('-')) + '%'
-        product = db.execute('SELECT id FROM products WHERE LOWER(name) LIKE LOWER(?)', (search,)).fetchone()
-        if not product: return jsonify([])
-        id = product['id']
+    print(f"LOG: Get Recommendations for {id_or_slug}")
+    try:
+        db = get_db()
+        
+        # Resolve ID if slug is passed
+        if str(id_or_slug).isdigit():
+            product_id = int(id_or_slug)
+        else:
+            search = '%' + '%'.join(id_or_slug.split('-')) + '%'
+            product = db.execute('SELECT id FROM products WHERE LOWER(name) LIKE LOWER(?)', (search,)).fetchone()
+            if not product:
+                print("LOG: Product not found for recommendations")
+                return jsonify([])
+            product_id = product['id']
 
-    tags_cursor = db.execute('SELECT tag_name FROM product_tags WHERE product_id = ?', (id,))
-    current_tags = [row['tag_name'] for row in tags_cursor.fetchall()]
-    
-    
-    rows = []
-    if current_tags:
-        # Simple query that works on both SQLite and Azure SQL
+        print(f"LOG: Resolved product_id = {product_id}")
+        
+        tags_cursor = db.execute('SELECT tag_name FROM product_tags WHERE product_id = ?', (product_id,))
+        current_tags = [row['tag_name'] for row in tags_cursor.fetchall()]
+        print(f"LOG: Current tags = {current_tags}")
+        
+        if not current_tags:
+            return jsonify([])
+        
+        # Simple query for recommendations
         placeholders = ','.join('?' * len(current_tags))
         sql = f'''
             SELECT DISTINCT p.id, p.name, p.price, p.original_price, p.thumbnail_url
@@ -179,26 +186,24 @@ def get_recommendations(id_or_slug):
             JOIN product_tags pt ON p.id = pt.product_id
             WHERE pt.tag_name IN ({placeholders}) AND p.id != ?
         '''
-        params = current_tags + [id]
+        params = current_tags + [product_id]
         
         rec_cursor = db.execute(sql, params)
         rows = rec_cursor.fetchall()
-    
-    # NEW: Fallback if no tag matches found (or no tags)
-    if not rows:
-       # No LIMIT here for Azure/T-SQL compatibility
-       rec_cursor = db.execute('SELECT * FROM products WHERE id != ?', (id,))
-       rows = rec_cursor.fetchall()
-    
-    # Limit to 5 results
-    recs = []
-    for row in rows[:5]:
-        recs.append({
-            'id': row['id'],
-            'name': row['name'],
-            'price': int(row['price']),
-            'original_price': int(row['original_price']) if row['original_price'] else None,
-            'thumbnail_url': row['thumbnail_url']
-        })
+        print(f"LOG: Found {len(rows)} recommendation rows")
         
-    return jsonify(recs)
+        # Limit to 5 results
+        recs = []
+        for row in rows[:5]:
+            recs.append({
+                'id': row['id'],
+                'name': row['name'],
+                'price': int(row['price']),
+                'original_price': int(row['original_price']) if row['original_price'] else None,
+                'thumbnail_url': row['thumbnail_url']
+            })
+            
+        return jsonify(recs)
+    except Exception as e:
+        print(f"ERROR in recommendations: {e}")
+        return jsonify([])
