@@ -14,7 +14,7 @@ async function deleteProduct(id, event) {
     if (!confirm('Delete this product? This cannot be undone.')) return;
 
     try {
-        const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
+        const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE', credentials: 'include' });
         const result = await res.json();
 
         if (res.ok && result.success) {
@@ -45,7 +45,8 @@ document.getElementById('addProductForm')?.addEventListener('submit', async (e) 
         const res = await fetch(API_BASE, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
+            credentials: 'include'
         });
 
         const result = await res.json();
@@ -62,7 +63,8 @@ document.getElementById('addProductForm')?.addEventListener('submit', async (e) 
                 // Use the singular endpoint
                 await fetch(`${API_BASE}/${productId}/image`, {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    credentials: 'include'
                 });
             }
 
@@ -96,7 +98,8 @@ async function uploadImage() {
         // Use PRODUCT_ID as slug/id
         const res = await fetch(`/api/products/${PRODUCT_ID}/image`, {
             method: 'POST',
-            body: formData
+            body: formData,
+            credentials: 'include'
         });
 
         const result = await res.json();

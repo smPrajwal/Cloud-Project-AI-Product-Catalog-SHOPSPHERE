@@ -34,7 +34,16 @@ def safe_get_about():
 def proxy(path):
     import requests
     backend_url = os.environ.get('BACKEND_API_URL', 'http://localhost:8000')
-    resp = requests.request(method=request.method, url=f"{backend_url}/api/{path}", params=request.args, json=request.get_json(silent=True))
+    headers = {}
+    if session.get('is_admin'):
+        headers['X-Admin'] = 'true'
+    
+    # Handle file uploads
+    if request.files:
+        files = {k: (f.filename, f.read(), f.content_type) for k, f in request.files.items()}
+        resp = requests.request(method=request.method, url=f"{backend_url}/api/{path}", params=request.args, files=files, headers=headers)
+    else:
+        resp = requests.request(method=request.method, url=f"{backend_url}/api/{path}", params=request.args, json=request.get_json(silent=True), headers=headers)
     return resp.content, resp.status_code
 
 @ui_bp.route('/')

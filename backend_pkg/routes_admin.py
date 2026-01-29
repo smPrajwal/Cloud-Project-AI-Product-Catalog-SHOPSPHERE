@@ -6,10 +6,9 @@ from shared_pkg.utils import upload_product_image
 admin_bp = Blueprint('admin', __name__)
 
 # --- Product Admin ---
-# --- Product Admin ---
 @admin_bp.route('/api/products', methods=['POST'])
 def add_product():
-    if not session.get('is_admin'):
+    if not session.get('is_admin') and request.headers.get('X-Admin') != 'true':
          return jsonify({'success': False, 'error': 'Unauthorized'}), 401
     
     data = request.json
@@ -27,7 +26,7 @@ def add_product():
 
 @admin_bp.route('/api/products/<id_or_slug>/image', methods=['POST'])
 def add_product_image(id_or_slug):
-    if not session.get('is_admin'):
+    if not session.get('is_admin') and request.headers.get('X-Admin') != 'true':
         return jsonify({'success': False, 'error': 'Unauthorized'}), 401
 
     db = get_db()
@@ -75,7 +74,7 @@ def add_product_image(id_or_slug):
 
 @admin_bp.route('/api/products/<int:id>', methods=['DELETE'])
 def delete_product(id):
-    if not session.get('is_admin'):
+    if not session.get('is_admin') and request.headers.get('X-Admin') != 'true':
         return jsonify({'success': False, 'error': 'Unauthorized'}), 401
     
     db = get_db()
