@@ -26,8 +26,9 @@ variable "lb_backend_pool_ids" {
 }
 variable "storage_account" {
   type = object({
-    name   = string
-    pa_key = string
+    name              = string
+    pa_key            = string
+    connection_string = string
   })
   sensitive = true
 }
