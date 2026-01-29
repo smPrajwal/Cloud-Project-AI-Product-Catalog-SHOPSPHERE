@@ -300,17 +300,27 @@ async function loadRecommendations(id) {
     console.log(`LOG: loadRecommendations for ${id}`);
     const res = await fetch(`${API_BASE}/${id}/recommendations`);
     const recs = await res.json();
-    document.getElementById('recommendationsList').innerHTML = recs.map(r => `
+    document.getElementById('recommendationsList').innerHTML = recs.map(r => {
+        let priceHtml = `<span class="fw-bold">₹${formatIndianCurrency(r.price)}</span>`;
+        if (r.original_price && r.original_price > r.price) {
+            const discount = Math.round((1 - r.price / r.original_price) * 100);
+            priceHtml = `
+                <span class="text-danger fw-bold me-1">-${discount}%</span>
+                <span class="fw-bold">₹${formatIndianCurrency(r.price)}</span>
+                <span class="text-muted text-decoration-line-through ms-1 small">₹${formatIndianCurrency(r.original_price)}</span>
+            `;
+        }
+        return `
         <div class="col-4 me-3" style="min-width: 250px;">
             <div class="card h-100 product-card">
                  <a href="/product/${toSlug(r.name)}" class="text-reset text-decoration-none">
                     <img src="${r.thumbnail_url}" alt="${r.name}" loading="lazy" onload="this.style.opacity=1" style="display: block; width: 100%; height: 180px; object-fit: contain; background: #f9f9f9; padding: 1rem; opacity: 0;">
                     <div class="card-body">
                         <h6 class="card-title text-truncate">${r.name}</h6>
-                        <small class="text-muted">₹${r.price}</small>
+                        <div class="small">${priceHtml}</div>
                     </div>
                 </a>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }

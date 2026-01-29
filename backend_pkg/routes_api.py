@@ -5,6 +5,14 @@ import os
 
 api_bp = Blueprint('api', __name__)
 
+# --- Advertisements API ---
+@api_bp.route('/api/ads', methods=['GET'])
+def get_ads():
+    print("LOG: API Get Ads")
+    db = get_db()
+    rows = db.execute('SELECT * FROM advertisements').fetchall()
+    return jsonify([dict(row) for row in rows])
+
 # --- Products API ---
 
 @api_bp.route('/api/products', methods=['GET'])

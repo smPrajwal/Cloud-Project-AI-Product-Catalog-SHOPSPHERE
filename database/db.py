@@ -166,20 +166,21 @@ def init_db(app):
             else:
                  db.execute('INSERT OR IGNORE INTO site_settings (key, value) VALUES (?, ?)', (key, value))
 
-        # Default Ads (Same logic)
-        
+        # Default Ads
         ads_check = db.execute('SELECT id FROM advertisements').fetchone()
+        print(f"LOG: Ads check result: {ads_check}")
         if not ads_check:
-             default_ads = [
+            print("LOG: Seeding advertisements...")
+            default_ads = [
                 ('LIMITED TIME', 'Tech Fest Sale', 'Up to 40% off on Electronics', 'Shop Now →', 'tech', '/static/uploads/promo_electronics.png', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'),
                 ('NEW ARRIVALS', 'Fashion Week', 'Trendy styles at best prices', 'Explore →', 'fashion', '/static/uploads/promo_fashion.png', 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'),
                 ('MEGA SALE', 'Kitchen Essentials', 'Premium appliances at 30% off', 'Shop Now →', 'kitchen', '/static/uploads/promo_kitchen.png', 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'),
                 ('TRENDING', 'Lifestyle Picks', 'Curated collection for you', 'Discover →', 'lifestyle', '/static/uploads/promo_lifestyle.png', 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'),
                 ('WORK SMART', 'Office Essentials', 'Upgrade your workspace today', 'Shop Now →', 'office', '/static/uploads/promo_office.png', 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)')
             ]
-             for ad in default_ads:
+            for ad in default_ads:
                 db.execute('INSERT INTO advertisements (badge, title, subtitle, button_text, category, image_url, gradient) VALUES (?, ?, ?, ?, ?, ?, ?)', ad)
-             db.commit()
-        
-
-        
+            db.commit()
+            print(f"LOG: Inserted {len(default_ads)} ads")
+        else:
+            print("LOG: Ads already exist, skipping seed")

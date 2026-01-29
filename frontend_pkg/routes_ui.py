@@ -4,15 +4,16 @@ import os
 ui_bp = Blueprint('ui', __name__)
 
 def safe_get_ads():
+    import requests
+    backend_url = os.environ.get('BACKEND_API_URL', 'http://localhost:5000')
     try:
-        from database.db import get_db
-        from flask import has_app_context
-        if has_app_context():
-            db = get_db()
-            rows = db.execute('SELECT * FROM advertisements').fetchall()
-            return [dict(row) for row in rows]
-    except:
-        pass
+        resp = requests.get(f'{backend_url}/api/ads', timeout=5)
+        if resp.ok:
+            ads = resp.json()
+            print(f"LOG: safe_get_ads got {len(ads)} ads from backend")
+            return ads
+    except Exception as e:
+        print(f"LOG: safe_get_ads error: {e}")
     return []
 
 def safe_get_footer():
