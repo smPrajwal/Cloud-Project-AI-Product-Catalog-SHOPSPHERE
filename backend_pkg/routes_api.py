@@ -168,21 +168,27 @@ def get_recommendations(id_or_slug):
     tags_cursor = db.execute('SELECT tag_name FROM product_tags WHERE product_id = ?', (id,))
     current_tags = [row['tag_name'] for row in tags_cursor.fetchall()]
     
-    if not current_tags:
-        return jsonify([])
     
-    # Simple query that works on both SQLite and Azure SQL
-    placeholders = ','.join('?' * len(current_tags))
-    sql = f'''
-        SELECT DISTINCT p.id, p.name, p.price, p.original_price, p.thumbnail_url
-        FROM products p
-        JOIN product_tags pt ON p.id = pt.product_id
-        WHERE pt.tag_name IN ({placeholders}) AND p.id != ?
-    '''
-    params = current_tags + [id]
+    rows = []
+    if current_tags:
+        # Simple query that works on both SQLite and Azure SQL
+        placeholders = ','.join('?' * len(current_tags))
+        sql = f'''
+            SELECT DISTINCT p.id, p.name, p.price, p.original_price, p.thumbnail_url
+            FROM products p
+            JOIN product_tags pt ON p.id = pt.product_id
+            WHERE pt.tag_name IN ({placeholders}) AND p.id != ?
+        '''
+        params = current_tags + [id]
+        
+        rec_cursor = db.execute(sql, params)
+        rows = rec_cursor.fetchall()
     
-    rec_cursor = db.execute(sql, params)
-    rows = rec_cursor.fetchall()
+    # NEW: Fallback if no tag matches found (or no tags)
+    if not rows:
+       # No LIMIT here for Azure/T-SQL compatibility
+       rec_cursor = db.execute('SELECT * FROM products WHERE id != ?', (id,))
+       rows = rec_cursor.fetchall()
     
     # Limit to 5 results
     recs = []
