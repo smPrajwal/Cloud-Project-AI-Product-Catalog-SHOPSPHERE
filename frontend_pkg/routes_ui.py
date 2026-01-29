@@ -16,7 +16,7 @@ def safe_get_about():
 def proxy(path):
     import requests
     backend_url = os.environ.get('BACKEND_API_URL', 'http://localhost:8000')
-    resp = requests.request(method=request.method, url=f"{backend_url}/api/{path}", json=request.get_json(silent=True))
+    resp = requests.request(method=request.method, url=f"{backend_url}/api/{path}", params=request.args, json=request.get_json(silent=True))
     return resp.content, resp.status_code
 
 @ui_bp.route('/')
