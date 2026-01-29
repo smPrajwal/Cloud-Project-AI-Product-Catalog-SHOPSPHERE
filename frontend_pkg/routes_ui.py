@@ -4,12 +4,13 @@ import os
 ui_bp = Blueprint('ui', __name__)
 
 def safe_get_ads():
-    import requests
-    backend_url = os.environ.get('BACKEND_API_URL', 'http://localhost:5000')
     try:
-        resp = requests.get(f"{backend_url}/api/ads", timeout=5)
-        if resp.ok:
-            return resp.json()
+        from database.db import get_db
+        from flask import has_app_context
+        if has_app_context():
+            db = get_db()
+            rows = db.execute('SELECT * FROM advertisements').fetchall()
+            return [dict(row) for row in rows]
     except:
         pass
     return []
@@ -21,11 +22,11 @@ def safe_get_about():
     return {
         'about_title': 'Our Story',
         'about_subtitle': 'Passionate about quality. Dedicated to you.',
-        'about_hero_image': 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800',
+        'about_hero_image': '/static/uploads/about_hero_about_hero.png',
         'about_section1_title': 'How We Started',
-        'about_section1_text': 'ShopSphere began with a simple idea: make quality products accessible to everyone. What started as a small online store has grown into a trusted destination for shoppers looking for the best deals on electronics, fashion, home goods, and more.',
+        'about_section1_text': 'We are obsessive about curating the finest selection of products that blend premium quality with thoughtful design. Every item in our catalog is chosen with care to enhance your everyday life.',
         'about_section2_title': 'Our Passion',
-        'about_section2_text': 'We believe shopping should be simple, enjoyable, and rewarding. Our team works hard to bring you carefully selected products at the best prices. Customer satisfaction is at the heart of everything we do.'
+        'about_section2_text': 'We believe that great design should be accessible to everyone. Our mission is to bring you beautiful, functional products without the luxury markup.'
     }
 
 @ui_bp.route('/api/<path:path>', methods=['GET', 'POST', 'DELETE'])
