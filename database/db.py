@@ -27,9 +27,11 @@ def get_db():
                             wrapper = AzureCursor(c)
                             if sql.strip().upper().startswith("INSERT"):
                                 try:
-                                    c.execute("SELECT CAST(SCOPE_IDENTITY() AS INT)")
-                                    row = c.fetchone()
-                                    if row: wrapper.lastrowid = row[0]
+                                    id_cursor = self.conn.cursor()
+                                    id_cursor.execute("SELECT @@IDENTITY AS id")
+                                    row = id_cursor.fetchone()
+                                    if row and row[0]: wrapper.lastrowid = int(row[0])
+                                    id_cursor.close()
                                 except: pass
                             return wrapper
                         def commit(self): self.conn.commit()

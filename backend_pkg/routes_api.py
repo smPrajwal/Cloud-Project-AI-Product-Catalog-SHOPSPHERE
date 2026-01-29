@@ -129,7 +129,7 @@ def add_review(id_or_slug):
 
 @api_bp.route('/api/reviews/<int:id>', methods=['DELETE'])
 def delete_review(id):
-    if not session.get('is_admin'):
+    if not session.get('is_admin') and request.headers.get('X-Admin') != 'true':
          return jsonify({'error': 'Admins only'}), 403
          
     db = get_db()

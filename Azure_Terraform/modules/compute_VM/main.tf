@@ -125,7 +125,7 @@ resource "azurerm_monitor_autoscale_setting" "vmss_autoscale" {
         time_window        = "PT5M"
         time_aggregation   = "Average"
         operator           = "GreaterThan"
-        threshold          = 30
+        threshold          = 80
       }
       scale_action {
         direction = "Increase"

@@ -44,7 +44,7 @@ resource "azurerm_monitor_metric_alert" "ss_mm_alert" {
     metric_name      = "Percentage CPU"
     aggregation      = "Average"
     operator         = "GreaterThan"
-    threshold        = 20
+    threshold        = 70
   }
 
   action {
