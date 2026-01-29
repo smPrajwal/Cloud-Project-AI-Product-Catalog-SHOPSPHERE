@@ -47,7 +47,6 @@ runcmd:
 
   # App setup
   - mkdir -p /app
-  - chown -R ${vm_user}:${vm_user} /app
   - cd /app
 
   # Wait for frontend ZIP and download
@@ -58,16 +57,19 @@ runcmd:
       sleep 10
     done
 
-  - unzip /tmp/frontend.zip
+  - unzip /tmp/frontend.zip -d /app
   - rm /tmp/frontend.zip
 
+  # Fix ownership after unzip
+  - chown -R ${vm_user}:${vm_user} /app
+
   # Python setup
-  - python3 -m venv venv
-  - . venv/bin/activate
-  - pip install --upgrade pip
-  - pip install -r requirements_frontend.txt
+  - python3 -m venv /app/venv
+  - /app/venv/bin/pip install --upgrade pip
+  - /app/venv/bin/pip install -r /app/requirements_frontend.txt
 
   # Start app (via SystemD)
   - systemctl daemon-reload
   - systemctl enable flaskapp
+  - sleep 5
   - systemctl start flaskapp

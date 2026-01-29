@@ -48,7 +48,6 @@ runcmd:
 
   # App setup
   - mkdir -p /app
-  - chown -R ${vm_user}:${vm_user} /app
   - cd /app
 
   # Wait for backend ZIP and download
@@ -59,15 +58,19 @@ runcmd:
       sleep 10
     done
 
-  - unzip /tmp/backend.zip
+  - unzip /tmp/backend.zip -d /app
   - rm /tmp/backend.zip
 
+  # Fix ownership after unzip
+  - chown -R ${vm_user}:${vm_user} /app
+
   # Python setup
-  - python3 -m venv venv
+  - python3 -m venv /app/venv
   - /app/venv/bin/pip install --upgrade pip
-  - /app/venv/bin/pip install -r requirements_backend.txt
+  - /app/venv/bin/pip install -r /app/requirements_backend.txt
 
   # Start app (via SystemD)
   - systemctl daemon-reload
   - systemctl enable flaskapp
+  - sleep 5
   - systemctl start flaskapp
