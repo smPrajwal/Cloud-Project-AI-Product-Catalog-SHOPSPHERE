@@ -40,9 +40,11 @@ def main(blob):
     tags = vision.analyze(blob.read(), ["Tags"]).tags
 
     for t in tags:
+        # Handle both object (t.name) and string (t) cases
+        tag_name = t.name if hasattr(t, 'name') else str(t)
         cur.execute(
             "INSERT INTO product_tags (product_id, tag_name) VALUES (?, ?)",
-            (product_id, t.name)
+            (product_id, tag_name)
         )
 
     db.commit()
