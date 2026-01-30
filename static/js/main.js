@@ -209,15 +209,9 @@ async function deleteReview(id, event) {
         if (res.ok) {
             // Dynamic Remove
             if (event && event.target) {
-                const item = event.target.closest('.mb-3');
-                if (item) item.remove();
-
-                // Update count
-                const countSpan = document.getElementById('reviewCount');
-                if (countSpan) {
-                    const curr = parseInt(countSpan.textContent.replace(/\D/g, '')) || 0;
-                    countSpan.textContent = `(${Math.max(0, curr - 1)})`;
-                }
+                // Just reload the entire product details
+                // This will re-fetch reviews and re-calculate the Avg Sentiment automatically
+                await loadProductDetails(PRODUCT_ID);
             } else {
                 window.location.reload(); // Fallback
             }
