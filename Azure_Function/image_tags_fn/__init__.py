@@ -11,13 +11,15 @@ def main(blob):
     # 2. Find Product ID
     cur.execute(
         "SELECT id FROM products WHERE thumbnail_url LIKE ?",
-        ("%" + blob.name,)
+        ("%" + blob.name + "%",)
     )
     row = cur.fetchone()
     
     if not row:
         db.close()
-        return
+        db.close()
+        # Retry! The DB might not be updated yet (New Product Race Condition)
+        raise Exception(f"Product not found for blob {blob.name}. Retrying...")
     
     product_id = row[0]
 

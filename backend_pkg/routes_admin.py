@@ -58,6 +58,10 @@ def add_product_image(id_or_slug):
     # Simple slug (Kid-friendly: just replace spaces)
     safe_name = product['name'].lower().replace(' ', '-')
     
+    # Clear existing tags FIRST (Fix Race Condition with Azure Function)
+    db.execute('DELETE FROM product_tags WHERE product_id = ?', (id,))
+    db.commit() # Commit so the Azure Function sees 0 tags immediately
+
     # Overwrite existing file (Name stays same)
     url, blob_name = upload_product_image(file, safe_name)
     
@@ -71,8 +75,7 @@ def add_product_image(id_or_slug):
     # Update DB with new "versioned" URL
     db.execute('UPDATE products SET thumbnail_url = ? WHERE id = ?', (final_url, id))
     
-    # Clear existing tags so AI can regenerate them for the new image
-    db.execute('DELETE FROM product_tags WHERE product_id = ?', (id,))
+
 
     db.commit()
     return jsonify({'success': True, 'data': {'url': final_url}, 'message': 'Image updated'})
