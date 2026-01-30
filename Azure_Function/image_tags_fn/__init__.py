@@ -18,7 +18,7 @@ def main(blob):
     
     if not row:
         db.close()
-        db.close()
+
         # Retry! The DB might not be updated yet (New Product Race Condition)
         raise Exception(f"Product not found for blob {blob.name}. Retrying...")
     

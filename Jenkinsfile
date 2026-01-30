@@ -213,19 +213,14 @@ pipeline {
             }
             steps {
                 echo "------------------------- Started Smoke Testing!... --------------------------------------"
-                // sh """
-                //     set -e
-                //     URL="${env.APP_URL}"
+                sh """
+                    set -e
+                    URL="${APP_URL}"
 
-                //     curl --fail --max-time 10 "$URL/health"
+                    curl --fail --max-time 10 "$URL/health"
 
-                //     curl -s --max-time 10 "$URL" | grep -q "ShopSphere"
-                // """
-                // echo "SMOKE TEST PASSED: Website is LIVE and working!"
-
-                // //Sleeping for the mentioned amount of time
-                // echo "Sleeping for amount of time, before destroying all the Terraform resources"
-                // sleep time: 10, unit: 'MINUTES'
+                    curl -s --max-time 10 "$URL" | grep -q "ShopSphere"
+                """
                 echo "--------- Smoke Testing Completed: The application is LIVE and working! ------------------"
             }
         }

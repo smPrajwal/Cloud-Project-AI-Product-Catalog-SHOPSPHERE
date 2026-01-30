@@ -233,6 +233,10 @@ a:hover {
     font-size: 0.75rem;
     padding: 0.35rem 0.85rem;
     border-radius: 100px;
+    display: inline-block;
+    margin-right: 0.25rem;
+    margin-bottom: 0.5rem;
+    /* Fix vertical spacing when wrapping */
 }
 
 /* Auth Pages */
