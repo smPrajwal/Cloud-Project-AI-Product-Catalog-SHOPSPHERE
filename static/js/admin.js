@@ -37,8 +37,7 @@ document.getElementById('addProductForm')?.addEventListener('submit', async (e) 
         name: document.getElementById('pName').value,
         price: parseFloat(document.getElementById('pPrice').value),
         original_price: document.getElementById('pOriginalPrice').value ? parseFloat(document.getElementById('pOriginalPrice').value) : null,
-        description: document.getElementById('pDesc').value,
-        tags: document.getElementById('pTags').value.split(',').map(t => t.trim()).filter(Boolean)
+        description: document.getElementById('pDesc').value
     };
 
     try {
