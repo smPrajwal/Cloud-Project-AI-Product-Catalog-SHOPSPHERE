@@ -217,9 +217,9 @@ pipeline {
                     set -e
                     URL="${APP_URL}"
 
-                    curl --fail --max-time 10 "$URL/health"
+                    curl --fail --max-time 10 "\$URL/health"
 
-                    curl -s --max-time 10 "$URL" | grep -q "ShopSphere"
+                    curl -s --max-time 10 "\$URL" | grep -q "ShopSphere"
                 """
                 echo "--------- Smoke Testing Completed: The application is LIVE and working! ------------------"
             }
