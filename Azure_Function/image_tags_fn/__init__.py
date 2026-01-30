@@ -47,7 +47,8 @@ def main(blob):
         # 5. Insert New Tags
         if result.tags and result.tags.list:
             # Note: No need to DELETE here because Backend/Logic already ensures we only get here if tags=0.
-            for tag in result.tags.list:
+            # Limit to top 8 tags as requested
+            for tag in result.tags.list[:8]:
                 cur.execute(
                     "INSERT INTO product_tags (product_id, tag_name) VALUES (?, ?)",
                     (product_id, tag.name)

@@ -144,7 +144,7 @@ async function loadProductDetails(id) {
 
     document.getElementById('pPrice').innerHTML = priceHtml; // Changed to innerHTML standard
     document.getElementById('pDesc').textContent = p.description;
-    document.getElementById('pTags').innerHTML = p.tags.map(t => `<span class="badge-minimal me-1">#${t}</span>`).join('');
+    document.getElementById('pTags').innerHTML = p.tags.slice(0, 10).map(t => `<span class="badge-minimal me-1">#${t}</span>`).join('');
 
     if (p.thumbnail_url && !p.thumbnail_url.includes('placeholder')) {
         document.getElementById('mainImage').src = p.thumbnail_url;
