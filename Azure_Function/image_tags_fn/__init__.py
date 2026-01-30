@@ -1,6 +1,7 @@
 import os
 import pyodbc
 from azure.ai.vision.imageanalysis import ImageAnalysisClient
+from azure.ai.vision.imageanalysis.models import VisualFeatures
 from azure.core.credentials import AzureKeyCredential
 
 def main(blob):
@@ -32,20 +33,17 @@ def main(blob):
         return
 
     # 4. Only Call AI if NO tags exist
-    vision = ImageAnalysisClient(
-        os.environ["VISION_ENDPOINT"],
-        AzureKeyCredential(os.environ["VISION_KEY"])
+    result = vision.analyze(
+        image_data=blob.read(),
+        visual_features=[VisualFeatures.TAGS]
     )
 
-    tags = vision.analyze(blob.read(), ["Tags"]).tags
-
-    for t in tags:
-        # Handle both object (t.name) and string (t) cases
-        tag_name = t.name if hasattr(t, 'name') else str(t)
-        cur.execute(
-            "INSERT INTO product_tags (product_id, tag_name) VALUES (?, ?)",
-            (product_id, tag_name)
-        )
+    if result.tags and result.tags.list:
+        for tag in result.tags.list:
+            cur.execute(
+                "INSERT INTO product_tags (product_id, tag_name) VALUES (?, ?)",
+                (product_id, tag.name)
+            )
 
     db.commit()
     db.close()
