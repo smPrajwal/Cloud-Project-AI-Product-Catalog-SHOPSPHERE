@@ -122,7 +122,8 @@ async function loadProductsAndScroll(category) {
 // Detail Page
 async function loadProductDetails(id) {
     console.log(`LOG: loadProductDetails ${id}`);
-    const res = await fetch(`${API_BASE}/${id}`);
+    // Add timestamp to prevent caching
+    const res = await fetch(`${API_BASE}/${id}?_t=${new Date().getTime()}`);
     if (!res.ok) return;
     const p = await res.json();
 
@@ -183,40 +184,12 @@ async function submitReview(event) {
         });
 
         if (res.ok) {
-            const data = await res.json();
-
-            // Dynamic Update (No Reload)
-            const list = document.getElementById('reviewsList');
-            if (list.innerHTML.includes('No reviews yet')) list.innerHTML = '';
-
-            const deleteBtn = (typeof IS_ADMIN !== 'undefined' && IS_ADMIN)
-                ? `<button class="btn btn-sm btn-link text-danger p-0 ms-2" onclick="deleteReview(${data.id}, event)" style="font-size: 0.8rem;">Delete</button>`
-                : '';
-
-            const newReviewHtml = `
-            <div class="mb-3 border-bottom pb-2">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="fw-bold small">${name}</span> 
-                        <span class="badge bg-${data.sentiment.label === 'Positive' ? 'success' : 'secondary'} ms-2" style="font-size: 0.7em;">${data.sentiment.label}</span>
-                    </div>
-                    ${deleteBtn}
-                </div>
-                <p class="mb-0 small mt-1">${text}</p>
-            </div>`;
-
-            list.insertAdjacentHTML('afterbegin', newReviewHtml);
-
             // Clear inputs
             document.getElementById('reviewerName').value = '';
             document.getElementById('reviewText').value = '';
 
-            // Update count (simple increment)
-            const countSpan = document.getElementById('reviewCount');
-            if (countSpan) {
-                const curr = parseInt(countSpan.textContent.replace(/\D/g, '')) || 0;
-                countSpan.textContent = `(${curr + 1})`;
-            }
+            // Reload details to update List and Avg Badge
+            loadProductDetails(PRODUCT_ID);
 
         } else {
             const err = await res.json();

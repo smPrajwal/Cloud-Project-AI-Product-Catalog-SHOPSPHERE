@@ -4,31 +4,38 @@ from azure.ai.vision.imageanalysis import ImageAnalysisClient
 from azure.core.credentials import AzureKeyCredential
 
 def main(blob):
+    # 1. Connect to DB first
+    db = pyodbc.connect(os.environ["AZURE_SQL_CONN"])
+    cur = db.cursor()
+
+    # 2. Find Product ID
+    cur.execute(
+        "SELECT id FROM products WHERE thumbnail_url LIKE ?",
+        ("%" + blob.name,)
+    )
+    row = cur.fetchone()
+    
+    if not row:
+        db.close()
+        return
+    
+    product_id = row[0]
+
+    # 3. Check if tags already exist (Save Money!)
+    cur.execute("SELECT COUNT(*) FROM product_tags WHERE product_id = ?", (product_id,))
+    count = cur.fetchone()[0]
+
+    if count > 0:
+        db.close()
+        return
+
+    # 4. Only Call AI if NO tags exist
     vision = ImageAnalysisClient(
         os.environ["VISION_ENDPOINT"],
         AzureKeyCredential(os.environ["VISION_KEY"])
     )
 
     tags = vision.analyze(blob.read(), ["Tags"]).tags
-
-    db = pyodbc.connect(os.environ["AZURE_SQL_CONN"])
-    cur = db.cursor()
-
-    cur.execute(
-        "SELECT id FROM products WHERE thumbnail_url LIKE ?",
-        ("%" + blob.name,)
-    )
-
-    row = cur.fetchone()
-    if not row:
-        return
-    
-    product_id = row[0]
-
-    cur.execute(
-        "DELETE FROM product_tags WHERE product_id = ?",
-        (product_id,)
-    )
 
     for t in tags:
         cur.execute(
