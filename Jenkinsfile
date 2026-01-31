@@ -86,24 +86,6 @@ pipeline {
             }
         }
 
-        stage('Azure Authentication using Service Principal') {
-            when {
-                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)'}
-            }
-            steps {
-                echo "------------ Authenticating with Azure using Azure Service Principal! --------------------"
-                sh """
-                    az login --service-principal \
-                    --username "$AZURE_CLIENT_ID" \
-                    --password "$AZURE_CLIENT_SECRET" \
-                    --tenant "$AZURE_TENANT_ID"
-
-                    az account set --subscription "$AZURE_SUBSCRIPTION_ID"
-                """
-                echo "------- Authenticating completed: Successfully Authenticated with Azure! -----------------"
-            }
-        }
-
         stage('Pull from Artifacts') {
             when {
                 expression {params.Run_type == 'Deploy Infrastructure and Application (CD)'}
@@ -159,6 +141,24 @@ pipeline {
             }
         }
 
+        stage('Azure Authentication using Service Principal') {
+            when {
+                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)'}
+            }
+            steps {
+                echo "------------ Authenticating with Azure using Azure Service Principal! --------------------"
+                sh """
+                    az login --service-principal \
+                    --username "$AZURE_CLIENT_ID" \
+                    --password "$AZURE_CLIENT_SECRET" \
+                    --tenant "$AZURE_TENANT_ID"
+
+                    az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+                """
+                echo "------- Authenticating completed: Successfully Authenticated with Azure! -----------------"
+            }
+        }
+
         stage('Uploading files to Azure Blob Container') {
             when {
                 expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)'}
@@ -207,6 +207,19 @@ pipeline {
             }
         }
 
+        stage('Logout from Service Principal') {
+            when {
+                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)'}
+            }
+            steps {
+                echo "Logging out from the Service Principal"
+                sh """
+                    az logout || true
+                """
+                echo "Logout Successful: Logged out from the Service Principal"
+            }
+        }
+
         stage('Smoke Testing') {
             when {
                 expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)'}
@@ -225,7 +238,7 @@ pipeline {
             }
         }
 
-        stage('Removing the complete Infrastructure, Resources and Application, along with the Logout from Service Principal') {
+        stage('Removing the complete Infrastructure, Resources and Application') {
             when {
                 expression {params.Run_type == 'De-provision Infrastructure and Application'}
             }
@@ -245,11 +258,9 @@ pipeline {
                         cd Azure_Terraform
                         terraform init -input=false
                         terraform destroy -auto-approve
-                        echo "----- Signing-out from the Azure Service Principal -----"
-                        az logout || true
                     """
                 }
-                echo "------- Infrastructure Tear down Completed: The Complete Infrastructure (with all the Resources) have been Cleaned-up and logged out from Service Principal -------"
+                echo "------- Infrastructure Tear down Completed: The Complete Infrastructure (with all the Resources) have been Cleaned-up -------"
             }
         }
     }
