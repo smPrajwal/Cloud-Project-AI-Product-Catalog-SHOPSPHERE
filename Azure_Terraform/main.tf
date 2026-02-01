@@ -77,12 +77,12 @@ module "compute_VM" {
 module "database" {
   source = "./modules/database"
 
-  default_loc    = var.default_loc
-  default_rg     = azurerm_resource_group.main_rg.name
-  db_un          = var.db_un
-  db_pwd         = var.db_pwd
-  vnet_id        = module.network_core.vnet_id
-  subnet_ids     = module.network_core.subnet_ids
+  default_loc = var.default_loc
+  default_rg  = azurerm_resource_group.main_rg.name
+  db_un       = var.db_un
+  db_pwd      = var.db_pwd
+  vnet_id     = module.network_core.vnet_id
+  subnet_ids  = module.network_core.subnet_ids
 }
 
 module "storage" {
