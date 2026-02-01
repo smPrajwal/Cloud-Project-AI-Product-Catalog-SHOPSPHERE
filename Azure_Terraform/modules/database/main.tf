@@ -7,7 +7,7 @@ resource "azurerm_mssql_server" "sql" {
   administrator_login          = var.db_un
   administrator_login_password = var.db_pwd
 
-  public_network_access_enabled = true
+  public_network_access_enabled = false
 }
 
 resource "azurerm_mssql_database" "db" {

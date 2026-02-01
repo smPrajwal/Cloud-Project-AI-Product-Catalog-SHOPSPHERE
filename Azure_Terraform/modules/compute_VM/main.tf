@@ -54,18 +54,18 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
       admin_username    = var.app_admin_un
       admin_password    = var.app_admin_pwd
       azure_sql_conn    = var.azure_sql_conn
-      frontend_blob_url = var.frontend_code_blob_url
+      frontend_blob_url = "${var.frontend_code_blob_url}?${var.sas_token}"
       vm_user           = var.vm_un
       backend_lb_ip     = var.backend_lb_private_ip
     }) :
     templatefile("${path.module}/backend-cloud-init.yaml", {
-      flask_secret        = random_password.flask_secret.result
-      azure_sql_conn      = var.azure_sql_conn
-      azure_ai_endpoint   = var.vision_endpoint
-      azure_ai_key        = var.vision_key
+      flask_secret         = random_password.flask_secret.result
+      azure_sql_conn       = var.azure_sql_conn
+      azure_ai_endpoint    = var.vision_endpoint
+      azure_ai_key         = var.vision_key
       storage_conn_string  = var.storage_account.connection_string
       storage_account_name = var.storage_account.name
-      backend_blob_url     = var.backend_code_blob_url
+      backend_blob_url     = "${var.backend_code_blob_url}?${var.sas_token}"
       vm_user              = var.vm_un
     })
   )

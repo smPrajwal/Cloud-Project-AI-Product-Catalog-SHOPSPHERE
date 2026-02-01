@@ -32,6 +32,9 @@ variable "storage_account" {
   })
   sensitive = true
 }
+variable "sas_token" {
+  sensitive = true
+}
 variable "subnet_details" {
   type = map(object({
     access              = string

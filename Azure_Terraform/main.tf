@@ -67,6 +67,7 @@ module "compute_VM" {
   vision_endpoint        = module.azure_ai.vision_endpoint
   vision_key             = module.azure_ai.vision_key
   storage_account        = module.storage.storage_account
+  sas_token              = module.storage.sas_token
   backend_lb_private_ip  = module.network_ingress.backend_lb_private_ip
 
   # Add explicit dependency to ensure NAT Gateway association completes before VM creation
