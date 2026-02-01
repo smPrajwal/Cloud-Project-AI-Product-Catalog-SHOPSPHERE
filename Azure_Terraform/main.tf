@@ -117,6 +117,7 @@ module "azure_functions" {
   storage_account                        = module.storage.storage_account
   application_insights_connection_string = module.monitoring_and_alerts.application_insights_connection_string
   function_app_name                      = var.function_app_name
+  subnet_ids                             = module.network_core.subnet_ids
 }
 
 module "monitoring_and_alerts" {

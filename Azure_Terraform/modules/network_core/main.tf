@@ -12,6 +12,17 @@ resource "azurerm_subnet" "subnet" {
   resource_group_name  = var.default_rg
   virtual_network_name = local.default_vnet
   address_prefixes     = [each.value.cidr]
+
+  dynamic "delegation" {
+    for_each = each.value.role == "function" ? [1] : []
+    content {
+      name = "function-delegation"
+      service_delegation {
+        name    = "Microsoft.Web/serverFarms"
+        actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+      }
+    }
+  }
 }
 
 resource "azurerm_network_security_group" "subnet-nsg" {
@@ -28,8 +39,8 @@ resource "azurerm_network_security_rule" "subnet-nsg-rule" {
   name                        = "${each.key}-subnet-nsg-rule"
   priority                    = each.value.sub_nsg_priority
   direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
+  access                      = each.value.role == "function" ? "Deny" : "Allow"
+  protocol                    = each.value.role == "function" ? "*" : "Tcp"
   source_port_range           = "*"
   destination_port_range      = "*"
   source_address_prefix       = each.value.sub_nsg_source_cidr
@@ -38,24 +49,10 @@ resource "azurerm_network_security_rule" "subnet-nsg-rule" {
   network_security_group_name = azurerm_network_security_group.subnet-nsg[each.key].name
 }
 
-resource "azurerm_network_security_rule" "allow-lb-probe" {
-  for_each = var.subnet_details
-
-  name                        = "${each.key}-allow-lb-probe"
-  priority                    = 150
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "*"
-  source_port_range           = "*"
-  destination_port_range      = "*"
-  source_address_prefix       = "AzureLoadBalancer"
-  destination_address_prefix  = "*"
-  resource_group_name         = var.default_rg
-  network_security_group_name = azurerm_network_security_group.subnet-nsg[each.key].name
-}
 
 resource "azurerm_subnet_network_security_group_association" "subnet-nsg-assoc" {
   for_each                  = var.subnet_details
+
   subnet_id                 = azurerm_subnet.subnet[each.key].id
   network_security_group_id = azurerm_network_security_group.subnet-nsg[each.key].id
 }
@@ -85,6 +82,7 @@ resource "azurerm_subnet_nat_gateway_association" "subnet_nat_assoc" {
   for_each       = {
     for k, v in var.subnet_details : k => v if v.role == "backend"
   }
+  
   subnet_id      = azurerm_subnet.subnet[each.key].id
   nat_gateway_id = azurerm_nat_gateway.nat_gw.id
 }

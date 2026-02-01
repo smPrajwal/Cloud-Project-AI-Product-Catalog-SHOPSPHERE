@@ -1,5 +1,8 @@
 variable "default_loc" {}
 variable "default_rg" {}
+variable "subnet_ids" {
+  type = map(string)
+}
 variable "azure_sql_conn" {}
 variable "vision_endpoint" {}
 variable "vision_key" {

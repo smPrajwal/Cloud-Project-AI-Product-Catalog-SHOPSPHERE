@@ -54,8 +54,18 @@ subnet_details = {
     contains_vmss       = false
     sub_nsg_priority    = 100
     sub_nsg_source_cidr = "VirtualNetwork"
-    vm_nsg_priority     = 100
-    vm_nsg_source_cidr  = "10.0.2.0/24"
+    vm_nsg_priority     = null
+    vm_nsg_source_cidr  = null
+  }
+  "private-func" = {
+    access              = "private"
+    cidr                = "10.0.4.0/24"
+    role                = "function"
+    contains_vmss       = false
+    sub_nsg_priority    = 100
+    sub_nsg_source_cidr = "*"
+    vm_nsg_priority     = null
+    vm_nsg_source_cidr  = null
   }
 }
 
