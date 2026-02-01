@@ -26,7 +26,7 @@ resource "azurerm_subnet" "subnet" {
 }
 
 resource "azurerm_network_security_group" "subnet-nsg" {
-  for_each            = var.subnet_details
+  for_each = var.subnet_details
 
   name                = "${each.key}-subnet-nsg"
   location            = var.default_loc
@@ -51,7 +51,7 @@ resource "azurerm_network_security_rule" "subnet-nsg-rule" {
 
 
 resource "azurerm_subnet_network_security_group_association" "subnet-nsg-assoc" {
-  for_each                  = var.subnet_details
+  for_each = var.subnet_details
 
   subnet_id                 = azurerm_subnet.subnet[each.key].id
   network_security_group_id = azurerm_network_security_group.subnet-nsg[each.key].id
@@ -79,10 +79,10 @@ resource "azurerm_nat_gateway_public_ip_association" "nat_gw_ip_assoc" {
 }
 
 resource "azurerm_subnet_nat_gateway_association" "subnet_nat_assoc" {
-  for_each       = {
+  for_each = {
     for k, v in var.subnet_details : k => v if v.role == "backend"
   }
-  
+
   subnet_id      = azurerm_subnet.subnet[each.key].id
   nat_gateway_id = azurerm_nat_gateway.nat_gw.id
 }

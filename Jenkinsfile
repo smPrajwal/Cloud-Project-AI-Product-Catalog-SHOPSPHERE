@@ -124,7 +124,7 @@ pipeline {
                     sh """
                         cd Azure_Terraform
                         terraform init -input=false
-                        terraform fmt -check
+                        terraform fmt -check -recursive
                         terraform validate
                         terraform plan
                         terraform apply -auto-approve
