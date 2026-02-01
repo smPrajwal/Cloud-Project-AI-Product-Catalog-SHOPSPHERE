@@ -46,10 +46,3 @@ resource "azurerm_private_endpoint" "db-endpoint" {
     private_dns_zone_ids = [azurerm_private_dns_zone.db-dns-zone.id]
   }
 }
-
-resource "azurerm_mssql_firewall_rule" "allow_azure_services" {
-  name             = "AllowAzureServices"
-  server_id        = azurerm_mssql_server.sql.id
-  start_ip_address = "0.0.0.0"
-  end_ip_address   = "0.0.0.0"
-}
