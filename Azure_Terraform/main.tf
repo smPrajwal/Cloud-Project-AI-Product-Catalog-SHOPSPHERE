@@ -83,7 +83,6 @@ module "database" {
   db_pwd         = var.db_pwd
   vnet_id        = module.network_core.vnet_id
   subnet_ids     = module.network_core.subnet_ids
-  subnet_details = var.subnet_details
 }
 
 module "storage" {
