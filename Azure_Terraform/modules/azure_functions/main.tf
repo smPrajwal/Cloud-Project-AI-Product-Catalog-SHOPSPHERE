@@ -4,7 +4,7 @@ resource "azurerm_service_plan" "azure_function_service_plan" {
   resource_group_name = var.default_rg
 
   os_type  = "Linux"
-  sku_name = "Y1"
+  sku_name = "B1"
 }
 
 resource "azurerm_linux_function_app" "azure_ai_function_app" {
