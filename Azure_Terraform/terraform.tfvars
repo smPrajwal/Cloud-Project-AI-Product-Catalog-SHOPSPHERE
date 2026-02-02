@@ -34,7 +34,7 @@ app_admin_un        = "admin"
 function_app_name   = "azure-ai-function-app"
 func_plan_name      = "azure-function-service-plan"
 func_plan_sku       = "B1"
-func_python_version = "3.10"
+func_python_version = "3.12"
 
 ai_name = "azure-ai"
 ai_sku  = "S0"
