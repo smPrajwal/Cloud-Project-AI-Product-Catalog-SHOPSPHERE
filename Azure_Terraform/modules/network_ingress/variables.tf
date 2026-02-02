@@ -1,5 +1,7 @@
 variable "default_loc" {}
 variable "default_rg" {}
+variable "lb_pip_name" {}
+variable "lb_pip_sku" {}
 variable "subnet_ids" {
   description = "This holds all the subnet IDs"
   type        = map(string)

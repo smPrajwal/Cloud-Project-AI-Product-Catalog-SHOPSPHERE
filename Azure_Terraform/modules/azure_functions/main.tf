@@ -1,10 +1,10 @@
 resource "azurerm_service_plan" "azure_function_service_plan" {
-  name                = "azure-function-service-plan"
+  name                = var.func_plan_name
   location            = var.default_loc
   resource_group_name = var.default_rg
 
   os_type  = "Linux"
-  sku_name = "B1"
+  sku_name = var.func_plan_sku
 }
 
 resource "azurerm_linux_function_app" "azure_ai_function_app" {
@@ -19,7 +19,7 @@ resource "azurerm_linux_function_app" "azure_ai_function_app" {
 
   site_config {
     application_stack {
-      python_version = "3.10"
+      python_version = var.func_python_version
     }
     always_on = true
   }

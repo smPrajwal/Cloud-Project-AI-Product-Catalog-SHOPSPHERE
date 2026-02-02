@@ -9,7 +9,9 @@ variable "vision_key" {
   sensitive = true
 }
 variable "function_app_name" {}
-
+variable "func_plan_name" {}
+variable "func_plan_sku" {}
+variable "func_python_version" {}
 variable "storage_account" {
   type = object({
     name              = string

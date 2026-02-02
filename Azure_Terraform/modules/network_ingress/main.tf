@@ -1,9 +1,9 @@
 resource "azurerm_public_ip" "fe_lb_public_ip" {
-  name                = "public-subnet-lb-pip"
+  name                = var.lb_pip_name
   resource_group_name = var.default_rg
   location            = var.default_loc
   allocation_method   = "Static"
-  sku                 = "Standard"
+  sku                 = var.lb_pip_sku
 }
 
 resource "azurerm_lb" "vmss_lb" {

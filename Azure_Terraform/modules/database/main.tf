@@ -1,8 +1,8 @@
 resource "azurerm_mssql_server" "sql" {
-  name                = "shopsphere-sql-db"
+  name                = var.sql_server_name
   resource_group_name = var.default_rg
   location            = var.default_loc
-  version             = "12.0"
+  version             = var.sql_version
 
   administrator_login          = var.db_un
   administrator_login_password = var.db_pwd
@@ -11,9 +11,10 @@ resource "azurerm_mssql_server" "sql" {
 }
 
 resource "azurerm_mssql_database" "db" {
-  name      = "sql-db"
-  server_id = azurerm_mssql_server.sql.id
-  sku_name  = "Basic"
+  name        = var.sql_db_name
+  server_id   = azurerm_mssql_server.sql.id
+  sku_name    = var.db_sku_name
+  max_size_gb = var.db_max_size_gb
 }
 
 resource "azurerm_private_dns_zone" "db-dns-zone" {

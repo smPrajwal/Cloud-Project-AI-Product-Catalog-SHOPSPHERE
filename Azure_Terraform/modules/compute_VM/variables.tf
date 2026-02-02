@@ -1,6 +1,14 @@
 variable "default_loc" {}
 variable "default_rg" {}
 variable "vm_un" {}
+variable "vm_sku" {}
+variable "vm_os_publisher" {}
+variable "vm_os_offer" {}
+variable "vm_os_sku" {}
+variable "vm_os_version" {}
+variable "vmss_min_capacity" {}
+variable "vmss_max_capacity" {}
+variable "vmss_default_capacity" {}
 variable "azure_sql_conn" {}
 variable "app_admin_un" {}
 variable "frontend_code_blob_url" {}

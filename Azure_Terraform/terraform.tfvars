@@ -1,30 +1,50 @@
 default_loc = "centralindia"
+rg_name     = "Project_ShopSphere"
 
-rg_name = "Project_ShopSphere"
-
-sa_name = "shopsphereappsa"
-
-sa_account_tier = "Standard"
-
-sa_replication_type = "LRS"
-
-sa_access_tier = "Hot"
-
+sa_name                = "shopsphereappsa"
+sa_account_tier        = "Standard"
+sa_replication_type    = "LRS"
+sa_access_tier         = "Hot"
 sa_allow_public_access = true
 
-code_blob_container_name = "application-code"
-
 vnet_name = "ss_main_vnet"
-
 vnet_cidr = "10.0.0.0/16"
 
-vm_un = "prajwalsm"
+lb_pip_name = "public-subnet-lb-pip"
+lb_pip_sku  = "Standard"
 
-db_un = "prajwalsm"
+vm_un                 = "prajwalsm"
+vm_sku                = "Standard_B2s_v2"
+vm_os_publisher       = "Canonical"
+vm_os_offer           = "0001-com-ubuntu-server-jammy"
+vm_os_sku             = "22_04-lts"
+vm_os_version         = "latest"
+vmss_min_capacity     = 1
+vmss_max_capacity     = 3
+vmss_default_capacity = 1
 
-app_admin_un = "admin"
+db_un           = "prajwalsm"
+sql_server_name = "shopsphere-sql-db"
+sql_db_name     = "sql-db"
+sql_version     = "12.0"
+db_sku_name     = "Basic"
+db_max_size_gb  = 2
 
-function_app_name = "azure-ai-function-app"
+app_admin_un        = "admin"
+function_app_name   = "azure-ai-function-app"
+func_plan_name      = "azure-function-service-plan"
+func_plan_sku       = "B1"
+func_python_version = "3.10"
+
+ai_name = "azure-ai"
+ai_sku  = "S0"
+
+la_workspace_name       = "ss-la-workspace"
+la_sku                  = "PerGB2018"
+la_retention            = 30
+app_insights_name       = "ss-appinsights"
+alert_action_group_name = "ss-ma-group"
+alert_email             = "prajwalprajwal1999@gmail.com"
 
 subnet_details = {
   "public-fe" = {
@@ -68,4 +88,3 @@ subnet_details = {
     vm_nsg_source_cidr  = null
   }
 }
-

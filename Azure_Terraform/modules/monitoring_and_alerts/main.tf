@@ -1,14 +1,14 @@
 resource "azurerm_log_analytics_workspace" "ss_la_workspace" {
-  name                = "ss-la-workspace"
+  name                = var.la_workspace_name
   location            = var.default_loc
   resource_group_name = var.default_rg
 
-  sku               = "PerGB2018"
-  retention_in_days = 30
+  sku               = var.la_sku
+  retention_in_days = var.la_retention
 }
 
 resource "azurerm_application_insights" "ss_appinsights" {
-  name                = "ss-appinsights"
+  name                = var.app_insights_name
   location            = var.default_loc
   resource_group_name = var.default_rg
 
@@ -17,13 +17,13 @@ resource "azurerm_application_insights" "ss_appinsights" {
 }
 
 resource "azurerm_monitor_action_group" "ss_ma_group" {
-  name                = "ss-ma-group"
+  name                = var.alert_action_group_name
   resource_group_name = var.default_rg
   short_name          = "app-alerts"
 
   email_receiver {
     name          = "admin"
-    email_address = "prajwalprajwal1999@gmail.com"
+    email_address = var.alert_email
   }
 }
 

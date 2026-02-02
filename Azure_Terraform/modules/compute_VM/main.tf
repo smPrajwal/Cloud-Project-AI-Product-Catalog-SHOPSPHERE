@@ -39,8 +39,8 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
   name                = "${each.key}-vmss"
   location            = var.default_loc
   resource_group_name = var.default_rg
-  sku                 = "Standard_B2s_v2"
-  instances           = 1
+  sku                 = var.vm_sku
+  instances           = var.vmss_default_capacity
   upgrade_mode        = "Automatic"
 
   admin_username                  = var.vm_un
@@ -71,10 +71,10 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
   )
 
   source_image_reference {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-jammy"
-    sku       = "22_04-lts"
-    version   = "latest"
+    publisher = var.vm_os_publisher
+    offer     = var.vm_os_offer
+    sku       = var.vm_os_sku
+    version   = var.vm_os_version
   }
 
   os_disk {
@@ -111,9 +111,9 @@ resource "azurerm_monitor_autoscale_setting" "vmss_autoscale" {
     name = "default"
 
     capacity {
-      minimum = 1
-      maximum = 3
-      default = 1
+      minimum = var.vmss_min_capacity
+      maximum = var.vmss_max_capacity
+      default = var.vmss_default_capacity
     }
 
     rule {

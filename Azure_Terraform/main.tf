@@ -40,15 +40,6 @@ module "network_core" {
   subnet_details = var.subnet_details
 }
 
-module "network_ingress" {
-  source = "./modules/network_ingress"
-
-  default_loc    = var.default_loc
-  default_rg     = azurerm_resource_group.main_rg.name
-  subnet_details = var.subnet_details
-  subnet_ids     = module.network_core.subnet_ids
-}
-
 module "compute_VM" {
   source = "./modules/compute_VM"
 
@@ -69,33 +60,44 @@ module "compute_VM" {
   storage_account        = module.storage.storage_account
   sas_token              = module.storage.sas_token
   backend_lb_private_ip  = module.network_ingress.backend_lb_private_ip
+  vm_sku                 = var.vm_sku
+  vm_os_publisher        = var.vm_os_publisher
+  vm_os_offer            = var.vm_os_offer
+  vm_os_sku              = var.vm_os_sku
+  vm_os_version          = var.vm_os_version
+  vmss_min_capacity      = var.vmss_min_capacity
+  vmss_max_capacity      = var.vmss_max_capacity
+  vmss_default_capacity  = var.vmss_default_capacity
 
-  # Add explicit dependency to ensure NAT Gateway association completes before VM creation
   depends_on = [module.network_core]
 }
 
 module "database" {
   source = "./modules/database"
 
-  default_loc = var.default_loc
-  default_rg  = azurerm_resource_group.main_rg.name
-  db_un       = var.db_un
-  db_pwd      = var.db_pwd
-  vnet_id     = module.network_core.vnet_id
-  subnet_ids  = module.network_core.subnet_ids
+  default_loc     = var.default_loc
+  default_rg      = azurerm_resource_group.main_rg.name
+  db_un           = var.db_un
+  db_pwd          = var.db_pwd
+  vnet_id         = module.network_core.vnet_id
+  subnet_ids      = module.network_core.subnet_ids
+  sql_server_name = var.sql_server_name
+  sql_db_name     = var.sql_db_name
+  sql_version     = var.sql_version
+  db_sku_name     = var.db_sku_name
+  db_max_size_gb  = var.db_max_size_gb
 }
 
 module "storage" {
   source = "./modules/storage"
 
-  default_loc              = var.default_loc
-  default_rg               = azurerm_resource_group.main_rg.name
-  sa_name                  = var.sa_name
-  sa_account_tier          = var.sa_account_tier
-  sa_replication_type      = var.sa_replication_type
-  sa_access_tier           = var.sa_access_tier
-  sa_allow_public_access   = var.sa_allow_public_access
-  code_blob_container_name = var.code_blob_container_name
+  default_loc            = var.default_loc
+  default_rg             = azurerm_resource_group.main_rg.name
+  sa_name                = var.sa_name
+  sa_account_tier        = var.sa_account_tier
+  sa_replication_type    = var.sa_replication_type
+  sa_access_tier         = var.sa_access_tier
+  sa_allow_public_access = var.sa_allow_public_access
 }
 
 module "azure_ai" {
@@ -103,25 +105,47 @@ module "azure_ai" {
 
   default_loc = var.default_loc
   default_rg  = azurerm_resource_group.main_rg.name
+  ai_name     = var.ai_name
+  ai_sku      = var.ai_sku
 }
 
 module "azure_functions" {
   source = "./modules/azure_functions"
 
-  default_loc       = var.default_loc
-  default_rg        = azurerm_resource_group.main_rg.name
-  azure_sql_conn    = module.database.azure_sql_conn
-  vision_endpoint   = module.azure_ai.vision_endpoint
-  vision_key        = module.azure_ai.vision_key
-  storage_account   = module.storage.storage_account
-  function_app_name = var.function_app_name
-  subnet_ids        = module.network_core.subnet_ids
+  default_loc         = var.default_loc
+  default_rg          = azurerm_resource_group.main_rg.name
+  azure_sql_conn      = module.database.azure_sql_conn
+  vision_endpoint     = module.azure_ai.vision_endpoint
+  vision_key          = module.azure_ai.vision_key
+  storage_account     = module.storage.storage_account
+  function_app_name   = var.function_app_name
+  subnet_ids          = module.network_core.subnet_ids
+  func_plan_name      = var.func_plan_name
+  func_plan_sku       = var.func_plan_sku
+  func_python_version = var.func_python_version
+}
+
+module "network_ingress" {
+  source = "./modules/network_ingress"
+
+  default_loc    = var.default_loc
+  default_rg     = azurerm_resource_group.main_rg.name
+  subnet_details = var.subnet_details
+  subnet_ids     = module.network_core.subnet_ids
+  lb_pip_name    = var.lb_pip_name
+  lb_pip_sku     = var.lb_pip_sku
 }
 
 module "monitoring_and_alerts" {
   source = "./modules/monitoring_and_alerts"
 
-  default_loc = var.default_loc
-  default_rg  = azurerm_resource_group.main_rg.name
-  vmss_ids    = module.compute_VM.vmss_ids
+  default_loc             = var.default_loc
+  default_rg              = azurerm_resource_group.main_rg.name
+  vmss_ids                = module.compute_VM.vmss_ids
+  la_workspace_name       = var.la_workspace_name
+  la_sku                  = var.la_sku
+  la_retention            = var.la_retention
+  app_insights_name       = var.app_insights_name
+  alert_action_group_name = var.alert_action_group_name
+  alert_email             = var.alert_email
 }

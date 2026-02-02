@@ -40,12 +40,6 @@ variable "sa_allow_public_access" {
   type        = bool
 }
 
-variable "code_blob_container_name" {
-  description = "This represents the default code blob container name"
-  default     = "application-code"
-  type        = string
-}
-
 variable "vnet_name" {
   description = "This represents the VNet name"
   default     = "ss_main_vnet"
@@ -121,4 +115,160 @@ variable "subnet_details" {
     vm_nsg_priority     = number
     vm_nsg_source_cidr  = string
   }))
+}
+
+variable "vm_sku" {
+  description = "The SKU (Size) of the Virtual Machines"
+  default     = "Standard_B2s_v2"
+  type        = string
+}
+
+variable "vm_os_publisher" {
+  description = "The Publisher of the OS Image"
+  default     = "Canonical"
+  type        = string
+}
+
+variable "vm_os_offer" {
+  description = "The Offer of the OS Image"
+  default     = "0001-com-ubuntu-server-jammy"
+  type        = string
+}
+
+variable "vm_os_sku" {
+  description = "The SKU of the OS Image"
+  default     = "22_04-lts"
+  type        = string
+}
+
+variable "vm_os_version" {
+  description = "The Version of the OS Image"
+  default     = "latest"
+  type        = string
+}
+
+variable "vmss_min_capacity" {
+  description = "Minimum number of instances in VMSS"
+  default     = 1
+  type        = number
+}
+
+variable "vmss_max_capacity" {
+  description = "Maximum number of instances in VMSS"
+  default     = 3
+  type        = number
+}
+
+variable "vmss_default_capacity" {
+  description = "Default number of instances in VMSS"
+  default     = 1
+  type        = number
+}
+
+variable "sql_server_name" {
+  description = "Name of the Azure SQL Server"
+  default     = "shopsphere-sql-db"
+  type        = string
+}
+
+variable "sql_db_name" {
+  description = "Name of the Azure SQL Database"
+  default     = "sql-db"
+  type        = string
+}
+
+variable "sql_version" {
+  description = "Version of the Azure SQL Server"
+  default     = "12.0"
+  type        = string
+}
+
+variable "db_sku_name" {
+  description = "SKU Name for the SQL Database"
+  default     = "Basic"
+  type        = string
+}
+
+variable "db_max_size_gb" {
+  description = "Max Size in GB for the SQL Database"
+  default     = 2
+  type        = number
+}
+
+variable "ai_name" {
+  description = "Name of the Azure AI Service"
+  default     = "azure-ai"
+  type        = string
+}
+
+variable "ai_sku" {
+  description = "SKU for the Azure AI Service"
+  default     = "S0"
+  type        = string
+}
+
+variable "func_plan_name" {
+  description = "Name of the App Service Plan for Azure Functions"
+  default     = "azure-function-service-plan"
+  type        = string
+}
+
+variable "func_plan_sku" {
+  description = "SKU for the Function App Service Plan"
+  default     = "B1"
+  type        = string
+}
+
+variable "func_python_version" {
+  description = "Python Version for the Function App"
+  default     = "3.10"
+  type        = string
+}
+
+variable "lb_pip_name" {
+  description = "Name of the Public IP for Load Balancer"
+  default     = "public-subnet-lb-pip"
+  type        = string
+}
+
+variable "lb_pip_sku" {
+  description = "SKU for the Load Balancer Public IP"
+  default     = "Standard"
+  type        = string
+}
+
+variable "la_workspace_name" {
+  description = "Name of the Log Analytics Workspace"
+  default     = "ss-la-workspace"
+  type        = string
+}
+
+variable "la_sku" {
+  description = "SKU for Log Analytics Workspace"
+  default     = "PerGB2018"
+  type        = string
+}
+
+variable "la_retention" {
+  description = "Retention in days for Log Analytics"
+  default     = 30
+  type        = number
+}
+
+variable "app_insights_name" {
+  description = "Name of the Application Insights resource"
+  default     = "ss-appinsights"
+  type        = string
+}
+
+variable "alert_action_group_name" {
+  description = "Name of the Monitor Action Group"
+  default     = "ss-ma-group"
+  type        = string
+}
+
+variable "alert_email" {
+  description = "Email address for Alerts"
+  default     = "prajwalprajwal1999@gmail.com"
+  type        = string
 }

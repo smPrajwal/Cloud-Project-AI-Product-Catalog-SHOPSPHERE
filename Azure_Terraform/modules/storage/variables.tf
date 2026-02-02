@@ -5,4 +5,3 @@ variable "sa_account_tier" {}
 variable "sa_replication_type" {}
 variable "sa_access_tier" {}
 variable "sa_allow_public_access" {}
-variable "code_blob_container_name" {}
