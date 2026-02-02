@@ -108,14 +108,14 @@ module "azure_ai" {
 module "azure_functions" {
   source = "./modules/azure_functions"
 
-  default_loc                            = var.default_loc
-  default_rg                             = azurerm_resource_group.main_rg.name
-  azure_sql_conn                         = module.database.azure_sql_conn
-  vision_endpoint                        = module.azure_ai.vision_endpoint
-  vision_key                             = module.azure_ai.vision_key
-  storage_account                        = module.storage.storage_account
-  function_app_name                      = var.function_app_name
-  subnet_ids                             = module.network_core.subnet_ids
+  default_loc       = var.default_loc
+  default_rg        = azurerm_resource_group.main_rg.name
+  azure_sql_conn    = module.database.azure_sql_conn
+  vision_endpoint   = module.azure_ai.vision_endpoint
+  vision_key        = module.azure_ai.vision_key
+  storage_account   = module.storage.storage_account
+  function_app_name = var.function_app_name
+  subnet_ids        = module.network_core.subnet_ids
 }
 
 module "monitoring_and_alerts" {
