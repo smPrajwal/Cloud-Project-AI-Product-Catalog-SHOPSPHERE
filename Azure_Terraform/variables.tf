@@ -221,7 +221,7 @@ variable "func_plan_sku" {
 
 variable "func_python_version" {
   description = "Python Version for the Function App"
-  default     = "3.12"
+  default     = "3.10"
   type        = string
 }
 
