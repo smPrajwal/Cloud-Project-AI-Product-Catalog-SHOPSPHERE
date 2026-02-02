@@ -21,6 +21,7 @@ resource "azurerm_linux_function_app" "azure_ai_function_app" {
     application_stack {
       python_version = "3.10"
     }
+    always_on = true
   }
 
   app_settings = {
