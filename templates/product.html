@@ -123,9 +123,30 @@
     </script>
     <script src="/static/js/main.js?v=6"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            loadProductDetails(PRODUCT_ID);
-            loadRecommendations(PRODUCT_ID);
+        document.addEventListener('DOMContentLoaded', async function () {
+            // 1. Tell the browser: "Don't scroll automatically. Wait for me."
+            if (history.scrollRestoration) {
+                history.scrollRestoration = 'manual';
+            }
+
+            // 2. Load the Product Data
+            await loadProductDetails(PRODUCT_ID);
+
+            // 3. Load the Recommendations (The "You might also like" part)
+            await loadRecommendations(PRODUCT_ID);
+
+            // 4. Get our saved scroll position from memory
+            var savedPosition = sessionStorage.getItem(window.location.href);
+
+            // 5. If we have a saved position, scroll to it!
+            if (savedPosition) {
+                window.scrollTo(0, savedPosition);
+            }
+
+            // 6. When the user leaves the page, save the current scroll position
+            window.addEventListener('beforeunload', function () {
+                sessionStorage.setItem(window.location.href, window.scrollY);
+            });
         });
     </script>
     {% if session.get('is_admin') %}
