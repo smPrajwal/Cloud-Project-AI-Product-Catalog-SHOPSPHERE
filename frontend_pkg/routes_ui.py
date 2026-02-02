@@ -5,7 +5,7 @@ ui_bp = Blueprint('ui', __name__)
 
 def safe_get_ads():
     import requests
-    backend_url = os.environ.get('BACKEND_API_URL', 'http://localhost:5000')
+    backend_url = os.environ.get('BACKEND_API_URL', 'http://127.0.0.1:5000')
     try:
         resp = requests.get(f'{backend_url}/api/ads', timeout=5)
         if resp.ok:
@@ -33,7 +33,7 @@ def safe_get_about():
 @ui_bp.route('/api/<path:path>', methods=['GET', 'POST', 'DELETE'])
 def proxy(path):
     import requests
-    backend_url = os.environ.get('BACKEND_API_URL', 'http://localhost:8000')
+    backend_url = os.environ.get('BACKEND_API_URL', 'http://127.0.0.1:5000')
     headers = {}
     if session.get('is_admin'):
         headers['X-Admin'] = 'true'
