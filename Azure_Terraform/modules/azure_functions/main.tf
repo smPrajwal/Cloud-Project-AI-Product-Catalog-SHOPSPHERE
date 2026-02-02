@@ -27,7 +27,6 @@ resource "azurerm_linux_function_app" "azure_ai_function_app" {
   app_settings = {
     FUNCTIONS_WORKER_RUNTIME = "python"
 
-    APPLICATIONINSIGHTS_CONNECTION_STRING = var.application_insights_connection_string
     AZURE_SQL_CONN                        = var.azure_sql_conn
     VISION_ENDPOINT                       = var.vision_endpoint
     VISION_KEY                            = var.vision_key

@@ -114,7 +114,6 @@ module "azure_functions" {
   vision_endpoint                        = module.azure_ai.vision_endpoint
   vision_key                             = module.azure_ai.vision_key
   storage_account                        = module.storage.storage_account
-  application_insights_connection_string = module.monitoring_and_alerts.application_insights_connection_string
   function_app_name                      = var.function_app_name
   subnet_ids                             = module.network_core.subnet_ids
 }

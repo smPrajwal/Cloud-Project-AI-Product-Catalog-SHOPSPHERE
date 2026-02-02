@@ -9,10 +9,7 @@ variable "vision_key" {
   sensitive = true
 }
 variable "function_app_name" {}
-variable "application_insights_connection_string" {
-  description = "This represents the Application Insights Connection string"
-  type        = string
-}
+
 variable "storage_account" {
   type = object({
     name              = string
