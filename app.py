@@ -22,6 +22,8 @@ try:
     print("LOG: Loaded UI (Frontend)")
 except ImportError:
     pass # Frontend module not present (Backend Server)
+except Exception as e:
+    print(f"LOG: Frontend UI Load Error: {e}")
 
 # 3. Backend API & Admin
 try:
@@ -32,6 +34,8 @@ try:
     print("LOG: Loaded API & Admin (Backend)")
 except ImportError:
     pass # Backend modules not present (Frontend Server)
+except Exception as e:
+    print(f"LOG: Backend API Load Error: {e}")
 
 
 # Register Teardown
