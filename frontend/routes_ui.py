@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, session, redirect, url_for
 import os
 
-ui_bp = Blueprint('ui', __name__)
+ui_bp = Blueprint('ui', __name__, template_folder='templates', static_folder='static')
 
 def safe_get_ads():
     import requests
@@ -53,7 +53,7 @@ def proxy(path):
 
 @ui_bp.route('/')
 def index():
-    return render_template('index.html', ads=safe_get_ads(), footer=safe_get_footer())
+    return render_template('pages/index.html', ads=safe_get_ads(), footer=safe_get_footer())
 
 @ui_bp.route('/health')
 def health_check():
@@ -77,8 +77,8 @@ def logout():
 
 @ui_bp.route('/about')
 def about():
-    return render_template('about.html', content=safe_get_about(), footer=safe_get_footer())
+    return render_template('pages/about.html', content=safe_get_about(), footer=safe_get_footer())
 
 @ui_bp.route('/product/<slug>')
 def product_detail(slug):
-    return render_template('product.html', product_id=slug, footer=safe_get_footer())
+    return render_template('pages/product.html', product_id=slug, footer=safe_get_footer())

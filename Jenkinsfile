@@ -35,9 +35,9 @@ pipeline {
                     test -d Azure_Terraform
                     test -d static
                     test -d templates
-                    test -d backend_pkg
-                    test -d frontend_pkg
-                    test -d shared_pkg
+                    test -d backend
+                    test -d frontend
+                    test -d common
                     test -d database
                     test -f app.py
                     test -f startup.sh
@@ -55,8 +55,8 @@ pipeline {
             steps {
                 echo "------------------------------------ Started Packaging!... -------------------------------"
                 sh """
-                    zip -r ${FRONTEND_APP_CODE} app.py startup.sh requirements_frontend.txt frontend_pkg shared_pkg templates static -x "static/product_images*"
-                    zip -r ${BACKEND_APP_CODE} app.py startup.sh requirements_backend.txt backend_pkg shared_pkg database
+                    zip -r ${FRONTEND_APP_CODE} app.py startup.sh requirements_frontend.txt frontend common -x "frontend/static/product_images*"
+                    zip -r ${BACKEND_APP_CODE} app.py startup.sh requirements_backend.txt backend common database
                     test -f ${FRONTEND_APP_CODE}
                     test -f ${BACKEND_APP_CODE}
                 """
@@ -184,7 +184,7 @@ pipeline {
                     az storage blob upload-batch \
                     --account-name "$STORAGE_ACCOUNT_NAME" \
                     --destination "product-images" \
-                    --source static/product_images \
+                    --source frontend/static/product_images \
                     --overwrite       
                 """
                 echo "-------- Upload Completed: Files have been uploaded to the Azure Blob Container --------------"

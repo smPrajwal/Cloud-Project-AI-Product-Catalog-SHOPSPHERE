@@ -1,9 +1,9 @@
 import os
 from flask import Flask
 from flask_cors import CORS
-from shared_pkg.utils import format_indian_currency
+from common.utils import format_indian_currency
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='frontend/static', template_folder='frontend/templates')
 CORS(app) # Allow Frontend to talk to Backend
 
 # Configuration
@@ -32,7 +32,7 @@ except ImportError:
 
 # 2. Frontend UI
 try:
-    from frontend_pkg.routes_ui import ui_bp
+    from frontend.routes_ui import ui_bp
     app.register_blueprint(ui_bp)
     print("LOG: Loaded UI (Frontend)")
 except ImportError:
@@ -40,8 +40,8 @@ except ImportError:
 
 # 3. Backend API & Admin
 try:
-    from backend_pkg.routes_api import api_bp
-    from backend_pkg.routes_admin import admin_bp
+    from backend.routes_api import api_bp
+    from backend.routes_admin import admin_bp
     app.register_blueprint(api_bp)
     app.register_blueprint(admin_bp)
     print("LOG: Loaded API & Admin (Backend)")
