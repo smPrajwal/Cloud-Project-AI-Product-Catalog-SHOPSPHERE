@@ -8,8 +8,8 @@ api_bp = Blueprint('api', __name__)
 # --- Products API ---
 
 @api_bp.route('/api/products', methods=['GET'])
+@api_bp.route('/api/products', methods=['GET'])
 def get_products():
-    print(f"LOG: API Get Products. Query: {request.args.get('q')}, Tag: {request.args.get('tag')}")
     query = request.args.get('q')
     tag = request.args.get('tag')
     limit = request.args.get('limit', 100)
@@ -66,7 +66,6 @@ def get_products():
 
 @api_bp.route('/api/products/<id_or_slug>', methods=['GET'])
 def get_product_details(id_or_slug):
-    print(f"LOG: API Get Product Details {id_or_slug}")
     db = get_db()
     
     # Handle Slug vs ID
@@ -145,8 +144,8 @@ def get_ads():
     return jsonify([dict(row) for row in rows])
 
 @api_bp.route('/api/products/<id_or_slug>/recommendations', methods=['GET'])
+@api_bp.route('/api/products/<id_or_slug>/recommendations', methods=['GET'])
 def get_recommendations(id_or_slug):
-    print(f"LOG: Get Recommendations for {id_or_slug}")
     try:
         db = get_db()
         
@@ -157,15 +156,12 @@ def get_recommendations(id_or_slug):
             search = '%' + '%'.join(id_or_slug.split('-')) + '%'
             product = db.execute('SELECT id FROM products WHERE LOWER(name) LIKE LOWER(?)', (search,)).fetchone()
             if not product:
-                print("LOG: Product not found for recommendations")
                 return jsonify([])
             product_id = product['id']
 
-        print(f"LOG: Resolved product_id = {product_id}")
         
         tags_cursor = db.execute('SELECT tag_name FROM product_tags WHERE product_id = ?', (product_id,))
         current_tags = [row['tag_name'] for row in tags_cursor.fetchall()]
-        print(f"LOG: Current tags = {current_tags}")
         
         if not current_tags:
             return jsonify([])

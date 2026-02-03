@@ -5,15 +5,17 @@ ui_bp = Blueprint('ui', __name__)
 
 def safe_get_ads():
     import requests
-    backend_url = os.environ.get('BACKEND_API_URL', 'http://127.0.0.1:5000')
+    backend_url = os.environ.get('BACKEND_API_URL')
+    if not backend_url:
+        print("ERROR: BACKEND_API_URL not set")
+        return []
     try:
         resp = requests.get(f'{backend_url}/api/ads', timeout=5)
         if resp.ok:
             ads = resp.json()
-            print(f"LOG: safe_get_ads got {len(ads)} ads from backend")
             return ads
     except Exception as e:
-        print(f"LOG: safe_get_ads error: {e}")
+        print(f"LOG: safe_get_ads error: {e}") # Keeping error log as it is important
     return []
 
 def safe_get_footer():
@@ -33,7 +35,10 @@ def safe_get_about():
 @ui_bp.route('/api/<path:path>', methods=['GET', 'POST', 'DELETE'])
 def proxy(path):
     import requests
-    backend_url = os.environ.get('BACKEND_API_URL', 'http://127.0.0.1:5000')
+    backend_url = os.environ.get('BACKEND_API_URL')
+    if not backend_url:
+        print("ERROR: BACKEND_API_URL not set")
+        return []
     headers = {}
     if session.get('is_admin'):
         headers['X-Admin'] = 'true'

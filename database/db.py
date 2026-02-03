@@ -1,15 +1,12 @@
-import sqlite3
 import os
 from flask import g
 import time
 
 
-DB_FILE = 'database/product_catalog.db'
-
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        # 1. Try Azure SQL (if env var exists)
+        # 1. Try Azure SQL (Required)
         if os.environ.get('AZURE_SQL_CONN'):
             import pyodbc
             # Retry loop for Azure Free Tier (It sleeps when idle)
@@ -58,12 +55,13 @@ def get_db():
                     print(f"Azure Connection Failed (Attempt {attempt+1}): {e}")
                     time.sleep(5) # Wait for DB to wake up
 
-            print("ERROR: Could not connect to Azure SQL after 3 tries. Falling back to Local.")
+            print("ERROR: Could not connect to Azure SQL after 3 tries.")
+            # No fallback, return None or raise error
+            raise Exception("Failed to connect to Azure SQL Database.")
 
-        # 2. SQLite Fallback (Local Mode or Azure Failure)
-        if db is None:
-            db = g._database = sqlite3.connect(DB_FILE)
-            db.row_factory = sqlite3.Row
+        else:
+             print("ERROR: AZURE_SQL_CONN environment variable not set.")
+             raise Exception("AZURE_SQL_CONN environment variable not set.")
             
     return db
 
@@ -75,81 +73,27 @@ def close_connection(exception):
 def init_db(app):
     with app.app_context():
         db = get_db()
-        if os.environ.get('AZURE_SQL_CONN'):
-            # --- Azure SQL (T-SQL) Initialization ---
-            try:
-                # products
-                db.execute("IF OBJECT_ID('products', 'U') IS NULL CREATE TABLE products (id INT IDENTITY(1,1) PRIMARY KEY, name NVARCHAR(MAX) NOT NULL, description NVARCHAR(MAX), price REAL, original_price REAL, thumbnail_url NVARCHAR(MAX))")
-                # reviews
-                db.execute("IF OBJECT_ID('reviews', 'U') IS NULL CREATE TABLE reviews (id INT IDENTITY(1,1) PRIMARY KEY, product_id INT, reviewer NVARCHAR(MAX), review_text NVARCHAR(MAX), sentiment_score REAL, sentiment_label NVARCHAR(MAX), FOREIGN KEY(product_id) REFERENCES products(id))")
-                # product_tags
-                db.execute("IF OBJECT_ID('product_tags', 'U') IS NULL CREATE TABLE product_tags (id INT IDENTITY(1,1) PRIMARY KEY, product_id INT, tag_name NVARCHAR(MAX), FOREIGN KEY(product_id) REFERENCES products(id))")
-                # site_settings
-                db.execute("IF OBJECT_ID('site_settings', 'U') IS NULL CREATE TABLE site_settings ([key] NVARCHAR(450) PRIMARY KEY, value NVARCHAR(MAX))")
-                # advertisements
-                db.execute("IF OBJECT_ID('advertisements', 'U') IS NULL CREATE TABLE advertisements (id INT IDENTITY(1,1) PRIMARY KEY, badge NVARCHAR(MAX), title NVARCHAR(MAX), subtitle NVARCHAR(MAX), button_text NVARCHAR(MAX), category NVARCHAR(MAX), image_url NVARCHAR(MAX), gradient NVARCHAR(MAX))")
-            except Exception as e:
-                print(f"Azure DB Init Error (ignoring if tables exist): {e}")
 
-            # --- Automated Seeding (Integrated) ---
-            try:
-                from database.seed_data import seed_azure
-                # Pass the raw pyodbc connection
-                seed_azure(db.conn)
-            except Exception as e:
-                print(f"Automated Seeding Error: {e}")
+        # --- Azure SQL (T-SQL) Initialization ---
+        # --- Azure SQL (T-SQL) Initialization ---
+        # products
+        db.execute("IF OBJECT_ID('products', 'U') IS NULL CREATE TABLE products (id INT IDENTITY(1,1) PRIMARY KEY, name NVARCHAR(MAX) NOT NULL, description NVARCHAR(MAX), price REAL, original_price REAL, thumbnail_url NVARCHAR(MAX))")
+        # reviews
+        db.execute("IF OBJECT_ID('reviews', 'U') IS NULL CREATE TABLE reviews (id INT IDENTITY(1,1) PRIMARY KEY, product_id INT, reviewer NVARCHAR(MAX), review_text NVARCHAR(MAX), sentiment_score REAL, sentiment_label NVARCHAR(MAX), FOREIGN KEY(product_id) REFERENCES products(id))")
+        # product_tags
+        db.execute("IF OBJECT_ID('product_tags', 'U') IS NULL CREATE TABLE product_tags (id INT IDENTITY(1,1) PRIMARY KEY, product_id INT, tag_name NVARCHAR(MAX), FOREIGN KEY(product_id) REFERENCES products(id))")
+        # site_settings
+        db.execute("IF OBJECT_ID('site_settings', 'U') IS NULL CREATE TABLE site_settings ([key] NVARCHAR(450) PRIMARY KEY, value NVARCHAR(MAX))")
+        # advertisements
+        db.execute("IF OBJECT_ID('advertisements', 'U') IS NULL CREATE TABLE advertisements (id INT IDENTITY(1,1) PRIMARY KEY, badge NVARCHAR(MAX), title NVARCHAR(MAX), subtitle NVARCHAR(MAX), button_text NVARCHAR(MAX), category NVARCHAR(MAX), image_url NVARCHAR(MAX), gradient NVARCHAR(MAX))")
 
-        else:
-            # --- SQLite Initialization ---
-            # Products table
-            db.execute('''CREATE TABLE IF NOT EXISTS products (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                description TEXT,
-                price REAL,
-                original_price REAL,
-                thumbnail_url TEXT
-            )''')
-            # Reviews table
-            db.execute('''CREATE TABLE IF NOT EXISTS reviews (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                product_id INTEGER,
-                reviewer TEXT,
-                review_text TEXT,
-                sentiment_score REAL,
-                sentiment_label TEXT,
-                FOREIGN KEY(product_id) REFERENCES products(id)
-            )''')
-            # ProductTags table
-            db.execute('''CREATE TABLE IF NOT EXISTS product_tags (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                product_id INTEGER,
-                tag_name TEXT,
-                FOREIGN KEY(product_id) REFERENCES products(id)
-            )''')
-            # Site settings
-            db.execute('''CREATE TABLE IF NOT EXISTS site_settings (
-                key TEXT PRIMARY KEY,
-                value TEXT
-            )''')
-            # Advertisements
-            db.execute('''CREATE TABLE IF NOT EXISTS advertisements (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                badge TEXT,
-                title TEXT,
-                subtitle TEXT,
-                button_text TEXT,
-                category TEXT,
-                image_url TEXT,
-                gradient TEXT
-            )''')
-            
-            # Optimize Indexes (SQLite only)
-            db.execute('CREATE INDEX IF NOT EXISTS idx_products_name ON products(name)')
-            db.execute('CREATE INDEX IF NOT EXISTS idx_tags_tagname ON product_tags(tag_name)')
-            db.execute('CREATE INDEX IF NOT EXISTS idx_tags_productid ON product_tags(product_id)')
+        # --- Automated Seeding (Integrated) ---
+        # --- Automated Seeding (Integrated) ---
+        from database.seed_data import seed_azure
+        # Pass the raw pyodbc connection
+        seed_azure(db.conn)
 
-        # Shared: Data seeding (Safe for both)
+        # Shared: Data seeding
         
         # Default Footer
         footer_defaults = [
@@ -158,15 +102,10 @@ def init_db(app):
             ('footer_phone', '+91 9035147223')
         ]
         for key, value in footer_defaults:
-            # T-SQL uses MERGE or IF EXISTS, but simple INSERT OR IGNORE is SQLite specific.
-            # Universal way: Check then insert.
-            if os.environ.get('AZURE_SQL_CONN'):
-                 # Simple T-SQL check
-                 exists = db.execute("SELECT 1 FROM site_settings WHERE [key] = ?", (key,)).fetchone()
-                 if not exists:
-                     db.execute("INSERT INTO site_settings ([key], value) VALUES (?, ?)", (key, value))
-            else:
-                 db.execute('INSERT OR IGNORE INTO site_settings (key, value) VALUES (?, ?)', (key, value))
+             # Simple T-SQL check
+             exists = db.execute("SELECT 1 FROM site_settings WHERE [key] = ?", (key,)).fetchone()
+             if not exists:
+                 db.execute("INSERT INTO site_settings ([key], value) VALUES (?, ?)", (key, value))
 
         # Default Ads
         ads_check = db.execute('SELECT id FROM advertisements').fetchone()

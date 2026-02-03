@@ -11,9 +11,9 @@ def analyze_sentiment(text):
     endpoint = os.environ.get('AZURE_AI_ENDPOINT')
     key = os.environ.get('AZURE_AI_KEY')
     
-    # If no keys, just return a fake neutral result (keeps app working locally)
+    # If no keys, return generic Neutral
     if not endpoint or not key:
-        return {'score': 0.5, 'label': 'Neutral (Local)'}
+        return {'score': 0.5, 'label': 'Neutral'}
 
     try:
         # Simple API call
@@ -45,26 +45,28 @@ def upload_product_image(file, slug):
     filename = f"product_{slug}.jpg"
     local_path = os.path.join(UPLOAD_FOLDER, filename)
     
-    # 1. Save Local (Always needed for temp or local mode)
+    # 1. Save Temp (For upload)
     with open(local_path, "wb") as f:
         f.write(file.read())
         
-    # 2. Cloud Logic (Simple Check)
-    if os.environ.get('CLOUD_ENV'):
-        try:
-            # Simple Azure Upload
-            from azure.storage.blob import BlobServiceClient
-            conn = os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
-            client = BlobServiceClient.from_connection_string(conn)
-            client.get_blob_client("product-images", filename).upload_blob(open(local_path, "rb"), overwrite=True)
-            
-            # Simple URL Return
-            return f"https://{client.account_name}.blob.core.windows.net/product-images/{filename}", filename
-        except Exception as e:
-            print("Cloud Upload Error:", e)
+    # 2. Azure Blob Upload (Required)
+    try:
+        from azure.storage.blob import BlobServiceClient
+        conn = os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
+        if not conn:
+             raise Exception("AZURE_STORAGE_CONNECTION_STRING not set")
 
-    # 3. Local URL
-    return f"/{local_path}".replace("\\", "/"), None
+        client = BlobServiceClient.from_connection_string(conn)
+        client.get_blob_client("product-images", filename).upload_blob(open(local_path, "rb"), overwrite=True)
+        
+        # Cleanup temp file
+        try: os.remove(local_path)
+        except: pass
+
+        return f"https://{client.account_name}.blob.core.windows.net/product-images/{filename}", filename
+    except Exception as e:
+        print("Cloud Upload Error:", e)
+        raise e
 
 
 

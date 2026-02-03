@@ -12,14 +12,12 @@ def add_product():
          return jsonify({'success': False, 'error': 'Unauthorized'}), 401
     
     data = request.json
-    print(f"LOG add_product: data={data}")
     db = get_db()
     cursor = db.execute('INSERT INTO products (name, description, price, original_price, thumbnail_url) VALUES (?, ?, ?, ?, ?)',
                (data['name'], data.get('description', ''), data['price'], data.get('original_price'), '/static/uploads/placeholder.png'))
     product_id = cursor.lastrowid
     
     if 'tags' in data and data['tags']:
-        print(f"LOG add_product: tags={data['tags']}")
         for tag in data['tags']:
             db.execute('INSERT INTO product_tags (product_id, tag_name) VALUES (?, ?)', (product_id, tag))
             
