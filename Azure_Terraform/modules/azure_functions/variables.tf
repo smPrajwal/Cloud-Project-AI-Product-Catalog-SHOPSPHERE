@@ -20,3 +20,7 @@ variable "storage_account" {
   })
   sensitive = true
 }
+
+variable "app_insights_connection_string" {
+  sensitive = true
+}
