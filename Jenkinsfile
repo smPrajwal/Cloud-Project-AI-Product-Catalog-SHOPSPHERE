@@ -33,16 +33,14 @@ pipeline {
 
                     test -d Azure_Function
                     test -d Azure_Terraform
-                    test -d static
-                    test -d templates
                     test -d backend
-                    test -d frontend
                     test -d common
                     test -d database
+                    test -d frontend
                     test -f app.py
-                    test -f startup.sh
                     test -f requirements_backend.txt
                     test -f requirements_frontend.txt
+                    test -f startup.sh
                 """
                 echo "----------------------- Testing Completed: All Checks passed in Testing! -----------------"
             }
@@ -229,9 +227,7 @@ pipeline {
                 sh """
                     set -e
                     URL="${APP_URL}"
-
                     curl --fail --max-time 10 "\$URL/health"
-
                     curl -s --max-time 10 "\$URL" | grep -q "ShopSphere"
                 """
                 echo "--------- Smoke Testing Completed: The application is LIVE and working! ------------------"
