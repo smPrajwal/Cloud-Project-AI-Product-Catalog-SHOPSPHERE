@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, session
-from database.db import get_db
+from database.db import get_db, query_db, query_one, execute_db, insert_get_id
 from shared_pkg.utils import analyze_sentiment
 import os
 
@@ -29,22 +29,17 @@ def get_products():
         sql += " AND id IN (SELECT product_id FROM product_tags WHERE tag_name = ?)"
         params.append(tag)
         
-    if os.environ.get('AZURE_SQL_CONN'):
-        sql += " ORDER BY id OFFSET ? ROWS FETCH NEXT ? ROWS ONLY"
-        params.extend([offset, limit])
-    else:
-        sql += " LIMIT ? OFFSET ?"
-        params.extend([limit, offset])
+    sql += " ORDER BY id OFFSET ? ROWS FETCH NEXT ? ROWS ONLY"
+    params.extend([offset, limit])
     
-    cursor = db.execute(sql, params)
-    rows = cursor.fetchall()
+    rows = query_db(sql, params)
     
     products = []
     if rows:
         ids = [row['id'] for row in rows]
         placeholders = ','.join('?' * len(ids))
         tags_query = f"SELECT product_id, tag_name FROM product_tags WHERE product_id IN ({placeholders})"
-        t_rows = db.execute(tags_query, ids).fetchall()
+        t_rows = query_db(tags_query, ids)
         
         tags_map = {}
         for t in t_rows:
@@ -66,27 +61,24 @@ def get_products():
 
 @api_bp.route('/api/products/<id_or_slug>', methods=['GET'])
 def get_product_details(id_or_slug):
-    db = get_db()
-    
     # Handle Slug vs ID
     product = None
     if str(id_or_slug).isdigit():
-        product = db.execute('SELECT * FROM products WHERE id = ?', (id_or_slug,)).fetchone()
+        product = query_one('SELECT * FROM products WHERE id = ?', (id_or_slug,))
     else:
         # Slug search
         search = '%' + '%'.join(id_or_slug.split('-')) + '%'
-        product = db.execute('SELECT * FROM products WHERE LOWER(name) LIKE LOWER(?)', (search,)).fetchone()
+        product = query_one('SELECT * FROM products WHERE LOWER(name) LIKE LOWER(?)', (search,))
     
     if not product:
         return jsonify({'error': 'Not found'}), 404
-    
+        
     id = product['id'] # Resolved ID
     
-    t_cursor = db.execute('SELECT tag_name FROM product_tags WHERE product_id = ?', (id,))
-    tags = [row['tag_name'] for row in t_cursor.fetchall()]
+    t_rows = query_db('SELECT tag_name FROM product_tags WHERE product_id = ?', (id,))
+    tags = [row['tag_name'] for row in t_rows]
     
-    r_cursor = db.execute('SELECT * FROM reviews WHERE product_id = ? ORDER BY id DESC', (id,))
-    reviews = [dict(row) for row in r_cursor.fetchall()]
+    reviews = query_db('SELECT * FROM reviews WHERE product_id = ? ORDER BY id DESC', (id,))
     
     return jsonify({
         'id': product['id'],
@@ -101,15 +93,14 @@ def get_product_details(id_or_slug):
 
 @api_bp.route('/api/products/<id_or_slug>/reviews', methods=['POST'])
 def add_review(id_or_slug):
-    db = get_db()
     # Resolve ID
     if str(id_or_slug).isdigit():
         id = id_or_slug
     else:
         search = '%' + '%'.join(id_or_slug.split('-')) + '%'
-        product = db.execute('SELECT id FROM products WHERE LOWER(name) LIKE LOWER(?)', (search,)).fetchone()
-        if not product: return jsonify({'error': 'Product not found'}), 404
-        id = product['id']
+        row = query_one('SELECT id FROM products WHERE LOWER(name) LIKE LOWER(?)', (search,))
+        if not row: return jsonify({'error': 'Product not found'}), 404
+        id = row['id']
 
     data = request.json
     reviewer = data.get('reviewer', '')
@@ -120,48 +111,46 @@ def add_review(id_or_slug):
 
     sentiment = analyze_sentiment(text)
     
-    cursor = db.execute('INSERT INTO reviews (product_id, reviewer, review_text, sentiment_score, sentiment_label) VALUES (?, ?, ?, ?, ?)',
-               (id, reviewer, text, sentiment['score'], sentiment['label']))
-    db.commit()
+    # Insert and get ID atomically
+    review_id = insert_get_id('''
+        INSERT INTO reviews (product_id, reviewer, review_text, sentiment_score, sentiment_label) 
+        VALUES (?, ?, ?, ?, ?);
+        SELECT SCOPE_IDENTITY();
+    ''', (id, reviewer, text, sentiment['score'], sentiment['label']))
     
-    return jsonify({'message': 'Review added', 'sentiment': sentiment, 'id': cursor.lastrowid})
+    return jsonify({'message': 'Review added', 'sentiment': sentiment, 'id': review_id})
 
 @api_bp.route('/api/reviews/<int:id>', methods=['DELETE'])
 def delete_review(id):
     if not session.get('is_admin') and request.headers.get('X-Admin') != 'true':
          return jsonify({'error': 'Admins only'}), 403
          
-    db = get_db()
-    db.execute('DELETE FROM reviews WHERE id = ?', (id,))
-    db.commit()
+    execute_db('DELETE FROM reviews WHERE id = ?', (id,))
     
     return jsonify({'message': 'Review deleted'})
 
 @api_bp.route('/api/ads', methods=['GET'])
 def get_ads():
-    db = get_db()
-    rows = db.execute('SELECT * FROM advertisements').fetchall()
-    return jsonify([dict(row) for row in rows])
+    return jsonify(query_db('SELECT * FROM advertisements'))
 
 @api_bp.route('/api/products/<id_or_slug>/recommendations', methods=['GET'])
 @api_bp.route('/api/products/<id_or_slug>/recommendations', methods=['GET'])
 def get_recommendations(id_or_slug):
     try:
-        db = get_db()
-        
         # Resolve ID if slug is passed
+        product_id = None
         if str(id_or_slug).isdigit():
             product_id = int(id_or_slug)
         else:
             search = '%' + '%'.join(id_or_slug.split('-')) + '%'
-            product = db.execute('SELECT id FROM products WHERE LOWER(name) LIKE LOWER(?)', (search,)).fetchone()
-            if not product:
+            p_row = query_one('SELECT id FROM products WHERE LOWER(name) LIKE LOWER(?)', (search,))
+            if not p_row:
                 return jsonify([])
-            product_id = product['id']
+            product_id = p_row['id']
 
         
-        tags_cursor = db.execute('SELECT tag_name FROM product_tags WHERE product_id = ?', (product_id,))
-        current_tags = [row['tag_name'] for row in tags_cursor.fetchall()]
+        t_rows = query_db('SELECT tag_name FROM product_tags WHERE product_id = ?', (product_id,))
+        current_tags = [row['tag_name'] for row in t_rows]
         
         if not current_tags:
             return jsonify([])
@@ -176,8 +165,7 @@ def get_recommendations(id_or_slug):
         '''
         params = current_tags + [product_id]
         
-        rec_cursor = db.execute(sql, params)
-        rows = rec_cursor.fetchall()
+        rows = query_db(sql, params)
         print(f"LOG: Found {len(rows)} recommendation rows")
         
         # Limit to 5 results

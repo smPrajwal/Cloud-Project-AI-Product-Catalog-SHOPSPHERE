@@ -96,7 +96,7 @@ from functools import lru_cache
 @lru_cache(maxsize=1)
 def get_footer_settings():
     """Helper to get footer settings from database"""
-    from database.db import get_db
-    db = get_db()
-    settings = db.execute('SELECT key, value FROM site_settings WHERE key LIKE "footer_%"').fetchall()
+    """Helper to get footer settings from database"""
+    from database.db import query_db
+    settings = query_db("SELECT [key], value FROM site_settings WHERE [key] LIKE 'footer_%'")
     return {row['key']: row['value'] for row in settings}

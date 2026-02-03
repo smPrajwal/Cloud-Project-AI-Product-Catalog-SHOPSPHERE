@@ -1,100 +1,102 @@
 import os
 from flask import g
 import time
-
+import pyodbc
 
 def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        # 1. Try Azure SQL (Required)
-        if os.environ.get('AZURE_SQL_CONN'):
-            import pyodbc
-            # Retry loop for Azure Free Tier (It sleeps when idle)
-            for attempt in range(3):
-                try:
-                    conn_str = os.environ.get('AZURE_SQL_CONN')
-                    conn = pyodbc.connect(conn_str, timeout=10)
-                    
-                    # --- AzureDB Wrapper Class (Same as before) ---
-                    class AzureDB:
-                        def __init__(self, conn): self.conn = conn
-                        def execute(self, sql, params=()):
-                            c = self.conn.cursor()
-                            c.execute(sql, params)
-                            wrapper = AzureCursor(c)
-                            if sql.strip().upper().startswith("INSERT"):
-                                try:
-                                    id_cursor = self.conn.cursor()
-                                    id_cursor.execute("SELECT @@IDENTITY AS id")
-                                    row = id_cursor.fetchone()
-                                    if row and row[0]: wrapper.lastrowid = int(row[0])
-                                    id_cursor.close()
-                                except: pass
-                            return wrapper
-                        def commit(self): self.conn.commit()
-                        def close(self): self.conn.close()
-
-                    class AzureCursor:
-                        def __init__(self, cursor): 
-                            self.cursor = cursor
-                            self.lastrowid = None
-                        def fetchone(self):
-                            row = self.cursor.fetchone()
-                            return dict(zip([d[0] for d in self.cursor.description], row)) if row else None
-                        def fetchall(self):
-                            cols = [d[0] for d in self.cursor.description]
-                            return [dict(zip(cols, row)) for row in self.cursor.fetchall()]
-                        def close(self): self.cursor.close()
-
-                    # Connection Successful
-                    db = g._database = AzureDB(conn)
-                    print(f"LOG: Connected to Azure SQL (Attempt {attempt+1})")
-                    return db
-                    
-                except Exception as e:
-                    print(f"Azure Connection Failed (Attempt {attempt+1}): {e}")
-                    time.sleep(5) # Wait for DB to wake up
-
-            print("ERROR: Could not connect to Azure SQL after 3 tries.")
-            # No fallback, return None or raise error
-            raise Exception("Failed to connect to Azure SQL Database.")
-
-        else:
+    conn = getattr(g, '_database', None)
+    if conn is None:
+        if not os.environ.get('AZURE_SQL_CONN'):
              print("ERROR: AZURE_SQL_CONN environment variable not set.")
              raise Exception("AZURE_SQL_CONN environment variable not set.")
-            
-    return db
+
+        conn_str = os.environ.get('AZURE_SQL_CONN')
+        
+        # Retry loop for connection
+        for attempt in range(3):
+            try:
+                # Direct PyODBC Connection
+                conn = pyodbc.connect(conn_str, timeout=10)
+                g._database = conn
+                print(f"LOG: Connected to Azure SQL (Attempt {attempt+1})")
+                return conn
+            except Exception as e:
+                print(f"Azure Connection Failed (Attempt {attempt+1}): {e}")
+                time.sleep(5)
+        
+        raise Exception("Failed to connect to Azure SQL Database.")
+
+    return conn
 
 def close_connection(exception):
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
+    conn = getattr(g, '_database', None)
+    if conn is not None:
+        conn.close()
+
+# --- Helpers ---
+
+def query_db(sql, params=()):
+    """Returns a list of dictionaries."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(sql, params)
+    if cursor.description:
+        columns = [column[0] for column in cursor.description]
+        return [dict(zip(columns, row)) for row in cursor.fetchall()]
+    return None
+
+def query_one(sql, params=()):
+    """Returns a single dictionary or None."""
+    rows = query_db(sql, params)
+    return rows[0] if rows else None
+
+def execute_db(sql, params=()):
+    """Executes a write operation and commits. Returns the cursor."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(sql, params)
+    conn.commit()
+    return cursor
+
+def insert_get_id(sql, params=()):
+    """Executes INSERT ...; SELECT SCOPE_IDENTITY() and returns the ID."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(sql, params)
+    if cursor.nextset(): 
+        row = cursor.fetchone()
+        if row:
+             id = int(row[0])
+             conn.commit()
+             return id
+    conn.commit()
+    return None
+
+# --- Init ---
 
 def init_db(app):
     with app.app_context():
-        db = get_db()
+        # Ensure connection logic is sound
+        try:
+            get_db()
+        except:
+            return # Skip if no DB configured (e.g. build step)
 
-        # --- Azure SQL (T-SQL) Initialization ---
-        # --- Azure SQL (T-SQL) Initialization ---
         # products
-        db.execute("IF OBJECT_ID('products', 'U') IS NULL CREATE TABLE products (id INT IDENTITY(1,1) PRIMARY KEY, name NVARCHAR(MAX) NOT NULL, description NVARCHAR(MAX), price REAL, original_price REAL, thumbnail_url NVARCHAR(MAX))")
+        execute_db("IF OBJECT_ID('products', 'U') IS NULL CREATE TABLE products (id INT IDENTITY(1,1) PRIMARY KEY, name NVARCHAR(MAX) NOT NULL, description NVARCHAR(MAX), price REAL, original_price REAL, thumbnail_url NVARCHAR(MAX))")
         # reviews
-        db.execute("IF OBJECT_ID('reviews', 'U') IS NULL CREATE TABLE reviews (id INT IDENTITY(1,1) PRIMARY KEY, product_id INT, reviewer NVARCHAR(MAX), review_text NVARCHAR(MAX), sentiment_score REAL, sentiment_label NVARCHAR(MAX), FOREIGN KEY(product_id) REFERENCES products(id))")
+        execute_db("IF OBJECT_ID('reviews', 'U') IS NULL CREATE TABLE reviews (id INT IDENTITY(1,1) PRIMARY KEY, product_id INT, reviewer NVARCHAR(MAX), review_text NVARCHAR(MAX), sentiment_score REAL, sentiment_label NVARCHAR(MAX), FOREIGN KEY(product_id) REFERENCES products(id))")
         # product_tags
-        db.execute("IF OBJECT_ID('product_tags', 'U') IS NULL CREATE TABLE product_tags (id INT IDENTITY(1,1) PRIMARY KEY, product_id INT, tag_name NVARCHAR(MAX), FOREIGN KEY(product_id) REFERENCES products(id))")
+        execute_db("IF OBJECT_ID('product_tags', 'U') IS NULL CREATE TABLE product_tags (id INT IDENTITY(1,1) PRIMARY KEY, product_id INT, tag_name NVARCHAR(MAX), FOREIGN KEY(product_id) REFERENCES products(id))")
         # site_settings
-        db.execute("IF OBJECT_ID('site_settings', 'U') IS NULL CREATE TABLE site_settings ([key] NVARCHAR(450) PRIMARY KEY, value NVARCHAR(MAX))")
+        execute_db("IF OBJECT_ID('site_settings', 'U') IS NULL CREATE TABLE site_settings ([key] NVARCHAR(450) PRIMARY KEY, value NVARCHAR(MAX))")
         # advertisements
-        db.execute("IF OBJECT_ID('advertisements', 'U') IS NULL CREATE TABLE advertisements (id INT IDENTITY(1,1) PRIMARY KEY, badge NVARCHAR(MAX), title NVARCHAR(MAX), subtitle NVARCHAR(MAX), button_text NVARCHAR(MAX), category NVARCHAR(MAX), image_url NVARCHAR(MAX), gradient NVARCHAR(MAX))")
+        execute_db("IF OBJECT_ID('advertisements', 'U') IS NULL CREATE TABLE advertisements (id INT IDENTITY(1,1) PRIMARY KEY, badge NVARCHAR(MAX), title NVARCHAR(MAX), subtitle NVARCHAR(MAX), button_text NVARCHAR(MAX), category NVARCHAR(MAX), image_url NVARCHAR(MAX), gradient NVARCHAR(MAX))")
 
-        # --- Automated Seeding (Integrated) ---
-        # --- Automated Seeding (Integrated) ---
+        # --- Automated Seeding ---
         from database.seed_data import seed_azure
-        # Pass the raw pyodbc connection
-        seed_azure(db.conn)
+        seed_azure(get_db())
 
-        # Shared: Data seeding
-        
         # Default Footer
         footer_defaults = [
             ('footer_brand_description', 'Your destination for quality products that blend aesthetics with functionality.'),
@@ -102,14 +104,12 @@ def init_db(app):
             ('footer_phone', '+91 9035147223')
         ]
         for key, value in footer_defaults:
-             # Simple T-SQL check
-             exists = db.execute("SELECT 1 FROM site_settings WHERE [key] = ?", (key,)).fetchone()
+             exists = query_one("SELECT 1 FROM site_settings WHERE [key] = ?", (key,))
              if not exists:
-                 db.execute("INSERT INTO site_settings ([key], value) VALUES (?, ?)", (key, value))
+                 execute_db("INSERT INTO site_settings ([key], value) VALUES (?, ?)", (key, value))
 
         # Default Ads
-        ads_check = db.execute('SELECT id FROM advertisements').fetchone()
-        print(f"LOG: Ads check result: {ads_check}")
+        ads_check = query_one('SELECT id FROM advertisements')
         if not ads_check:
             print("LOG: Seeding advertisements...")
             default_ads = [
@@ -120,8 +120,7 @@ def init_db(app):
                 ('WORK SMART', 'Office Essentials', 'Upgrade your workspace today', 'Shop Now →', 'office', '/static/uploads/promo_office.png', 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)')
             ]
             for ad in default_ads:
-                db.execute('INSERT INTO advertisements (badge, title, subtitle, button_text, category, image_url, gradient) VALUES (?, ?, ?, ?, ?, ?, ?)', ad)
-            db.commit()
+                execute_db('INSERT INTO advertisements (badge, title, subtitle, button_text, category, image_url, gradient) VALUES (?, ?, ?, ?, ?, ?, ?)', ad)
             print(f"LOG: Inserted {len(default_ads)} ads")
         else:
             print("LOG: Ads already exist, skipping seed")

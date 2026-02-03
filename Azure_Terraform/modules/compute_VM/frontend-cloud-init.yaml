@@ -9,7 +9,6 @@ write_files:
       ADMIN_USERNAME="${admin_username}"
       ADMIN_PASSWORD="${admin_password}"
       BACKEND_API_URL="http://${backend_lb_ip}:80"
-      CLOUD_ENV="true"
 
   - path: /etc/systemd/system/flaskapp.service
     content: |

@@ -10,7 +10,6 @@ write_files:
       AZURE_AI_KEY="${azure_ai_key}"
       AZURE_STORAGE_CONNECTION_STRING="${storage_conn_string}"
       STORAGE_ACCOUNT_NAME="${storage_account_name}"
-      CLOUD_ENV="true"
 
   - path: /etc/systemd/system/flaskapp.service
     content: |
