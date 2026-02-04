@@ -1,26 +1,15 @@
-
-"""
-Seeding Logic for Azure SQL
-Automates initial data population for Products, Reviews, and Tags.
-"""
+import os
 
 def seed_azure(conn):
     try:
         cursor = conn.cursor()
         
-        # Helper for Blob URL
-        import os
-        STORAGE_ACCOUNT = os.environ.get('STORAGE_ACCOUNT_NAME') 
-        # If we have a storage account, use Blob URL. Otherwise, use local static path.
-        IMG_BASE = f"https://{STORAGE_ACCOUNT}.blob.core.windows.net/product-images/" if STORAGE_ACCOUNT else "/static/product_images/"
-        
-        def get_img_url(filename):
-             # Extract filename from old static path if needed, or just append
-             name = filename.split('/')[-1]
-             return f"{IMG_BASE}{name}"
+        # Base Image URL (Simple Check)
+        acc = os.environ.get('STORAGE_ACCOUNT_NAME')
+        base = f"https://{acc}.blob.core.windows.net/product-images/" if acc else "/static/product_images/"
 
-        # --- Embedded Seed Data ---
-        SEED_DATA = {
+        # Data Dictionary
+        data = {
           "products": [
             {
               "id": 1,
@@ -1388,66 +1377,46 @@ def seed_azure(conn):
         }
         
         # --- Seed Products ---
-        print("Checking 'products' table...")
-        try:
-            cursor.execute("SELECT COUNT(*) FROM products")
-            count = cursor.fetchone()[0]
-            if count == 0:
-                print("Seeding 'products'...")
-                cursor.execute("SET IDENTITY_INSERT products ON")
-                for p in SEED_DATA["products"]:
-                    cursor.execute(
-                        "INSERT INTO products (id, name, description, price, original_price, thumbnail_url) VALUES (?, ?, ?, ?, ?, ?)",
-                        (p["id"], p["name"], p["description"], p["price"], p["original_price"], get_img_url(p["thumbnail_url"]))
-                    )
-                cursor.execute("SET IDENTITY_INSERT products OFF")
-                print(f"Inserted {len(SEED_DATA['products'])} products.")
-            else:
-                print(f"'products' table already has {count} rows. Skipping.")
-        except Exception as e:
-            print(f"Error seeding products: {e}")
-
+        print("Checking Products...")
+        if cursor.execute("SELECT COUNT(*) FROM products").fetchone()[0] == 0:
+            print("Seeding Products...")
+            cursor.execute("SET IDENTITY_INSERT products ON")
+            for p in data['products']:
+                img = base + p['thumbnail_url'].split('/')[-1]
+                cursor.execute(
+                    "INSERT INTO products (id, name, description, price, original_price, thumbnail_url) VALUES (?, ?, ?, ?, ?, ?)",
+                    (p['id'], p['name'], p['description'], p['price'], p['original_price'], img)
+                )
+            cursor.execute("SET IDENTITY_INSERT products OFF")
+            print("Products seeded.")
+            
         # --- Seed Reviews ---
-        print("Checking 'reviews' table...")
-        try:
-            cursor.execute("SELECT COUNT(*) FROM reviews")
-            count = cursor.fetchone()[0]
-            if count == 0:
-                print("Seeding 'reviews'...")
-                cursor.execute("SET IDENTITY_INSERT reviews ON")
-                for r in SEED_DATA["reviews"]:
-                    cursor.execute(
-                        "INSERT INTO reviews (id, product_id, reviewer, review_text, sentiment_score, sentiment_label) VALUES (?, ?, ?, ?, ?, ?)",
-                        (r["id"], r["product_id"], r["reviewer"], r["review_text"], r["sentiment_score"], r["sentiment_label"])
-                    )
-                cursor.execute("SET IDENTITY_INSERT reviews OFF")
-                print(f"Inserted {len(SEED_DATA['reviews'])} reviews.")
-            else:
-                print(f"'reviews' table already has {count} rows. Skipping.")
-        except Exception as e:
-            print(f"Error seeding reviews: {e}")
+        print("Checking Reviews...")
+        if cursor.execute("SELECT COUNT(*) FROM reviews").fetchone()[0] == 0:
+            print("Seeding Reviews...")
+            cursor.execute("SET IDENTITY_INSERT reviews ON")
+            for r in data['reviews']:
+                cursor.execute(
+                    "INSERT INTO reviews (id, product_id, reviewer, review_text, sentiment_score, sentiment_label) VALUES (?, ?, ?, ?, ?, ?)",
+                    (r['id'], r['product_id'], r['reviewer'], r['review_text'], r['sentiment_score'], r['sentiment_label'])
+                )
+            cursor.execute("SET IDENTITY_INSERT reviews OFF")
+            print("Reviews seeded.")
 
-        # --- Seed Product Tags ---
-        print("Checking 'product_tags' table...")
-        try:
-            cursor.execute("SELECT COUNT(*) FROM product_tags")
-            count = cursor.fetchone()[0]
-            if count == 0:
-                print("Seeding 'product_tags'...")
-                cursor.execute("SET IDENTITY_INSERT product_tags ON")
-                for t in SEED_DATA["product_tags"]:
-                    cursor.execute(
-                        "INSERT INTO product_tags (id, product_id, tag_name) VALUES (?, ?, ?)",
-                        (t["id"], t["product_id"], t["tag_name"])
-                    )
-                cursor.execute("SET IDENTITY_INSERT product_tags OFF")
-                print(f"Inserted {len(SEED_DATA['product_tags'])} tags.")
-            else:
-                print(f"'product_tags' table already has {count} rows. Skipping.")
-        except Exception as e:
-            print(f"Error seeding product_tags: {e}")
+        # --- Seed Tags ---
+        print("Checking Tags...")
+        if cursor.execute("SELECT COUNT(*) FROM product_tags").fetchone()[0] == 0:
+            print("Seeding Tags...")
+            cursor.execute("SET IDENTITY_INSERT product_tags ON")
+            for t in data['product_tags']:
+                cursor.execute(
+                    "INSERT INTO product_tags (id, product_id, tag_name) VALUES (?, ?, ?)",
+                    (t['id'], t['product_id'], t['tag_name'])
+                )
+            cursor.execute("SET IDENTITY_INSERT product_tags OFF")
+            print("Tags seeded.")
 
         conn.commit()
     except Exception as e:
-        print(f"Global Seeding Error: {e}")
+        print(f"Seeding Error: {e}")
 
