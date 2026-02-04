@@ -1,94 +1,62 @@
 import os
-
-
-UPLOAD_FOLDER = 'frontend/static/product_images'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-# Azure Stubs
 import requests
 
+# 1. AI Analysis
 def analyze_sentiment(text):
     endpoint = os.environ.get('AZURE_AI_ENDPOINT')
     key = os.environ.get('AZURE_AI_KEY')
     
-    # If no keys, return generic Neutral
-    if not endpoint or not key:
-        return {'score': 0.5, 'label': 'Neutral'}
+    if not (endpoint and key): return {'score': 0.5, 'label': 'Neutral'}
 
     try:
-        # Simple API call
+        # Call Azure AI
         url = f"{endpoint}/text/analytics/v3.1/sentiment"
-        headers = {"Ocp-Apim-Subscription-Key": key, "Content-Type": "application/json"}
-        data = {"documents": [{"id": "1", "language": "en", "text": text}]}
+        resp = requests.post(url, headers={"Ocp-Apim-Subscription-Key": key}, json={"documents": [{"id": "1", "text": text}]})
         
-        response = requests.post(url, headers=headers, json=data)
-        result = response.json()
+        # Get Result
+        tag = resp.json()['documents'][0]['sentiment']
+        score = {'positive': 0.9, 'negative': 0.1}.get(tag, 0.5)
         
-        # Get the answer
-        doc = result['documents'][0]
-        sentiment = doc['sentiment']
-        
-        # Convert 'positive'/'negative' to a simple number (0 to 1)
-        score = 0.5
-        if sentiment == 'positive':
-            score = 0.9
-        elif sentiment == 'negative':
-            score = 0.1
-            
-        return {'score': score, 'label': sentiment.capitalize()}
-        
-    except Exception as e:
-        print("AI Error:", e)
+        return {'score': score, 'label': tag.capitalize()}
+    except:
         return {'score': 0.5, 'label': 'Error'}
 
-def upload_product_image(file, slug):
-    filename = f"product_{slug}.jpg"
-    local_path = os.path.join(UPLOAD_FOLDER, filename)
-    
-    # 1. Save Temp (For upload)
-    with open(local_path, "wb") as f:
-        f.write(file.read())
-        
-    # 2. Azure Blob Upload (Required)
+# 2. Image Upload
+def upload_product_image(file, name):
     try:
         from azure.storage.blob import BlobServiceClient
-        conn = os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
-        if not conn:
-             raise Exception("AZURE_STORAGE_CONNECTION_STRING not set")
-
-        client = BlobServiceClient.from_connection_string(conn)
-        client.get_blob_client("product-images", filename).upload_blob(open(local_path, "rb"), overwrite=True)
         
-        # Cleanup temp file
-        try: os.remove(local_path)
-        except: pass
-
-        return f"https://{client.account_name}.blob.core.windows.net/product-images/{filename}", filename
+        # Connect to Azure
+        connect_str = os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
+        client = BlobServiceClient.from_connection_string(connect_str)
+        
+        # Create Filename & Upload
+        filename = f"product_{name}.jpg"
+        blob = client.get_blob_client("product-images", filename)
+        
+        file.seek(0) # Make sure we read from start
+        blob.upload_blob(file.read(), overwrite=True)
+        
+        return blob.url, filename
     except Exception as e:
-        print("Cloud Upload Error:", e)
-        raise e
+        print(f"Upload Error: {e}")
+        return None, None
 
-
-
+# 3. Currency Format (Indian Style: 1,00,000)
 def format_indian_currency(value):
-    try:
-        value = int(float(value)) 
-    except (ValueError, TypeError):
-        return value
+    s = str(int(value))
+    if len(s) <= 3: return s
     
-    s = str(value)
-    if len(s) <= 3:
-        return s
-    
-    last_three = s[-3:]
+    # 12345 -> 12,345 | 1234567 -> 12,34,567
+    last_3 = s[-3:]
     rest = s[:-3]
     
-    parts = []
-    while rest:
-        parts.append(rest[-2:])
+    # Add commas to the rest every 2 digits
+    formatted = ""
+    while len(rest) > 2:
+        formatted = "," + rest[-2:] + formatted
         rest = rest[:-2]
-    
-    parts.reverse()
-    return ",".join(parts) + "," + last_three
+        
+    return rest + formatted + "," + last_3
 
 
