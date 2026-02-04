@@ -36,9 +36,7 @@ def query_one(sql, params=()):
 
 def insert_get_id(sql, params=()):
     cursor = execute_db(sql, params)
-    cursor.execute("SELECT SCOPE_IDENTITY();")
-    row = cursor.fetchone()
-    return int(row[0]) if row and row[0] is not None else None
+    return int(cursor.fetchone()[0]) if cursor.description else None
 
 # 3. Setup Tables & Data
 def init_db(app):

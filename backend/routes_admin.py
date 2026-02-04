@@ -17,9 +17,8 @@ def add_product():
     
     # Add Product
     # Use EXTERNAL placeholder to avoid local file issues
-    # Use EXTERNAL placeholder to avoid local file issues, and revert to simple INSERT
     pid = insert_get_id(
-        "INSERT INTO products (name, description, price, original_price, thumbnail_url) VALUES (?, ?, ?, ?, ?)", 
+        "INSERT INTO products (name, description, price, original_price, thumbnail_url) OUTPUT INSERTED.ID VALUES (?, ?, ?, ?, ?)", 
         (data['name'], data.get('description', ''), data['price'], data.get('original_price'), 'https://placehold.co/600x400/png?text=Product+Image')
     )
     
