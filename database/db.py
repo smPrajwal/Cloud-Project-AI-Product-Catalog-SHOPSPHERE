@@ -120,7 +120,9 @@ def init_db(app):
                 ('WORK SMART', 'Office Essentials', 'Upgrade your workspace today', 'Shop Now →', 'office', '/static/uploads/promo_office.png', 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)')
             ]
             for ad in default_ads:
-                execute_db('INSERT INTO advertisements (badge, title, subtitle, button_text, category, image_url, gradient) VALUES (?, ?, ?, ?, ?, ?, ?)', ad)
-            print(f"LOG: Inserted {len(default_ads)} ads")
+                # Check if specific ad exists (logic: title must be unique)
+                if not query_one("SELECT 1 FROM advertisements WHERE title = ?", (ad[1],)):
+                     execute_db('INSERT INTO advertisements (badge, title, subtitle, button_text, category, image_url, gradient) VALUES (?, ?, ?, ?, ?, ?, ?)', ad)
+            print(f"LOG: Seeding check complete for ads")
         else:
             print("LOG: Ads already exist, skipping seed")
