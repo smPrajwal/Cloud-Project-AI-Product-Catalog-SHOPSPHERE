@@ -1,4 +1,4 @@
-import pyodbc, os
+import pyodbc, os, time
 from flask import g
 
 # 1. Connect to Azure SQL
@@ -6,13 +6,22 @@ def get_db():
     if not hasattr(g, 'db'):
         conn_str = os.environ.get('AZURE_SQL_CONN')
         if not conn_str: return None
-        try:
-            g.db = pyodbc.connect(conn_str, timeout=10)
-        except: return None
+        
+        # Simple Retry Logic (3 attempts)
+        for i in range(3):
+            try:
+                g.db = pyodbc.connect(conn_str, timeout=10)
+                return g.db
+            except Exception as e:
+                print(f"DB Connect Error (Attempt {i+1}): {e}")
+                time.sleep(2)
+        
+        return None # Failed to connect
     return g.db
 
 def close_connection(e):
-    if hasattr(g, 'db'): g.db.close()
+    if hasattr(g, 'db'): 
+        g.db.close()
 
 # 2. Simple Helpers
 def execute_db(sql, params=()):
