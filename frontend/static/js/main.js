@@ -102,22 +102,7 @@ window.addEventListener('pageshow', (event) => {
     }
 });
 
-// Load products and scroll to product grid (used by ad banners)
-async function loadProductsAndScroll(category) {
-    await loadProducts(category);
-    const productGrid = document.getElementById('productGrid');
-    if (productGrid) {
-        // Get the position and account for sticky header + leave some breathing room
-        const headerOffset = 180;
-        const elementPosition = productGrid.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
-        window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-        });
-    }
-}
 
 // Detail Page
 async function loadProductDetails(id) {

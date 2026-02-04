@@ -1,13 +1,12 @@
 from flask import Blueprint, request, jsonify, session
 from database.db import get_db, query_db, query_one, execute_db, insert_get_id
 from common.utils import analyze_sentiment
-import os
+
 
 api_bp = Blueprint('api', __name__)
 
 # --- Products API ---
 
-@api_bp.route('/api/products', methods=['GET'])
 @api_bp.route('/api/products', methods=['GET'])
 def get_products():
     query = request.args.get('q')
@@ -133,7 +132,6 @@ def delete_review(id):
 def get_ads():
     return jsonify(query_db('SELECT * FROM advertisements'))
 
-@api_bp.route('/api/products/<id_or_slug>/recommendations', methods=['GET'])
 @api_bp.route('/api/products/<id_or_slug>/recommendations', methods=['GET'])
 def get_recommendations(id_or_slug):
     try:
