@@ -16,8 +16,11 @@ def add_product():
     data = request.json
     
     # Add Product
-    sql = "INSERT INTO products (name, description, price, original_price, thumbnail_url) VALUES (?, ?, ?, ?, ?); SELECT SCOPE_IDENTITY()"
-    pid = insert_get_id(sql, (data['name'], data.get('description', ''), data['price'], data.get('original_price'), '/static/uploads/placeholder.png'))
+    # Use EXTERNAL placeholder to avoid local file issues
+    pid = insert_get_id(
+        "INSERT INTO products (name, description, price, original_price, thumbnail_url) OUTPUT INSERTED.ID VALUES (?, ?, ?, ?, ?)", 
+        (data['name'], data.get('description', ''), data['price'], data.get('original_price'), 'https://placehold.co/600x400/png?text=Product+Image')
+    )
     
     # Add Tags
     for tag in data.get('tags', []):
