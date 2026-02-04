@@ -239,22 +239,7 @@ a:hover {
     /* Fix vertical spacing when wrapping */
 }
 
-/* Auth Pages */
-.auth-container {
-    max-width: 450px;
-    margin: 80px auto;
-    padding: 40px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-lg);
-    background: #fff;
-    box-shadow: var(--card-shadow);
-    text-align: center;
-}
 
-.auth-container h2 {
-    margin-bottom: 2rem;
-    font-weight: 600;
-}
 
 /* Modal */
 .modal-content {
@@ -278,45 +263,9 @@ a:hover {
     border: 1px solid var(--border-color);
 }
 
-/* Circular Buttons for Cart Control */
-.btn-circle {
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    line-height: 1;
-}
 
-/* Sleek Nav Arrows */
-.nav-arrow {
-    background: transparent;
-    border: none;
-    color: #333;
-    font-size: 2rem;
-    padding: 0 1rem;
-    opacity: 0.5;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: auto;
-    /* Fix: removed 100% height */
-    top: 50%;
-    transform: translateY(-50%);
-}
 
-.nav-arrow:hover {
-    opacity: 1;
-    background: transparent;
-    color: #000;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-    transform: translateY(-50%) scale(1.1);
-    /* Maintaining vertical center on hover */
-}
+
 
 /* Carousel Dots */
 .carousel-dots-container {
