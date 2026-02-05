@@ -1,133 +1,111 @@
-// Modal Helpers
+// Admin JavaScript File - Simple and Easy to Understand
+// Used for: Adding products, Deleting products, and Uploading images.
+
+// 1. Open the "Add New Product" Modal
 function openAddModal() {
+    // Reset the form so it is empty
     document.getElementById('addProductForm').reset();
 
-    document.getElementById('productModalTitle').textContent = 'New Item';
-    document.getElementById('modalSubmitBtn').textContent = 'Create Product';
+    // Show the modal window
     const modal = new bootstrap.Modal(document.getElementById('addProductModal'));
     modal.show();
 }
 
+// 2. Delete a Product
 async function deleteProduct(id, event) {
-    if (event) { event.preventDefault(); event.stopPropagation(); }
+    if (event) event.preventDefault(); // Stop clicking link
 
-    if (!confirm('Delete this product? This cannot be undone.')) return;
+    // Ask for confirmation
+    if (confirm("Are you sure you want to delete this product?")) {
+        // Send DELETE command to server
+        const response = await fetch(`${API_BASE}/${id}`, {
+            method: 'DELETE',
+            credentials: 'include' // Needed for admin check
+        });
 
-    try {
-        const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE', credentials: 'include' });
-        const result = await res.json();
-
-        if (res.ok && result.success) {
-            // Efficient: Remove element instead of reload
-            const card = event.target.closest('.col-6') || event.target.closest('.col-md-3'); // Safer selector
-            if (card) card.remove();
-            else window.location.reload(); // Fallback
+        if (response.ok) {
+            // If successful, reload page to update list
+            window.location.reload();
+        } else {
+            alert("Failed to delete product.");
         }
-        else alert('Failed to delete product: ' + (result.error || 'Error'));
-    } catch (e) {
-        console.error(e);
-        alert('Network error');
     }
 }
 
-document.getElementById('addProductForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
+// 3. Add a New Product (Form Submit)
+const addForm = document.getElementById('addProductForm');
+if (addForm) {
+    addForm.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Stop normal submit
 
-    const data = {
-        name: document.getElementById('pName').value,
-        price: parseFloat(document.getElementById('pPrice').value),
-        original_price: document.getElementById('pOriginalPrice').value ? parseFloat(document.getElementById('pOriginalPrice').value) : null,
-        description: document.getElementById('pDesc').value
-    };
+        // Step A: Get data from inputs
+        const name = document.getElementById('pName').value;
+        const price = document.getElementById('pPrice').value;
+        const desc = document.getElementById('pDesc').value;
+        const origPrice = document.getElementById('pOriginalPrice').value;
 
-    try {
-        const res = await fetch(API_BASE, {
+        // Step B: Send Product Data to Server
+        const response = await fetch(API_BASE, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
+            body: JSON.stringify({
+                name: name,
+                price: parseFloat(price),
+                description: desc,
+                original_price: origPrice ? parseFloat(origPrice) : null
+            }),
             credentials: 'include'
         });
 
-        const result = await res.json();
-        if (res.ok && result.success) {
-            const productId = result.data.id;
+        const result = await response.json();
 
-            // Upload images if any
-            const imageInput = document.getElementById('pImages');
-            if (imageInput.files.length > 0 && productId) {
+        // Step C: If success, upload image (if selected)
+        if (response.ok) {
+            const fileInput = document.getElementById('pImages');
+            if (fileInput.files.length > 0) {
+                // Prepare image data
                 const formData = new FormData();
-                const file = imageInput.files[0];
-                formData.append('file', file);
+                formData.append('file', fileInput.files[0]);
 
-                // Use the singular endpoint
-                await fetch(`${API_BASE}/${productId}/image`, {
+                // Send image
+                await fetch(`${API_BASE}/${result.data.id}/image`, {
                     method: 'POST',
                     body: formData,
                     credentials: 'include'
                 });
             }
-
+            // All done, reload page
             window.location.reload();
         } else {
-            alert('Error: ' + (result.error || 'Unauthorized'));
+            alert("Error creating product: " + result.error);
         }
-    } catch (err) { console.error(err); }
-});
+    });
+}
 
-// Consolidated uploadImage from product.html
+// 4. Upload Image (from Product Details page)
 async function uploadImage() {
-    const input = document.getElementById('imageUploadInput');
-    if (!input.files || input.files.length === 0) {
-        alert('Please select a file first.');
+    const fileInput = document.getElementById('imageUploadInput');
+
+    // Check if file is selected
+    if (fileInput.files.length === 0) {
+        alert("Please pick a file first.");
         return;
     }
 
-    const file = input.files[0];
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', fileInput.files[0]);
 
-    const btn = document.querySelector('button[onclick="uploadImage()"]');
-    if (btn) {
-        var originalText = btn.innerText;
-        btn.innerText = 'Uploading...';
-        btn.disabled = true;
-    }
+    // Send to Server
+    const response = await fetch(`/api/products/${PRODUCT_ID}/image`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+    });
 
-    try {
-        // Use PRODUCT_ID as slug/id
-        const res = await fetch(`/api/products/${PRODUCT_ID}/image`, {
-            method: 'POST',
-            body: formData,
-            credentials: 'include'
-        });
-
-        const result = await res.json();
-
-        if (res.ok && result.success) {
-            // Update image on page immediately
-            const img = document.getElementById('mainImage');
-            const timestamp = new Date().getTime(); // Cache buster
-            // Backend returns: { success: true, data: { url: "..." } }
-            const newUrl = result.data.url;
-
-            // Check for existing query params in newUrl
-            const separator = newUrl.includes('?') ? '&' : '?';
-            img.src = newUrl + separator + 't=' + timestamp;
-            img.style.display = 'block';
-            document.getElementById('imgPlaceholder').style.display = 'none';
-
-            // Clear input
-            input.value = '';
-        } else {
-            alert('Error: ' + (result.error || 'Upload failed'));
-        }
-    } catch (e) {
-        console.error(e);
-        alert('Network error during upload.');
-    } finally {
-        if (btn) {
-            btn.innerText = originalText;
-            btn.disabled = false;
-        }
+    if (response.ok) {
+        // Reload page to show new image
+        window.location.reload();
+    } else {
+        alert("Upload failed.");
     }
 }

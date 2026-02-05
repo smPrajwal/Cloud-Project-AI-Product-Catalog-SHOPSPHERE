@@ -21,7 +21,7 @@ function createProductCard(product, isRecommendation = false) {
     return `
         <div class="${isRecommendation ? 'col-4 me-3' : 'col-md-3 col-6 mb-4'}" style="${isRecommendation ? 'min-width: 250px;' : ''}">
             <div class="card product-card h-100"><a href="/product/${createSlug(product.name)}" class="text-decoration-none">
-                <img src="${product.thumbnail_url}" class="card-img-top" alt="${product.name}" style="height: 180px; object-fit: contain; padding: 0;">
+                <img src="${product.thumbnail_url}" class="card-img-top" alt="${product.name}" style="height: 260px; object-fit: contain; padding: 0;">
                 <div class="card-body"><h5 class="card-title text-dark text-truncate">${product.name}</h5><div class="mb-2">${priceHtml}</div>${deleteBtn}</div>
             </a></div>
         </div>`;
@@ -88,7 +88,7 @@ function renderReviews(reviews) {
     for (let review of reviews) {
         totalScore += review.sentiment_score;
         let badge = review.sentiment_label === 'Positive' ? 'bg-success' : 'bg-secondary';
-        let deleteBtn = (typeof IS_ADMIN !== 'undefined' && IS_ADMIN) ? `<button class="btn btn-sm btn-link text-danger ms-2" onclick="deleteReview(${review.id})">Delete</button>` : '';
+        let deleteBtn = (typeof IS_ADMIN !== "undefined" && IS_ADMIN) ? `<button class="btn btn-sm btn-link text-danger ms-2 p-0 text-decoration-none" style="font-size: 0.9em;" onclick="deleteReview(${review.id})">Delete</button>` : "";
 
         list.innerHTML += `<div class="mb-2 border-bottom pb-1"><div class="d-flex justify-content-between align-items-center">
             <div><strong>${review.reviewer}</strong><span class="badge ${badge} ms-2">${review.sentiment_label}</span></div>${deleteBtn}</div>
