@@ -33,19 +33,15 @@
                     <span id="imgPlaceholder" class="text-muted">No Image</span>
                 </div>
 
-                <!-- Image Upload (Admin Only) -->
+                <!-- Simplified Image Upload (Admin Only) -->
                 {% if session.get('is_admin') %}
-                <div class="card mt-4 border-subtle shadow-sm bg-body-tertiary">
-                    <div class="card-body">
-                        <label class="form-label fw-bold text-uppercase small text-secondary mb-3">Change Image</label>
-                        <div class="input-group">
-                            <input type="file" id="imageUploadInput" class="form-control" accept="image/*">
-                            <button class="btn btn-dark" type="button" onclick="uploadImage()">Upload</button>
-                        </div>
-                        <div class="form-text text-muted small mt-2">
-                            Analyzes tags with Computer Vision (Stub)
-                        </div>
+                <div class="mt-4 p-4 rounded" style="border: 1px solid var(--border-color);">
+                    <label class="fw-bold small text-uppercase mb-2">Change Image</label>
+                    <div class="d-flex gap-2">
+                        <input type="file" id="imageUploadInput" class="form-control" accept="image/*">
+                        <button class="btn btn-dark" type="button" onclick="uploadImage()">Upload</button>
                     </div>
+                    <small class="text-muted d-block mt-2">Analyzes tags with Computer Vision (Stub)</small>
                 </div>
                 {% endif %}
             </div>
