@@ -5,7 +5,6 @@ const CATEGORIES = ['tech', 'fashion', 'home', 'lifestyle', 'office', 'audio', '
 // Helpers
 function formatPrice(price) { return price ? Number(price).toLocaleString('en-IN') : "0"; }
 function createSlug(name) { return name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'); }
-window.addEventListener('pageshow', (event) => { if (event.persisted) window.location.reload(); });
 
 // Create Product Card HTML
 function createProductCard(product, isRecommendation = false) {
