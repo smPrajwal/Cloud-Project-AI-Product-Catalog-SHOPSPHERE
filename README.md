@@ -1,35 +1,149 @@
-# Product Catalog Web App
+# ShopSphere - Azure 3-Tier Cloud Project
 
-A minimalist product catalog web application built for Azure 3-tier architecture demonstrations.
+A product catalog web app deployed on Azure using a 3-tier architecture with CI/CD automation.
 
-## Overview
-This application provides a clean, responsive UI for browsing products, submitting reviews, and managing inventory. It includes stubs for Azure AI and Storage services to demonstrate cloud integration patterns without incurring costs during development.
+## What This Project Demonstrates
 
-## How to Deploy to Azure
-This application is designed to run on Azure App Service with Azure SQL Database.
+- **3-Tier Architecture** on Azure (Frontend VMs, Backend VMs, SQL Database)
+- **Infrastructure as Code** using Terraform with modular design
+- **CI/CD Pipeline** using Jenkins with multiple deployment modes
+- **AI Integration** via Azure Functions + Computer Vision for auto image tagging
+- **Monitoring & Alerts** using Log Analytics and Application Insights
+
+## Architecture Overview
+
+```
+                    ┌─────────────────┐
+                    │   Public Load   │
+                    │    Balancer     │
+                    └────────┬────────┘
+                             │
+              ┌──────────────┴──────────────┐
+              │                             │
+     ┌────────▼────────┐           ┌────────▼────────┐
+     │  Frontend VMSS  │           │  Frontend VMSS  │
+     │   (Flask App)   │           │   (Flask App)   │
+     └────────┬────────┘           └────────┬────────┘
+              │                             │
+              └──────────────┬──────────────┘
+                             │
+                    ┌────────▼────────┐
+                    │  Internal Load  │
+                    │    Balancer     │
+                    └────────┬────────┘
+                             │
+              ┌──────────────┴──────────────┐
+              │                             │
+     ┌────────▼────────┐           ┌────────▼────────┐
+     │  Backend VMSS   │           │  Backend VMSS   │
+     │   (Flask API)   │           │   (Flask API)   │
+     └────────┬────────┘           └────────┬────────┘
+              │                             │
+              └──────────────┬──────────────┘
+                             │
+                    ┌────────▼────────┐
+                    │   Azure SQL     │
+                    │    Database     │
+                    └─────────────────┘
+```
+
+## Project Structure
+
+```
+├── Azure_Terraform/          # Infrastructure as Code
+│   ├── main.tf               # Main config with 8 modules
+│   ├── variables.tf          # All configurable parameters
+│   ├── terraform.tfvars      # Variable values
+│   └── modules/
+│       ├── network_core/     # VNet, Subnets, NSGs
+│       ├── compute_VM/       # VM Scale Sets + Autoscaling
+│       ├── database/         # Azure SQL Server + DB
+│       ├── storage/          # Blob Storage
+│       ├── azure_ai/         # Computer Vision service
+│       ├── azure_functions/  # Serverless function
+│       ├── network_ingress/  # Load Balancers
+│       └── monitoring_and_alerts/  # Log Analytics, App Insights
+│
+├── Azure_Function/           # Serverless AI tagging function
+│   └── image_tags_fn/        # Blob-triggered function
+│
+├── Jenkinsfile               # CI/CD Pipeline (12 stages)
+│
+├── backend/                  # Backend Flask API
+├── frontend/                 # Frontend Flask App
+├── database/                 # DB initialization scripts
+└── common/                   # Shared utilities
+```
+
+## CI/CD Pipeline
+
+The Jenkins pipeline has 4 modes:
+
+| Mode | What It Does |
+|------|--------------|
+| Clone and Package (CI) | Validates code, creates zip artifacts |
+| Deploy Infrastructure (CD) | Provisions Azure resources, deploys app |
+| Full Pipeline (CICD) | Complete end-to-end deployment |
+| De-provision | Tears down all infrastructure |
+
+**Pipeline Stages:**
+1. Pre-build Validation
+2. Packaging
+3. Push to Artifacts
+4. Manual Approval
+5. Terraform Apply
+6. Azure Authentication
+7. Blob Upload
+8. Azure Function Deployment
+9. Smoke Testing
+10. Email Notification
+
+## Azure Resources Created
+
+- Resource Group
+- Virtual Network with Subnets
+- 2x VM Scale Sets (Frontend + Backend) with Autoscaling
+- Public Load Balancer + Internal Load Balancer
+- Azure SQL Database
+- Storage Account (for code + images)
+- Azure Function App (Blob trigger)
+- Azure AI Vision
+- Log Analytics Workspace
+- Application Insights
+- Alert Action Group
 
 ## Environment Variables
 
 | Variable | Description |
 |----------|-------------|
-| `FLASK_SECRET` | Secret key for session management. |
-| `AZURE_SQL_CONN` | **Required.** ODBC Connection string for Azure SQL. |
-| `USE_AZURE_BLOB` | Set to `true` to enable Azure Blob Storage. |
-| `AZURE_STORAGE_CONNECTION_STRING` | Connection string for Azure Blob Storage. |
-| `TEXT_ANALYTICS_KEY` | Key for Azure AI Language Service (Sentiment stub). |
-| `TEXT_ANALYTICS_ENDPOINT` | Endpoint for Azure AI Language Service. |
-| `VISION_KEY` | Key for Azure Computer Vision (Tagging stub). |
-| `VISION_ENDPOINT` | Endpoint for Azure Computer Vision. |
-| `ADMIN_USERNAME` | Admin username (default: admin). |
-| `ADMIN_PASSWORD` | Admin password (default: admin). |
+| `AZURE_SQL_CONN` | ODBC connection string for Azure SQL |
+| `AZURE_STORAGE_CONNECTION_STRING` | Blob storage connection |
+| `VISION_KEY` | Azure Computer Vision key |
+| `VISION_ENDPOINT` | Azure Computer Vision endpoint |
+| `ADMIN_USERNAME` | App admin username |
+| `ADMIN_PASSWORD` | App admin password |
 
-> **Note:** This application requires Azure Services (SQL, Blob Storage) to function. Local SQLite fallbacks have been removed.
+## How to Deploy
 
-## Smoke Test Checklist (Azure)
+1. **Setup Jenkins** with required credentials (Azure SP, Terraform Cloud token)
+2. **Configure Terraform Cloud** workspace for remote state
+3. **Run the Pipeline** - Select "Full Pipeline (CICD)" mode
+4. **Access the App** - Use the public IP from Terraform output
 
-1. **Deploy**: Push changes to Azure Repos / GitHub.
-2. **Public View**: Open your Azure Web App URL -> Verify products load from Azure SQL.
-3. **Admin Login**: Go to `/admin-auth` -> Log in.
-4. **Ops Check**: Add a new product -> Upload an image -> Verify image appears (via Blob Storage).
+## Quick Test
 
+After deployment:
+1. Open the public load balancer IP in browser
+2. Browse products on homepage
+3. Login at `/admin-auth` (admin credentials)
+4. Upload a product image → AI tags are auto-generated
 
+## Tech Stack
+
+- **Cloud**: Azure (IaaS)
+- **IaC**: Terraform + Terraform Cloud
+- **CI/CD**: Jenkins
+- **App**: Python Flask
+- **Database**: Azure SQL
+- **AI**: Azure Computer Vision
+- **Monitoring**: Log Analytics, Application Insights
