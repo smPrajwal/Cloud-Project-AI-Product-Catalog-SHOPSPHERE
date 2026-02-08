@@ -20,7 +20,7 @@ vm_os_offer           = "0001-com-ubuntu-server-jammy"
 vm_os_sku             = "22_04-lts"
 vm_os_version         = "latest"
 vmss_min_capacity     = 1
-vmss_max_capacity     = 3
+vmss_max_capacity     = 2
 vmss_default_capacity = 1
 
 db_un           = "prajwalsm"

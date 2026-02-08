@@ -40,7 +40,6 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
   location            = var.default_loc
   resource_group_name = var.default_rg
   sku                 = var.vm_sku
-  instances           = var.vmss_default_capacity
   upgrade_mode        = "Automatic"
 
   admin_username                  = var.vm_un
