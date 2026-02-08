@@ -1,7 +1,7 @@
 default_loc = "centralindia"
 rg_name     = "Project_ShopSphere"
 
-sa_name                = "shopsphereappsa"
+sa_name                = "shopsphereapplicationsa"
 sa_account_tier        = "Standard"
 sa_replication_type    = "LRS"
 sa_access_tier         = "Hot"
@@ -24,19 +24,19 @@ vmss_max_capacity     = 3
 vmss_default_capacity = 1
 
 db_un           = "prajwalsm"
-sql_server_name = "shopsphere-sql-db"
+sql_server_name = "shopsphereapp-sql-db"
 sql_db_name     = "sql-db"
 sql_version     = "12.0"
 db_sku_name     = "Basic"
 db_max_size_gb  = 2
 
 app_admin_un        = "admin"
-function_app_name   = "azure-ai-function-app"
+function_app_name   = "azure-ai-function-app-ss"
 func_plan_name      = "azure-function-service-plan"
 func_plan_sku       = "B1"
 func_python_version = "3.12"
 
-ai_name = "azure-ai"
+ai_name = "azure-ai-ss"
 ai_sku  = "S0"
 
 la_workspace_name       = "ss-la-workspace"
