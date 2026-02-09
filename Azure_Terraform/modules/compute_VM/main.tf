@@ -121,10 +121,10 @@ resource "azurerm_monitor_autoscale_setting" "vmss_autoscale" {
         metric_resource_id = each.value.id
         time_grain         = "PT1M"
         statistic          = "Average"
-        time_window        = "PT1M"
+        time_window        = "PT2M"
         time_aggregation   = "Average"
         operator           = "GreaterThan"
-        threshold          = 60
+        threshold          = 40
       }
       scale_action {
         direction = "Increase"
