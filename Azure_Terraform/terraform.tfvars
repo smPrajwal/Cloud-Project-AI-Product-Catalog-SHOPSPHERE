@@ -14,7 +14,7 @@ lb_pip_name = "public-subnet-lb-pip"
 lb_pip_sku  = "Standard"
 
 vm_un                 = "prajwalsm"
-vm_sku                = "Standard_B2ps_v2"
+vm_sku                = "Standard_B2s_v2"
 vm_os_publisher       = "Canonical"
 vm_os_offer           = "0001-com-ubuntu-server-jammy"
 vm_os_sku             = "22_04-lts"
