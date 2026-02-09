@@ -37,7 +37,7 @@ resource "azurerm_monitor_metric_alert" "ss_mm_alert" {
   description = "CPU usage too high on ${each.key} VMSS"
   severity    = 3
   frequency   = "PT1M"
-  window_size = "PT2M"
+  window_size = "PT1M"
 
   criteria {
     metric_namespace = "Microsoft.Compute/virtualMachineScaleSets"
