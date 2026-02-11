@@ -15,7 +15,7 @@ lb_pip_sku  = "Standard"
 vm_un                 = "prajwalsm"
 vm_os_publisher       = "Canonical"
 vm_os_offer           = "0001-com-ubuntu-server-jammy"
-vm_os_sku             = "22_04-lts"
+vm_os_sku             = "22_04-lts-arm64"
 vm_os_version         = "latest"
 vmss_min_capacity     = 1
 vmss_max_capacity     = 2
@@ -29,7 +29,7 @@ db_sku_name     = "Basic"
 db_max_size_gb  = 2
 
 app_admin_un         = "admin"
-function_app_name    = "azure-ai-function-app-ss"
+function_app_name    = "azure-vision-ai-function-app-ss"
 func_plan_name       = "azure-function-service-plan"
 func_plan_sku        = "B1"
 func_python_version  = "3.12"
