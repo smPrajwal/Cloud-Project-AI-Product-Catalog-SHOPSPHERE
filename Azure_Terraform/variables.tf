@@ -1,6 +1,6 @@
 variable "default_loc" {
   description = "This represents the default location"
-  default     = "South India"
+  default     = "southindia"
   type        = string
 }
 
@@ -137,7 +137,7 @@ variable "vm_os_offer" {
 
 variable "vm_os_sku" {
   description = "The SKU of the OS Image"
-  default     = "22_04-lts"
+  default     = "Standard_B2ts_v2"
   type        = string
 }
 
