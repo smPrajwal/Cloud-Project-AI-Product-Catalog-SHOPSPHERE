@@ -10,9 +10,9 @@ pipeline {
         AZURE_SUBSCRIPTION_ID = credentials('AZURE_SUBSCRIPTION_ID')
         AZURE_VM_PASSWORD = credentials('vm_password')
         AZURE_SQL_PASSWORD = credentials('db_password')
-        STORAGE_ACCOUNT_NAME = 'shopsphereapplicationsa'
+        STORAGE_ACCOUNT_NAME = 'ssapplicationstorageacc'
         CODE_CONTAINER_NAME = 'application-code'
-        AZURE_FUNCTIONAPP_NAME = 'azure-ai-function-app-ss'
+        AZURE_FUNCTIONAPP_NAME = 'azure-vision-ai-function-app-ss'
         FRONTEND_APP_CODE = 'project1_shopsphere_frontend.zip'
         BACKEND_APP_CODE = 'project1_shopsphere_backend.zip'
         AZURE_REGION = 'centralindia'

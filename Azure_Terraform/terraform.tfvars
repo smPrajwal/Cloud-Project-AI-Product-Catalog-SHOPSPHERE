@@ -1,6 +1,5 @@
 rg_name = "Project_ShopSphere"
 
-sa_name                = "ssapplicationstorageacc"
 sa_account_tier        = "Standard"
 sa_replication_type    = "LRS"
 sa_access_tier         = "Hot"
@@ -29,7 +28,6 @@ db_sku_name     = "Basic"
 db_max_size_gb  = 2
 
 app_admin_un         = "admin"
-function_app_name    = "azure-vision-ai-function-app-ss"
 func_plan_name       = "azure-function-service-plan"
 func_plan_sku        = "B1"
 func_python_version  = "3.12"
