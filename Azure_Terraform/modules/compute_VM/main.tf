@@ -36,12 +36,12 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
     for k, v in var.subnet_details : k => v if v.contains_vmss
   }
 
-  name                = "${each.key}-vmss"
-  location            = var.default_loc
-  resource_group_name = var.default_rg
-  sku                 = var.vm_sku
-  upgrade_mode        = "Automatic"
-
+  name                            = "${each.key}-vmss"
+  location                        = var.default_loc
+  resource_group_name             = var.default_rg
+  sku                             = var.vm_sku
+  upgrade_mode                    = "Automatic"
+  instances                       = 1
   admin_username                  = var.vm_un
   admin_password                  = var.vm_pwd
   disable_password_authentication = false

@@ -15,6 +15,8 @@ pipeline {
         AZURE_FUNCTIONAPP_NAME = 'azure-ai-function-app-ss'
         FRONTEND_APP_CODE = 'project1_shopsphere_frontend.zip'
         BACKEND_APP_CODE = 'project1_shopsphere_backend.zip'
+        AZURE_REGION = 'southeastasia'
+        AZURE_VM_SKU = 'Standard_B2s_v2'
     }
     parameters {
         choice(name: 'Run_type',
@@ -116,6 +118,8 @@ pipeline {
                     "TF_VAR_sa_name=${STORAGE_ACCOUNT_NAME}",
                     "TF_VAR_code_blob_container_name=${CODE_CONTAINER_NAME}",
                     "TF_VAR_function_app_name=${AZURE_FUNCTIONAPP_NAME}",
+                    "TF_VAR_default_loc=${AZURE_REGION}",
+                    "TF_VAR_vm_sku=${AZURE_VM_SKU}",
                     "TF_VAR_frontend_code_blob_url=https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${CODE_CONTAINER_NAME}/frontend/${FRONTEND_APP_CODE}",
                     "TF_VAR_backend_code_blob_url=https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${CODE_CONTAINER_NAME}/backend/${BACKEND_APP_CODE}"
                 ]) {
@@ -247,6 +251,8 @@ pipeline {
                     "TF_VAR_sa_name=${STORAGE_ACCOUNT_NAME}",
                     "TF_VAR_code_blob_container_name=${CODE_CONTAINER_NAME}",
                     "TF_VAR_function_app_name=${AZURE_FUNCTIONAPP_NAME}",
+                    "TF_VAR_default_loc=${AZURE_REGION}",
+                    "TF_VAR_vm_sku=${AZURE_VM_SKU}",
                     "TF_VAR_frontend_code_blob_url=https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${CODE_CONTAINER_NAME}/frontend/${FRONTEND_APP_CODE}",
                     "TF_VAR_backend_code_blob_url=https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${CODE_CONTAINER_NAME}/backend/${BACKEND_APP_CODE}"
                 ]) {
