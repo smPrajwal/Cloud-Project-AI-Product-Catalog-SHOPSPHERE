@@ -11,6 +11,7 @@ variable "vision_key" {
 variable "function_app_name" {}
 variable "func_plan_name" {}
 variable "func_plan_sku" {}
+variable "func_service_plan_id" {}
 variable "func_python_version" {}
 variable "storage_account" {
   type = object({

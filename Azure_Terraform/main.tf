@@ -124,6 +124,7 @@ module "azure_functions" {
   func_plan_sku                  = var.func_plan_sku
   func_python_version            = var.func_python_version
   app_insights_connection_string = module.monitoring_and_alerts.app_insights_connection_string
+  func_service_plan_id           = var.func_service_plan_id
 }
 
 module "network_ingress" {

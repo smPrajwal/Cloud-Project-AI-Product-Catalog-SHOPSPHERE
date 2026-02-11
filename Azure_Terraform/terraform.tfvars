@@ -28,11 +28,12 @@ sql_version     = "12.0"
 db_sku_name     = "Basic"
 db_max_size_gb  = 2
 
-app_admin_un        = "admin"
-function_app_name   = "azure-ai-function-app-ss"
-func_plan_name      = "azure-function-service-plan"
-func_plan_sku       = "B1"
-func_python_version = "3.12"
+app_admin_un         = "admin"
+function_app_name    = "azure-ai-function-app-ss"
+func_plan_name       = "azure-function-service-plan"
+func_plan_sku        = "B1"
+func_python_version  = "3.12"
+func_service_plan_id = "/subscriptions/9b00fd5e-e9ef-4ebe-aab0-2b3caf06fdee/resourceGroups/Practice/providers/Microsoft.Web/serverfarms/app-service-plan"
 
 ai_name = "azure-ai-ss"
 ai_sku  = "S0"

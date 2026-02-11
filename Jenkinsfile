@@ -15,8 +15,8 @@ pipeline {
         AZURE_FUNCTIONAPP_NAME = 'azure-ai-function-app-ss'
         FRONTEND_APP_CODE = 'project1_shopsphere_frontend.zip'
         BACKEND_APP_CODE = 'project1_shopsphere_backend.zip'
-        AZURE_REGION = 'southindia'
-        AZURE_VM_SKU = 'Standard_B2ts_v2'
+        AZURE_REGION = 'centralindia'
+        AZURE_VM_SKU = 'Standard_B2pls_v2'
     }
     parameters {
         choice(name: 'Run_type',

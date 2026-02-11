@@ -1,6 +1,6 @@
 variable "default_loc" {
   description = "This represents the default location"
-  default     = "southindia"
+  default     = "centralindia"
   type        = string
 }
 
@@ -119,7 +119,7 @@ variable "subnet_details" {
 
 variable "vm_sku" {
   description = "The SKU (Size) of the Virtual Machines"
-  default     = "Standard_B2s_v2"
+  default     = "Standard_B2pls_v2"
   type        = string
 }
 
@@ -222,6 +222,11 @@ variable "func_plan_sku" {
 variable "func_python_version" {
   description = "Python Version for the Function App"
   default     = "3.12"
+  type        = string
+}
+
+variable "func_service_plan_id" {
+  description = "App Service Plan ID for Azure Function"
   type        = string
 }
 

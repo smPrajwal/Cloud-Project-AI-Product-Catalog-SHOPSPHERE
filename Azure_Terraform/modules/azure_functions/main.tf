@@ -1,18 +1,17 @@
-resource "azurerm_service_plan" "azure_function_service_plan" {
-  name                = var.func_plan_name
-  location            = var.default_loc
-  resource_group_name = var.default_rg
-
-  os_type  = "Linux"
-  sku_name = var.func_plan_sku
-}
+# resource "azurerm_service_plan" "azure_function_service_plan" {
+#   name                = var.func_plan_name
+#   location            = var.default_loc
+#   resource_group_name = var.default_rg
+#   os_type  = "Linux"
+#   sku_name = var.func_plan_sku
+# }
 
 resource "azurerm_linux_function_app" "azure_ai_function_app" {
   name                = var.function_app_name
   location            = var.default_loc
   resource_group_name = var.default_rg
 
-  service_plan_id = azurerm_service_plan.azure_function_service_plan.id
+  service_plan_id = var.func_service_plan_id
 
   storage_account_name       = var.storage_account.name
   storage_account_access_key = var.storage_account.pa_key
