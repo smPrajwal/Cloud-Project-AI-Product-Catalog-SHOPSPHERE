@@ -1,4 +1,4 @@
-rg_name     = "Project_ShopSphere"
+rg_name = "Project_ShopSphere"
 
 sa_name                = "shopsphereapplicationsa"
 sa_account_tier        = "Standard"
