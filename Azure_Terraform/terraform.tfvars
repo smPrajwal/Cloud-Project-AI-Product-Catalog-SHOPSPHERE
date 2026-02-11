@@ -1,6 +1,6 @@
 rg_name = "Project_ShopSphere"
 
-sa_name                = "shopsphereapplicationsa"
+sa_name                = "ssapplicationstorageaccount"
 sa_account_tier        = "Standard"
 sa_replication_type    = "LRS"
 sa_access_tier         = "Hot"
@@ -22,7 +22,7 @@ vmss_max_capacity     = 2
 vmss_default_capacity = 1
 
 db_un           = "prajwalsm"
-sql_server_name = "shopsphereapp-sql-db"
+sql_server_name = "ss-sql-db-sql-server"
 sql_db_name     = "sql-db"
 sql_version     = "12.0"
 db_sku_name     = "Basic"
@@ -33,9 +33,9 @@ function_app_name    = "azure-ai-function-app-ss"
 func_plan_name       = "azure-function-service-plan"
 func_plan_sku        = "B1"
 func_python_version  = "3.12"
-func_service_plan_id = "/subscriptions/9b00fd5e-e9ef-4ebe-aab0-2b3caf06fdee/resourceGroups/Practice/providers/Microsoft.Web/serverfarms/app-service-plan"
+func_service_plan_id = "/subscriptions/9b00fd5e-e9ef-4ebe-aab0-2b3caf06fdee/resourceGroups/Practice/providers/Microsoft.Web/serverFarms/app-service-plan"
 
-ai_name = "azure-ai-ss"
+ai_name = "azure-cognitive-ai-ss-app"
 ai_sku  = "S0"
 
 la_workspace_name       = "ss-la-workspace"
