@@ -1,6 +1,6 @@
 rg_name = "Project_ShopSphere"
 
-sa_name                = "ssapplicationstorageaccount"
+sa_name                = "ssapplicationstorageacc"
 sa_account_tier        = "Standard"
 sa_replication_type    = "LRS"
 sa_access_tier         = "Hot"
