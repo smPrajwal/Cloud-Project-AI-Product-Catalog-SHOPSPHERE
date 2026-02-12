@@ -75,17 +75,17 @@ module "compute_VM" {
 module "database" {
   source = "./modules/database"
 
-  default_loc     = var.default_loc
-  default_rg      = azurerm_resource_group.main_rg.name
-  db_un           = var.db_un
-  db_pwd          = var.db_pwd
-  vnet_id         = module.network_core.vnet_id
-  subnet_ids      = module.network_core.subnet_ids
-  sql_server_name = var.sql_server_name
+  default_loc        = var.default_loc
+  default_rg         = azurerm_resource_group.main_rg.name
+  db_un              = var.db_un
+  db_pwd             = var.db_pwd
+  vnet_id            = module.network_core.vnet_id
+  subnet_ids         = module.network_core.subnet_ids
+  sql_server_name    = var.sql_server_name
   static_resource_rg = var.static_resource_rg
-  sql_db_name     = var.sql_db_name
-  db_sku_name     = var.db_sku_name
-  db_max_size_gb  = var.db_max_size_gb
+  sql_db_name        = var.sql_db_name
+  db_sku_name        = var.db_sku_name
+  db_max_size_gb     = var.db_max_size_gb
 }
 
 module "storage" {

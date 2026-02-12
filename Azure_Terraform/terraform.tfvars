@@ -1,4 +1,4 @@
-rg_name = "Project_ShopSphere"
+rg_name            = "Project_ShopSphere"
 static_resource_rg = "Practice"
 
 sa_account_tier        = "Standard"
@@ -27,10 +27,10 @@ sql_db_name     = "sql-db"
 db_sku_name     = "Basic"
 db_max_size_gb  = 2
 
-app_admin_un         = "admin"
+app_admin_un = "admin"
 
-func_plan_name       = "app-service-plan"
-func_python_version  = "3.12"
+func_plan_name      = "app-service-plan"
+func_python_version = "3.12"
 
 ai_name = "azure-cognitive-ai-ss-app"
 ai_sku  = "S0"
