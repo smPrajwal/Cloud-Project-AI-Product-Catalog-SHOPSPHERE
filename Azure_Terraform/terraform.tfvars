@@ -1,4 +1,5 @@
 rg_name = "Project_ShopSphere"
+static_resource_rg = "Practice"
 
 sa_account_tier        = "Standard"
 sa_replication_type    = "LRS"
@@ -27,10 +28,9 @@ db_sku_name     = "Basic"
 db_max_size_gb  = 2
 
 app_admin_un         = "admin"
-func_plan_name       = "azure-function-service-plan"
-func_plan_sku        = "B1"
+
+func_plan_name       = "app-service-plan"
 func_python_version  = "3.12"
-func_service_plan_id = "/subscriptions/9b00fd5e-e9ef-4ebe-aab0-2b3caf06fdee/resourceGroups/Practice/providers/Microsoft.Web/serverFarms/app-service-plan"
 
 ai_name = "azure-cognitive-ai-ss-app"
 ai_sku  = "S0"

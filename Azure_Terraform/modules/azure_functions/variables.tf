@@ -10,9 +10,8 @@ variable "vision_key" {
 }
 variable "function_app_name" {}
 variable "func_plan_name" {}
-variable "func_plan_sku" {}
-variable "func_service_plan_id" {}
 variable "func_python_version" {}
+variable "static_resource_rg" {}
 variable "storage_account" {
   type = object({
     name              = string

@@ -12,7 +12,7 @@
 
 data "azurerm_mssql_server" "existing" {
   name                = var.sql_server_name
-  resource_group_name = var.default_rg
+  resource_group_name = var.static_resource_rg
 }
 
 resource "azurerm_mssql_database" "db" {

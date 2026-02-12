@@ -10,6 +10,12 @@ variable "rg_name" {
   type        = string
 }
 
+variable "static_resource_rg" {
+  description = "Resource Group of the static resources (SQL Server, App Service Plan, etc)"
+  default     = "Practice"
+  type        = string
+}
+
 variable "sa_name" {
   description = "This represents the default storage account name"
   default     = "shopspheresa"
@@ -203,15 +209,9 @@ variable "ai_sku" {
 
 variable "func_plan_name" {
   description = "Name of the App Service Plan for Azure Functions"
-  default     = "azure-function-service-plan"
   type        = string
 }
 
-variable "func_plan_sku" {
-  description = "SKU for the Function App Service Plan"
-  default     = "B1"
-  type        = string
-}
 
 variable "func_python_version" {
   description = "Python Version for the Function App"
@@ -219,10 +219,6 @@ variable "func_python_version" {
   type        = string
 }
 
-variable "func_service_plan_id" {
-  description = "App Service Plan ID for Azure Function"
-  type        = string
-}
 
 variable "lb_pip_name" {
   description = "Name of the Public IP for Load Balancer"

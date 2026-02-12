@@ -2,6 +2,7 @@ variable "default_loc" {}
 variable "default_rg" {}
 variable "db_un" {}
 variable "sql_server_name" {}
+variable "static_resource_rg" {}
 variable "sql_db_name" {}
 variable "db_sku_name" {}
 variable "db_max_size_gb" {}

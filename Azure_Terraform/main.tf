@@ -82,6 +82,7 @@ module "database" {
   vnet_id         = module.network_core.vnet_id
   subnet_ids      = module.network_core.subnet_ids
   sql_server_name = var.sql_server_name
+  static_resource_rg = var.static_resource_rg
   sql_db_name     = var.sql_db_name
   db_sku_name     = var.db_sku_name
   db_max_size_gb  = var.db_max_size_gb
@@ -120,10 +121,9 @@ module "azure_functions" {
   function_app_name              = var.function_app_name
   subnet_ids                     = module.network_core.subnet_ids
   func_plan_name                 = var.func_plan_name
-  func_plan_sku                  = var.func_plan_sku
   func_python_version            = var.func_python_version
   app_insights_connection_string = module.monitoring_and_alerts.app_insights_connection_string
-  func_service_plan_id           = var.func_service_plan_id
+  static_resource_rg             = var.static_resource_rg
 }
 
 module "network_ingress" {
