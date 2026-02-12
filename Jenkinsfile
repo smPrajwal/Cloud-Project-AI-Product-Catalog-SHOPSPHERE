@@ -19,7 +19,7 @@ pipeline {
         AZURE_VM_SKU = 'Standard_B2pls_v2'
     }
     parameters {
-        choice(name: 'Run_type',
+        choice(name: 'Run Type',
         choices: ['Clone and Package (CI)', 'Deploy Infrastructure and Application (CD)', 'Full Pipeline (CICD)', 'De-provision Infrastructure and Application'],
         description: 'This is used to select the part of pipeline to run')
     }
