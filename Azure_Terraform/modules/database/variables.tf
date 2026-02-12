@@ -3,7 +3,6 @@ variable "default_rg" {}
 variable "db_un" {}
 variable "sql_server_name" {}
 variable "sql_db_name" {}
-variable "sql_version" {}
 variable "db_sku_name" {}
 variable "db_max_size_gb" {}
 variable "db_pwd" {

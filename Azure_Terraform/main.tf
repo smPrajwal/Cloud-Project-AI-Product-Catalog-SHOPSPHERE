@@ -83,7 +83,6 @@ module "database" {
   subnet_ids      = module.network_core.subnet_ids
   sql_server_name = var.sql_server_name
   sql_db_name     = var.sql_db_name
-  sql_version     = var.sql_version
   db_sku_name     = var.db_sku_name
   db_max_size_gb  = var.db_max_size_gb
 }

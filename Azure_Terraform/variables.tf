@@ -177,12 +177,6 @@ variable "sql_db_name" {
   type        = string
 }
 
-variable "sql_version" {
-  description = "Version of the Azure SQL Server"
-  default     = "12.0"
-  type        = string
-}
-
 variable "db_sku_name" {
   description = "SKU Name for the SQL Database"
   default     = "Basic"
