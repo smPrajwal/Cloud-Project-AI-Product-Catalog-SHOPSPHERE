@@ -196,6 +196,9 @@ pipeline {
             when {
                 expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)'}
             }
+            options {
+                retry(3)
+            }
             steps {
                 echo "------------------- Started to Configure and deploy the code to Azure Function!... ---------------------------------"
                 sh """

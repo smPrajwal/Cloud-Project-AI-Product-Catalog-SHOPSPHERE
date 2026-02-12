@@ -1,4 +1,3 @@
-
 data "azurerm_service_plan" "existing" {
   name                = var.func_plan_name
   resource_group_name = var.static_resource_rg

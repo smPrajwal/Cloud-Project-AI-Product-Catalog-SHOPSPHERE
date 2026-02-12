@@ -1,15 +1,3 @@
-# resource "azurerm_mssql_server" "sql" {
-#   name                = var.sql_server_name
-#   resource_group_name = var.default_rg
-#   location            = var.default_loc
-#   version             = var.sql_version
-
-#   administrator_login          = var.db_un
-#   administrator_login_password = var.db_pwd
-
-#   public_network_access_enabled = false
-# }
-
 data "azurerm_mssql_server" "existing" {
   name                = var.sql_server_name
   resource_group_name = var.static_resource_rg
