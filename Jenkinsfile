@@ -19,14 +19,14 @@ pipeline {
         AZURE_VM_SKU = 'Standard_B2pls_v2'
     }
     parameters {
-        choice(name: 'Run Type',
+        choice(name: 'RUN_TYPE',
         choices: ['Clone and Package (CI)', 'Deploy Infrastructure and Application (CD)', 'Full Pipeline (CICD)', 'De-provision Infrastructure and Application'],
         description: 'This is used to select the part of pipeline to run')
     }
     stages {
         stage('Pre-build Validation') {
             when {
-                expression {params.Run_type == 'Clone and Package (CI)' || params.Run_type == 'Full Pipeline (CICD)'}
+                expression {params.RUN_TYPE == 'Clone and Package (CI)' || params.RUN_TYPE == 'Full Pipeline (CICD)'}
             }
             steps {
                 echo "-------------------------------------- Started Testing!... -------------------------------"
@@ -50,7 +50,7 @@ pipeline {
 
         stage('Packaging') {
             when {
-                expression {params.Run_type == 'Clone and Package (CI)' || params.Run_type == 'Full Pipeline (CICD)'}
+                expression {params.RUN_TYPE == 'Clone and Package (CI)' || params.RUN_TYPE == 'Full Pipeline (CICD)'}
             }
             steps {
                 echo "------------------------------------ Started Packaging!... -------------------------------"
@@ -66,7 +66,7 @@ pipeline {
 
         stage('Push to Artifacts') {
             when {
-                expression {params.Run_type == 'Clone and Package (CI)' || params.Run_type == 'Full Pipeline (CICD)'}
+                expression {params.RUN_TYPE == 'Clone and Package (CI)' || params.RUN_TYPE == 'Full Pipeline (CICD)'}
             }
             steps {
                 echo "----------------------- Started Archiving to Jenkins Artifact!... ------------------------"
@@ -77,7 +77,7 @@ pipeline {
 
         stage('Manual Approval') {
             when {
-                expression {params.Run_type != 'Clone and Package (CI)'}
+                expression {params.RUN_TYPE != 'Clone and Package (CI)'}
             }
             steps {
                 echo "-------------------------- Waiting for manual approval!... -------------------------------"
@@ -88,7 +88,7 @@ pipeline {
 
         stage('Pull from Artifacts') {
             when {
-                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)'}
+                expression {params.RUN_TYPE == 'Deploy Infrastructure and Application (CD)'}
             }
             steps {
                 echo "------------------------ Started pulling the Artifact!... --------------------------------"
@@ -107,7 +107,7 @@ pipeline {
 
         stage('Creating Resources using Terraform') {
             when {
-                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)'}
+                expression {params.RUN_TYPE == 'Deploy Infrastructure and Application (CD)' || params.RUN_TYPE == 'Full Pipeline (CICD)'}
             }
             steps {
                 echo "--------------- Started Building the Infrastructure using Terraform!... ------------------"
@@ -144,7 +144,7 @@ pipeline {
 
         stage('Azure Authentication using Service Principal') {
             when {
-                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)'}
+                expression {params.RUN_TYPE == 'Deploy Infrastructure and Application (CD)' || params.RUN_TYPE == 'Full Pipeline (CICD)'}
             }
             steps {
                 echo "------------ Authenticating with Azure using Azure Service Principal! --------------------"
@@ -162,7 +162,7 @@ pipeline {
 
         stage('Uploading files to Azure Blob Container') {
             when {
-                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)'}
+                expression {params.RUN_TYPE == 'Deploy Infrastructure and Application (CD)' || params.RUN_TYPE == 'Full Pipeline (CICD)'}
             }
             steps {
                 echo " ---------------- Started uploading files to Azure Blob Container ---------------------"
@@ -194,7 +194,7 @@ pipeline {
 
         stage('Configuration and Deployment to Azure Function') {
             when {
-                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)'}
+                expression {params.RUN_TYPE == 'Deploy Infrastructure and Application (CD)' || params.RUN_TYPE == 'Full Pipeline (CICD)'}
             }
             options {
                 retry(3)
@@ -215,7 +215,7 @@ pipeline {
 
         stage('Logout from Service Principal') {
             when {
-                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)'}
+                expression {params.RUN_TYPE == 'Deploy Infrastructure and Application (CD)' || params.RUN_TYPE == 'Full Pipeline (CICD)'}
             }
             steps {
                 echo "Logging out from the Service Principal"
@@ -228,7 +228,7 @@ pipeline {
 
         stage('Smoke Testing') {
             when {
-                expression {params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)'}
+                expression {params.RUN_TYPE == 'Deploy Infrastructure and Application (CD)' || params.RUN_TYPE == 'Full Pipeline (CICD)'}
             }
             steps {
                 echo "------------------------- Started Smoke Testing!... --------------------------------------"
@@ -244,7 +244,7 @@ pipeline {
 
         stage('Removing the complete Infrastructure, Resources and Application') {
             when {
-                expression {params.Run_type == 'De-provision Infrastructure and Application'}
+                expression {params.RUN_TYPE == 'De-provision Infrastructure and Application'}
             }
             steps {
                 echo "------- Started Tear down of the complete Infrastructure and Application -----------------"
@@ -273,7 +273,7 @@ pipeline {
         always {
             script {
                 def extraContent  = ""
-                if ((params.Run_type == 'Deploy Infrastructure and Application (CD)' || params.Run_type == 'Full Pipeline (CICD)') && currentBuild.currentResult == 'SUCCESS') {
+                if ((params.RUN_TYPE == 'Deploy Infrastructure and Application (CD)' || params.RUN_TYPE == 'Full Pipeline (CICD)') && currentBuild.currentResult == 'SUCCESS') {
                     extraContent += """
                         <br/>
                         Click here to access the application: 
@@ -288,7 +288,7 @@ pipeline {
                     mimeType: 'text/html',
                     body: """
                         <b>The Pipeline was executed using the below Parameter:</b><br/>
-                        Run_type: ${params.Run_type}
+                        RUN_TYPE: ${params.RUN_TYPE}
                         <br/><br/>
                         \$DEFAULT_CONTENT
                         ${extraContent}
