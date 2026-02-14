@@ -201,7 +201,7 @@ pipeline {
             }
             steps {
                 echo "Waiting for 1 minute for Function App Sync/Warm-up..."
-                sleep 60
+                sleep 120
                 echo "------------------- Started to Configure and deploy the code to Azure Function!... ---------------------------------"
                 sh """
                     cd Azure_Function
