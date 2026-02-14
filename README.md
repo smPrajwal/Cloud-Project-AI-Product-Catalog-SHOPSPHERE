@@ -275,12 +275,11 @@ The Jenkins pipeline has 4 modes:
 - Public IP for Load Balancer (application entry point)
 - Public Load Balancer with health probes and rules
 - Internal Load Balancer with health probes and rules
-- Azure SQL Server + Database
+- Azure SQL Database
 - Private Endpoint for SQL Server
 - Private DNS Zone + VNet Link (database name resolution)
 - Storage Account with 2 Blob containers (application-code, product-images)
 - SAS Token for secure code download
-- App Service Plan (Linux)
 - Azure Function App (Blob trigger + VNet Integration)
 - Azure Cognitive Services (Computer Vision + Text Analytics)
 - Log Analytics Workspace
