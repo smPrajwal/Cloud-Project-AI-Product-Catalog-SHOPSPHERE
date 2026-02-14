@@ -200,8 +200,8 @@ pipeline {
                 retry(3)
             }
             steps {
-                echo "Waiting for 1 minute for Function App Sync/Warm-up..."
-                sleep 120
+                echo "Waiting for 1.5 minutes for Function App Sync/Warm-up..."
+                sleep 90
                 echo "------------------- Started to Configure and deploy the code to Azure Function!... ---------------------------------"
                 sh """
                     cd Azure_Function
