@@ -42,7 +42,6 @@ pipeline {
                     test -f app.py
                     test -f requirements_backend.txt
                     test -f requirements_frontend.txt
-                    test -f startup.sh
                 """
                 echo "----------------------- Testing Completed: All Checks passed in Testing! -----------------"
             }
@@ -55,8 +54,8 @@ pipeline {
             steps {
                 echo "------------------------------------ Started Packaging!... -------------------------------"
                 sh """
-                    zip -r ${FRONTEND_APP_CODE} app.py startup.sh requirements_frontend.txt frontend common -x "frontend/static/product_images*"
-                    zip -r ${BACKEND_APP_CODE} app.py startup.sh requirements_backend.txt backend common database
+                    zip -r ${FRONTEND_APP_CODE} app.py requirements_frontend.txt frontend common -x "frontend/static/product_images*"
+                    zip -r ${BACKEND_APP_CODE} app.py requirements_backend.txt backend common database
                     test -f ${FRONTEND_APP_CODE}
                     test -f ${BACKEND_APP_CODE}
                 """
@@ -200,8 +199,8 @@ pipeline {
                 retry(3)
             }
             steps {
-                echo "Waiting for 1.5 minutes for Function App Sync/Warm-up..."
-                sleep 90
+                echo "Waiting for 1 minute for Function App Sync/Warm-up..."
+                sleep 60
                 echo "------------------- Started to Configure and deploy the code to Azure Function!... ---------------------------------"
                 sh """
                     cd Azure_Function

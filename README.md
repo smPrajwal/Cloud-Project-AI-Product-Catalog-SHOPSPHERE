@@ -200,7 +200,6 @@ The database has 5 tables: `products`, `reviews`, `product_tags`, `advertisement
 │
 ├── Jenkinsfile               # CI/CD Pipeline (12 stages)
 ├── app.py                    # Flask application entry point
-├── startup.sh                # Azure App Service startup script
 ├── requirements_frontend.txt # Frontend Python dependencies
 ├── requirements_backend.txt  # Backend Python dependencies
 └── .gitignore                # Git ignore rules
