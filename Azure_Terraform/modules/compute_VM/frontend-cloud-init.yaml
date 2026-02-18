@@ -5,7 +5,6 @@ write_files:
     append: true
     content: |
       FLASK_SECRET="${flask_secret}"
-      AZURE_SQL_CONN="${azure_sql_conn}"
       ADMIN_USERNAME="${admin_username}"
       ADMIN_PASSWORD="${admin_password}"
       BACKEND_API_URL="http://${backend_lb_ip}:80"
@@ -32,18 +31,10 @@ packages:
   - python3-pip
   - python3-venv
   - python3-dev
-  - unixodbc-dev
-  - gnupg2
   - curl
   - unzip
 
 runcmd:
-  # ODBC Driver 18
-  - curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-  - curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list > /etc/apt/sources.list.d/mssql-release.list
-  - apt-get update
-  - ACCEPT_EULA=Y apt-get install -y msodbcsql18
-
   # App setup
   - mkdir -p /app
   - cd /app

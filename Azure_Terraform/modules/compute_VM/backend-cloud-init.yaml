@@ -4,7 +4,6 @@ write_files:
   - path: /etc/environment
     append: true
     content: |
-      FLASK_SECRET="${flask_secret}"
       AZURE_SQL_CONN="${azure_sql_conn}"
       AZURE_AI_ENDPOINT="${azure_ai_endpoint}"
       AZURE_AI_KEY="${azure_ai_key}"
