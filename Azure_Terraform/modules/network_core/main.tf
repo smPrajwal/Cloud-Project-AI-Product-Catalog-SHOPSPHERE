@@ -79,7 +79,7 @@ resource "azurerm_nat_gateway_public_ip_association" "nat_gw_ip_assoc" {
 
 resource "azurerm_subnet_nat_gateway_association" "subnet_nat_assoc" {
   for_each = {
-    for k, v in var.subnet_details : k => v if v.role == "backend"
+    for k, v in var.subnet_details : k => v if v.role == "backend" || v.role == "function"
   }
 
   subnet_id      = azurerm_subnet.subnet[each.key].id
