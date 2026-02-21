@@ -185,11 +185,12 @@ pipeline {
             }
             steps {
                 echo "Waiting for Function App SCM Warm-up..."
+                sleep 90
                 echo "------------------- Started to Configure and deploy the code to Azure Function!... ---------------------------------"
                 retry(3) {
                     sh """
                         cd Azure_Function
-                        timeout 210 func azure functionapp publish ${TF_VAR_function_app_name} --python
+                        timeout 270 func azure functionapp publish ${TF_VAR_function_app_name} --python
                         echo "------ Testing Azure Function code Deployment ------"
                         func azure functionapp list-functions ${TF_VAR_function_app_name}
                     """
