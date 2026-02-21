@@ -3,20 +3,20 @@ pipeline {
     agent any
     environment {
         TF_TOKEN_app_terraform_io = credentials('tfc-token')
-        SHOPSPHERE_APP_ADMIN_PWD = credentials('ShopSphere_App_Admin_Password')
+        TF_VAR_app_admin_pwd = credentials('ShopSphere_App_Admin_Password')
         AZURE_CLIENT_ID       = credentials('AZURE_CLIENT_ID')
         AZURE_CLIENT_SECRET   = credentials('AZURE_CLIENT_SECRET')
         AZURE_TENANT_ID       = credentials('AZURE_TENANT_ID')
         AZURE_SUBSCRIPTION_ID = credentials('AZURE_SUBSCRIPTION_ID')
-        AZURE_VM_PASSWORD = credentials('vm_password')
-        AZURE_SQL_PASSWORD = credentials('db_password')
-        STORAGE_ACCOUNT_NAME = 'ssapplicationstorageacc'
-        CODE_CONTAINER_NAME = 'application-code'
-        AZURE_FUNCTIONAPP_NAME = 'azure-vision-ai-function-app-ss'
-        FRONTEND_APP_CODE = 'project1_shopsphere_frontend.zip'
-        BACKEND_APP_CODE = 'project1_shopsphere_backend.zip'
-        AZURE_REGION = 'centralindia'
-        AZURE_VM_SKU = 'Standard_B2pls_v2'
+        TF_VAR_vm_pwd = credentials('vm_password')
+        TF_VAR_db_pwd = credentials('db_password')
+        TF_VAR_sa_name = 'ssapplicationstorageacc'
+        TF_VAR_code_container = 'application-code'
+        TF_VAR_function_app_name = 'azure-vision-ai-function-app-ss'
+        TF_VAR_frontend_code = 'project1_shopsphere_frontend.zip'
+        TF_VAR_backend_code = 'project1_shopsphere_backend.zip'
+        TF_VAR_default_loc = 'centralindia'
+        TF_VAR_vm_sku = 'Standard_B2pls_v2'
     }
     parameters {
         choice(name: 'RUN_TYPE',
@@ -54,10 +54,10 @@ pipeline {
             steps {
                 echo "------------------------------------ Started Packaging!... -------------------------------"
                 sh """
-                    zip -r ${FRONTEND_APP_CODE} app.py requirements_frontend.txt frontend common -x "frontend/static/product_images*"
-                    zip -r ${BACKEND_APP_CODE} app.py requirements_backend.txt backend common database
-                    test -f ${FRONTEND_APP_CODE}
-                    test -f ${BACKEND_APP_CODE}
+                    zip -r ${TF_VAR_frontend_code} app.py requirements_frontend.txt frontend common -x "frontend/static/product_images*"
+                    zip -r ${TF_VAR_backend_code} app.py requirements_backend.txt backend common database
+                    test -f ${TF_VAR_frontend_code}
+                    test -f ${TF_VAR_backend_code}
                 """
                 echo "-------------------- Packaging Completed: files have been Packaged! -----------------"
             }
@@ -69,7 +69,7 @@ pipeline {
             }
             steps {
                 echo "----------------------- Started Archiving to Jenkins Artifact!... ------------------------"
-                archiveArtifacts artifacts: "${FRONTEND_APP_CODE}, ${BACKEND_APP_CODE}"
+                archiveArtifacts artifacts: "${TF_VAR_frontend_code}, ${TF_VAR_backend_code}"
                 echo "-------------------- Archiving Completed: Artifact has been pushed! ----------------------"
             }
         }
@@ -94,11 +94,11 @@ pipeline {
                 copyArtifacts(
                 projectName: env.JOB_NAME,
                 selector: lastWithArtifacts(),
-                filter: "${FRONTEND_APP_CODE}, ${BACKEND_APP_CODE}"
+                filter: "${TF_VAR_frontend_code}, ${TF_VAR_backend_code}"
                 )
                 sh """
-                    test -f ${FRONTEND_APP_CODE}
-                    test -f ${BACKEND_APP_CODE}
+                    test -f ${TF_VAR_frontend_code}
+                    test -f ${TF_VAR_backend_code}
                 """
                 echo "----------- Pulled the Artifact: The Artifact is ready in the workspace! -----------------"
             }
@@ -110,26 +110,14 @@ pipeline {
             }
             steps {
                 echo "--------------- Started Building the Infrastructure using Terraform!... ------------------"
-                withEnv([
-                    "TF_VAR_app_admin_pwd=${SHOPSPHERE_APP_ADMIN_PWD}",
-                    "TF_VAR_vm_pwd=${AZURE_VM_PASSWORD}",
-                    "TF_VAR_db_pwd=${AZURE_SQL_PASSWORD}",
-                    "TF_VAR_sa_name=${STORAGE_ACCOUNT_NAME}",
-                    "TF_VAR_function_app_name=${AZURE_FUNCTIONAPP_NAME}",
-                    "TF_VAR_default_loc=${AZURE_REGION}",
-                    "TF_VAR_vm_sku=${AZURE_VM_SKU}",
-                    "TF_VAR_frontend_code_blob_url=https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${CODE_CONTAINER_NAME}/frontend/${FRONTEND_APP_CODE}",
-                    "TF_VAR_backend_code_blob_url=https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${CODE_CONTAINER_NAME}/backend/${BACKEND_APP_CODE}"
-                ]) {
-                    sh """
-                        cd Azure_Terraform
-                        terraform init -input=false
-                        terraform fmt -check -recursive
-                        terraform validate
-                        terraform plan
-                        terraform apply -auto-approve
-                    """
-                }
+                sh """
+                    cd Azure_Terraform
+                    terraform init -input=false
+                    terraform fmt -check -recursive
+                    terraform validate
+                    terraform plan
+                    terraform apply -auto-approve
+                """
                 script {
                     def ip = sh(
                         script: 'cd Azure_Terraform && terraform output -raw application_public_ip',
@@ -167,25 +155,25 @@ pipeline {
                 echo " ---------------- Started uploading files to Azure Blob Container ---------------------"
                 sh """
                     az storage blob upload \
-                    --account-name "$STORAGE_ACCOUNT_NAME" \
-                    --container-name "$CODE_CONTAINER_NAME" \
-                    --name frontend/${FRONTEND_APP_CODE} \
-                    --file ${FRONTEND_APP_CODE} \
+                    --account-name "$TF_VAR_sa_name" \
+                    --container-name "$TF_VAR_code_container" \
+                    --name frontend/${TF_VAR_frontend_code} \
+                    --file ${TF_VAR_frontend_code} \
                     --overwrite
 
                     az storage blob upload \
-                    --account-name "$STORAGE_ACCOUNT_NAME" \
-                    --container-name "$CODE_CONTAINER_NAME" \
-                    --name backend/${BACKEND_APP_CODE} \
-                    --file ${BACKEND_APP_CODE} \
+                    --account-name "$TF_VAR_sa_name" \
+                    --container-name "$TF_VAR_code_container" \
+                    --name backend/${TF_VAR_backend_code} \
+                    --file ${TF_VAR_backend_code} \
                     --overwrite
 
                     echo "Uploading Product Images..."
                     az storage blob upload-batch \
-                    --account-name "$STORAGE_ACCOUNT_NAME" \
+                    --account-name "$TF_VAR_sa_name" \
                     --destination "product-images" \
                     --source frontend/static/product_images \
-                    --overwrite       
+                    --overwrite
                 """
                 echo "-------- Upload Completed: Files have been uploaded to the Azure Blob Container --------------"
             }
@@ -204,9 +192,9 @@ pipeline {
                 echo "------------------- Started to Configure and deploy the code to Azure Function!... ---------------------------------"
                 sh """
                     cd Azure_Function
-                    func azure functionapp publish ${AZURE_FUNCTIONAPP_NAME} --python
+                    func azure functionapp publish ${TF_VAR_function_app_name} --python
                     echo "------ Testing Azure Function code Deployment ------"
-                    func azure functionapp list-functions ${AZURE_FUNCTIONAPP_NAME}
+                    func azure functionapp list-functions ${TF_VAR_function_app_name}
                 """
                 echo "---------- Azure Function Configuration Completed: The Azure function is ready to be triggered through Blob upload! ----------------"
             }
@@ -247,23 +235,11 @@ pipeline {
             }
             steps {
                 echo "------- Started Tear down of the complete Infrastructure and Application -----------------"
-                withEnv([
-                    "TF_VAR_app_admin_pwd=${SHOPSPHERE_APP_ADMIN_PWD}",
-                    "TF_VAR_vm_pwd=${AZURE_VM_PASSWORD}",
-                    "TF_VAR_db_pwd=${AZURE_SQL_PASSWORD}",
-                    "TF_VAR_sa_name=${STORAGE_ACCOUNT_NAME}",
-                    "TF_VAR_function_app_name=${AZURE_FUNCTIONAPP_NAME}",
-                    "TF_VAR_default_loc=${AZURE_REGION}",
-                    "TF_VAR_vm_sku=${AZURE_VM_SKU}",
-                    "TF_VAR_frontend_code_blob_url=https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${CODE_CONTAINER_NAME}/frontend/${FRONTEND_APP_CODE}",
-                    "TF_VAR_backend_code_blob_url=https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${CODE_CONTAINER_NAME}/backend/${BACKEND_APP_CODE}"
-                ]) {
-                    sh """
-                        cd Azure_Terraform
-                        terraform init -input=false
-                        terraform destroy -auto-approve
-                    """
-                }
+                sh """
+                    cd Azure_Terraform
+                    terraform init -input=false
+                    terraform destroy -auto-approve
+                """
                 echo "------- Infrastructure Tear down Completed: The Complete Infrastructure (with all the Resources) have been Cleaned-up -------"
             }
         }
@@ -284,7 +260,6 @@ pipeline {
                     subject: '$DEFAULT_SUBJECT',
                     attachLog: true, 
                     compressLog: true,
-                    mimeType: 'text/html',
                     body: """
                         <b>The Pipeline was executed using the below Parameter:</b><br/>
                         RUN_TYPE: ${params.RUN_TYPE}

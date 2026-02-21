@@ -57,7 +57,6 @@ resource "azurerm_subnet_network_security_group_association" "subnet-nsg-assoc" 
   network_security_group_id = azurerm_network_security_group.subnet-nsg[each.key].id
 }
 
-# --- Simple NAT Gateway for Internet Access ---
 resource "azurerm_public_ip" "nat_gw_pip" {
   name                = "nat-gateway-public-ip"
   location            = var.default_loc
