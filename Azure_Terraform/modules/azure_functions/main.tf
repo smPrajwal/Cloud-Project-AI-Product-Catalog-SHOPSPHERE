@@ -23,6 +23,8 @@ resource "azurerm_linux_function_app" "azure_ai_function_app" {
   app_settings = {
     FUNCTIONS_WORKER_RUNTIME              = "python"
     APPLICATIONINSIGHTS_CONNECTION_STRING = var.app_insights_connection_string
+    ENABLE_ORYX_BUILD                     = "true"
+    SCM_DO_BUILD_DURING_DEPLOYMENT        = "true"
 
     AZURE_SQL_CONN  = var.azure_sql_conn
     VISION_ENDPOINT = var.vision_endpoint

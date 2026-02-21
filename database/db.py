@@ -82,7 +82,7 @@ def init_db(app):
             if not query_one("SELECT 1 FROM site_settings WHERE [key] = ?", (k,)):
                 execute_db("INSERT INTO site_settings ([key], value) VALUES (?, ?)", (k, v))
 
-        # Seed Ads (Unique Check Prevent Duplicates!)
+        # Seed Ads (Single atomic SQL prevents duplicates even with multiple VMSS instances)
         ads = [
             ('LIMITED TIME', 'Tech Fest Sale', 'Up to 40% off on Electronics', 'Shop Now →', 'tech', '/static/uploads/promo_electronics.png', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'),
             ('NEW ARRIVALS', 'Fashion Week', 'Trendy styles at best prices', 'Explore →', 'fashion', '/static/uploads/promo_fashion.png', 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'),
@@ -91,5 +91,8 @@ def init_db(app):
             ('WORK SMART', 'Office Essentials', 'Upgrade your workspace today', 'Shop Now →', 'office', '/static/uploads/promo_office.png', 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)')
         ]
         for ad in ads:
-            if not query_one("SELECT 1 FROM advertisements WHERE title = ?", (ad[1],)):
-                execute_db("INSERT INTO advertisements (badge, title, subtitle, button_text, category, image_url, gradient) VALUES (?, ?, ?, ?, ?, ?, ?)", ad)
+            execute_db("""
+                IF NOT EXISTS (SELECT 1 FROM advertisements WHERE title = ?)
+                INSERT INTO advertisements (badge, title, subtitle, button_text, category, image_url, gradient)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (ad[1], *ad))
