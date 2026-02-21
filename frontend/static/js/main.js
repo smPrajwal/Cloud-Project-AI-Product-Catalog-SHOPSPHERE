@@ -126,3 +126,6 @@ function deleteReview(id) { apiAction(`/api/reviews/${id}`, 'DELETE'); }
 
 // Init
 document.addEventListener('DOMContentLoaded', () => typeof PRODUCT_ID !== 'undefined' ? loadProductDetails(PRODUCT_ID) : loadProducts());
+
+// Reload data when navigating back (browser restores page from cache, so images may be stale)
+window.addEventListener('pageshow', (e) => { if (e.persisted) location.reload(); });

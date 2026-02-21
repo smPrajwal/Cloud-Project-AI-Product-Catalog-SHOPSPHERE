@@ -183,19 +183,18 @@ pipeline {
             when {
                 expression {params.RUN_TYPE == 'Deploy Infrastructure and Application (CD)' || params.RUN_TYPE == 'Full Pipeline (CICD)'}
             }
-            options {
-                retry(3)
-            }
             steps {
-                echo "Waiting for 1 minute for Function App Sync/Warm-up..."
-                sleep 60
+                echo "Waiting for Function App SCM Warm-up..."
+                sleep 90
                 echo "------------------- Started to Configure and deploy the code to Azure Function!... ---------------------------------"
-                sh """
-                    cd Azure_Function
-                    func azure functionapp publish ${TF_VAR_function_app_name} --python
-                    echo "------ Testing Azure Function code Deployment ------"
-                    func azure functionapp list-functions ${TF_VAR_function_app_name}
-                """
+                retry(3) {
+                    sh """
+                        cd Azure_Function
+                        func azure functionapp publish ${TF_VAR_function_app_name} --python
+                        echo "------ Testing Azure Function code Deployment ------"
+                        func azure functionapp list-functions ${TF_VAR_function_app_name}
+                    """
+                }
                 echo "---------- Azure Function Configuration Completed: The Azure function is ready to be triggered through Blob upload! ----------------"
             }
         }
