@@ -185,7 +185,6 @@ pipeline {
             }
             steps {
                 echo "Waiting for Function App SCM Warm-up..."
-                sleep 60
                 echo "------------------- Started to Configure and deploy the code to Azure Function!... ---------------------------------"
                 retry(3) {
                     sh """
