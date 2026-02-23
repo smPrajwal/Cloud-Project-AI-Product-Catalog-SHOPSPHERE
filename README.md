@@ -2,6 +2,8 @@
 
 A fully automated, end-to-end cloud deployment of a product catalog web application on Microsoft Azure. Features a 3-tier architecture (Frontend VMs, Backend VMs, SQL Database), Infrastructure as Code with Terraform, Jenkins CI/CD pipeline, AI-powered image tagging and sentiment analysis, autoscaling, and comprehensive monitoring.
 
+📂 **[Project Demo & Resources (Google Drive)](https://drive.google.com/drive/folders/1sYyktNkMw_YCGyhWtr0BsFAKUanTixTy)** — Contains the project demo video and related files.
+
 ## What This Project Demonstrates
 
 - **3-Tier Architecture** on Azure (Frontend VMs, Backend VMs, SQL Database)
@@ -15,6 +17,30 @@ A fully automated, end-to-end cloud deployment of a product catalog web applicat
 - **AI Integration** - Computer Vision for image tagging + Text Analytics for sentiment analysis
 - **Monitoring & Alerts** - Log Analytics, Application Insights, CPU alerts with email notifications
 - **Secure Credential Management** - Jenkins credentials, SAS tokens, Service Principal authentication
+
+## The Web Application (ShopSphere)
+
+The core of this project is **ShopSphere**, a fully functional, AI-enhanced product catalog web application built using **Python Flask**. It features a decoupled frontend-backend architecture designed to run on separate VM Scale Sets across different subnets.
+
+**Pages:**
+- **Home Page (`/`)** — Product catalog with a promotional carousel, category filtering (Electronics, Fashion, Kitchen, Lifestyle, Office), live search, and a responsive product grid with pricing in ₹
+- **Product Details (`/product/<slug>`)** — Full product view with AI-generated image tags, customer reviews with sentiment analysis badges, review submission form, and a "You might also like" recommendation section
+- **About Page (`/about`)** — Store's origin story with hero image, content sections, and an inspirational quote
+- **Admin Login (`/admin-auth`)** — Secure admin portal using HTTP Basic Authentication to unlock product management across all pages
+- **Health Check (`/health`)** — Lightweight endpoint used by load balancer probes and the Jenkins smoke test
+
+**Admin Features:**
+- Add new products (name, price, description, images) via a modal form on the home page
+- Upload or change product images — triggers automatic AI tagging via Azure Function
+- Delete products and moderate customer reviews
+
+**AI Integration:**
+- **Image Tagging** — Uploading a product image triggers an Azure Function that uses Computer Vision to auto-generate descriptive tags, powering search, filtering, and recommendations
+- **Sentiment Analysis** — Every review is analyzed by Azure Text Analytics, displaying Positive/Neutral/Negative labels with confidence scores
+
+**Tech:** Flask, Jinja2 Templates, Bootstrap 5, vanilla JavaScript, Azure SQL (5 tables), Azure Blob Storage for images.
+
+For the complete breakdown of every page, API endpoint, database schema, and architecture details, see [**The Web Application — Detailed Description**](#the-web-application--detailed-description) below.
 
 ## Architecture Overview
 
@@ -151,13 +177,119 @@ The pipeline uses a Service Principal for Azure authentication. Credentials like
 
 After deployment, a smoke test runs to verify the application is actually responding. If everything looks good, a notification email is sent out.
 
-### The Application (Brief Overview)
+## The Web Application — Detailed Description
 
-The application itself is a product catalog called ShopSphere. Users can browse products by category, view product details with AI-generated tags, read sentiment-analyzed reviews, and search. There's also a tag-based recommendation system that suggests similar products. Admins can log in to add, edit, or delete products. When a product image is uploaded, the AI tagging kicks in automatically.
+This section provides a comprehensive breakdown of every page, feature, API, and technical detail of the ShopSphere web application.
 
-It's built with Flask on both frontend and backend. The frontend renders pages using Jinja2 templates and proxies API calls to the backend. The backend exposes REST APIs for products, reviews, advertisements, and recommendations. There's also a `/health` endpoint used by the load balancer probes and the Jenkins smoke test.
+### 1. Pages & User-Facing Features
 
-The database has 5 tables: `products`, `reviews`, `product_tags`, `advertisements`, and `site_settings`. The app seeds sample data on first run if the tables are empty.
+#### Home Page (`/`)
+
+<!-- Add screenshot here -->
+
+The main landing page of ShopSphere. It features:
+- **Promotional Carousel** — An auto-rotating banner at the top showcasing promotional ads (Tech Fest Sale, Fashion Week, Kitchen Essentials, Lifestyle Picks, Office Essentials) with gradient backgrounds, badge labels, and category-specific call-to-action buttons.
+- **Category Navigation Bar** — A dark-themed horizontal bar with quick-filter links: All, Electronics, Fashion, Kitchen, Lifestyle, and Office. Clicking a category instantly filters the product grid by AI-generated tags.
+- **Product Grid** — A responsive grid displaying all products dynamically loaded via the API. Each product card shows the thumbnail image, product name, current price in Indian Rupee format (₹), original price with strikethrough, and the calculated discount percentage.
+- **Live Search** — A search input in the navbar that filters products in real-time as you type, searching across product names and descriptions.
+- **Admin Controls** (visible when logged in as admin) — An "+ Add Product" button in the navbar and a "Delete" button on each product card.
+
+#### Product Details Page (`/product/<slug>`)
+
+<!-- Add screenshot here -->
+
+A detailed view of an individual product, accessed by clicking any product card. It includes:
+- **Product Image** — A large display area showing the product's image (sourced from Azure Blob Storage in cloud or local static files).
+- **Product Information** — The full product name, description, current price, original price, and discount percentage.
+- **AI-Generated Tags** — Tags assigned by Azure Computer Vision are displayed as minimal badges below the product info. These tags describe the image content (e.g., "electronics", "headphones", "gadget").
+- **Customer Reviews Section** — All submitted reviews are listed with the reviewer's name, review text, a color-coded sentiment badge (Positive in green, Neutral/Negative in grey), and an average sentiment score across all reviews.
+- **Review Submission Form** — Any user can submit a review by entering their name and review text. Upon submission, Azure Text Analytics instantly analyzes the sentiment and assigns a label and confidence score.
+- **"You Might Also Like" Recommendations** — A horizontally scrollable row of up to 5 recommended products that share the same AI-generated tags as the currently viewed product.
+- **Admin Controls** (visible when logged in) — An image upload section that lets admins change the product image. Uploading a new image streams it to Azure Blob Storage and triggers the AI tagging Azure Function. Admins can also delete individual reviews.
+
+#### About Page (`/about`)
+
+<!-- Add screenshot here -->
+
+A content page that tells the story behind ShopSphere. It displays:
+- A hero section with a title ("Our Story"), subtitle, and a hero banner image.
+- Two content cards: "How We Started" and "Our Passion", each with descriptive text.
+- An inspirational design quote blockquote.
+
+#### Admin Login (`/admin-auth`)
+
+<!-- Add screenshot here -->
+
+A secure entry point for store administrators. It uses HTTP Basic Authentication — when an admin navigates to this URL, the browser prompts for a username and password. Valid credentials (set via environment variables `ADMIN_USERNAME` and `ADMIN_PASSWORD`) grant admin access for the session, enabling product management controls across all pages. Admins can log out via the "Exit as Admin" button visible in the navbar.
+
+#### Health Check (`/health`)
+
+A lightweight endpoint that returns a plain `200 OK` response. This is used by both the Frontend and Backend Azure Load Balancer health probes, as well as the Jenkins pipeline smoke test to verify the application is running after deployment.
+
+### 2. Admin Portal & Product Management
+
+When logged in as an admin, the application unlocks a full product management interface:
+
+- **Add Product** — A modal form on the home page lets admins create new products by entering the name, original price, discounted price, description, and product image. The image is uploaded to Azure Blob Storage immediately after product creation.
+- **Upload / Change Product Image** — On the product details page, admins can upload a new image for any existing product. The upload goes to Azure Blob Storage, old AI tags are cleared, and the Blob trigger fires the Azure Function to generate fresh tags from the new image.
+- **Delete Product** — Each product card on the home page shows a delete button for admins. Deleting a product removes its associated tags, reviews, and the product itself from the database.
+- **Delete Reviews** — On the product details page, admins can delete individual reviews (e.g., offensive or spam content).
+
+### 3. REST APIs (Backend)
+
+The backend exposes RESTful JSON APIs that power all frontend interactions:
+
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/products` | GET | Public | Fetches products with pagination (`limit`, `offset`), fuzzy search (`q`), and tag-based filtering (`tag`). Returns products with their AI tags attached. |
+| `/api/products/<id>` | GET | Public | Returns full product details including description, price, AI tags, and all reviews with sentiment data. |
+| `/api/products/<id>/reviews` | POST | Public | Submits a new review. The backend instantly calls Azure Text Analytics to analyze sentiment before saving. |
+| `/api/products/<id>/recommendations` | GET | Public | Returns up to 5 products that share the same AI-generated tags (tag-based recommendation engine). |
+| `/api/ads` | GET | Public | Returns promotional advertisement banners for the home page carousel. |
+| `/api/reviews/<id>` | DELETE | Admin | Deletes a specific review (admin-only). |
+| `/api/products` | POST | Admin | Creates a new product with name, price, description, and optional manual tags. |
+| `/api/products/<id>/image` | POST | Admin | Uploads a product image to Azure Blob Storage and clears old tags for AI re-tagging. |
+| `/api/products/<id>` | DELETE | Admin | Deletes a product along with all its tags and reviews. |
+
+The frontend proxies all `/api/*` requests to the backend through an internal API proxy route, forwarding the admin session header (`X-Admin`) for authentication.
+
+### 4. AI & Cognitive Services Integration
+
+The application integrates two Azure Cognitive Services directly into its data pipeline:
+
+**Automated Image Tagging (Azure Computer Vision + Azure Function):**
+When an admin uploads a product image, it is stored in Azure Blob Storage. This triggers a serverless Azure Function (Blob trigger) that reads the image, sends it to the Azure Computer Vision API, and receives up to 8 descriptive tags (e.g., "electronics", "smartphone", "gadget"). The function writes these tags directly into the `product_tags` table in Azure SQL. These tags are then used for category filtering on the home page, the tag badges on the product details page, and the "You might also like" recommendation engine.
+
+**Review Sentiment Analysis (Azure Text Analytics):**
+Every time a user submits a product review, the backend API instantly sends the review text to Azure Text Analytics for sentiment analysis. The API returns a sentiment label (`Positive`, `Neutral`, or `Negative`) and a confidence score. These are stored alongside the review in the database and displayed as color-coded badges next to each review. An average sentiment score is also calculated and shown at the top of the reviews section.
+
+### 5. Database Schema
+
+The application manages 5 tables, created automatically on first startup if they don't exist. Sample data is seeded on first run when tables are empty.
+
+| Table | Purpose | Key Columns |
+|-------|---------|-------------|
+| `products` | Stores the product catalog | `id`, `name`, `description`, `price`, `original_price`, `thumbnail_url` |
+| `reviews` | Stores user reviews with AI sentiment | `id`, `product_id`, `reviewer`, `review_text`, `sentiment_score`, `sentiment_label` |
+| `product_tags` | Stores AI-generated tags per product | `id`, `product_id`, `tag_name` |
+| `advertisements` | Stores promotional banners for the carousel | `id`, `badge`, `title`, `subtitle`, `button_text`, `category`, `image_url`, `gradient` |
+| `site_settings` | Stores global app configuration (footer text, contact info) | `key`, `value` |
+
+### 6. Frontend Technology
+
+The frontend is built with:
+- **Jinja2 Templates** — Server-side rendered HTML pages (3 page templates + 2 reusable components: navbar and footer)
+- **Bootstrap 5** — Responsive grid, cards, modals, carousel, dropdowns, and form components
+- **JavaScript** — Dynamic product loading, live search, review submission, image uploads, and admin actions (no frontend framework, pure vanilla JS)
+- **Inter Font** (Google Fonts) — Clean, modern typography across all pages
+- **Indian Currency Formatting** — Prices displayed in ₹ with Indian-style comma grouping (e.g., ₹1,00,000) via a custom Jinja2 filter
+
+### 7. Split-Architecture Design
+
+The application is designed to run as a single codebase that conditionally loads modules based on the deployment context:
+- **Frontend VMSS** — Loads only `routes_ui.py` (UI pages + API proxy). All API calls are forwarded to the backend via the internal load balancer.
+- **Backend VMSS** — Loads only `routes_api.py` and `routes_admin.py` (REST APIs + database access). Connects directly to Azure SQL via Private Endpoint.
+- **Local Development** — Both frontend and backend modules load together, and the app runs as a single Flask instance on port 5000.
 
 ## Project Structure
 
