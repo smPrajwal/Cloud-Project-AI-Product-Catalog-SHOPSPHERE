@@ -134,6 +134,9 @@ The infrastructure includes:
 - Private Endpoints for the database, meaning the SQL Server is not exposed to the public internet at all
 - Private DNS Zone linked to the VNet for internal name resolution
 
+<!-- Terraform Cloud Workspace -->
+![Terraform Cloud Workspace](docs/screenshots/terraform_cloud_workspace.png)
+
 **Subnet Configuration:**
 
 | Subnet | CIDR | Access | Role | VMSS | Subnet NSG Source | VM NSG Source |
@@ -204,8 +207,6 @@ All configurable parameters are defined in `variables.tf`. Update `terraform.tfv
 | `alert_action_group_name` | Monitor Action Group name | `string` | `ss-ma-group` |
 | `alert_email` | Email address for alert notifications | `string` | `prajwalprajwal1999@gmail.com` |
 
-<!-- Terraform Cloud Workspace -->
-![Terraform Cloud Workspace](docs/screenshots/terraform_cloud_workspace.png)
 
 ### Compute and Autoscaling
 
