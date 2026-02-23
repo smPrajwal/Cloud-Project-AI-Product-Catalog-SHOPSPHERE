@@ -44,7 +44,7 @@ For the complete breakdown of every page, API endpoint, database schema, and arc
 
 ## Architecture Overview
 
-The diagram below shows the main traffic flow and compute layer. Additional components like Blob Storage, Azure Functions, and monitoring are described in the sections above.
+The diagram below shows the main traffic flow and compute layer. Additional components like Blob Storage, Azure Functions, and monitoring are described in the sections below.
 
 ```
                         INTERNET
@@ -116,6 +116,9 @@ The diagram below shows the main traffic flow and compute layer. Additional comp
 - Private DNS Zone for database name resolution
 - Azure Text Analytics for review sentiment analysis
 
+<!-- Resource Group Overview -->
+![Azure Resource Group](docs/screenshots/azure_resource_group.png)
+
 ## Detailed Description
 
 This project is a complete end-to-end cloud deployment that brings together multiple Azure services, infrastructure automation, and a working web application. The main goal was to build something that mimics real-world production setups, not just a toy project.
@@ -131,11 +134,87 @@ The infrastructure includes:
 - Private Endpoints for the database, meaning the SQL Server is not exposed to the public internet at all
 - Private DNS Zone linked to the VNet for internal name resolution
 
+**Subnet Configuration:**
+
+| Subnet | CIDR | Access | Role | VMSS | Subnet NSG Source | VM NSG Source |
+|--------|------|--------|------|------|-------------------|---------------|
+| `public-fe` | `10.0.1.0/24` | Public | Frontend | Yes | Internet | Internet |
+| `private-be` | `10.0.2.0/24` | Private | Backend | Yes | VirtualNetwork | `10.0.1.0/24` |
+| `private-db` | `10.0.3.0/24` | Private | DB Endpoint | No | VirtualNetwork | — |
+| `private-func` | `10.0.4.0/24` | Private | Function | No | `*` | — |
+
+**Terraform Variables Reference:**
+
+All configurable parameters are defined in `variables.tf`. Update `terraform.tfvars` to customize these values for your deployment. Sensitive variables (marked 🔒) are injected via Jenkins credentials and should not be committed to version control.
+
+| Variable | Description | Type | Default |
+|----------|-------------|------|---------|
+| **General** | | | |
+| `default_loc` | Azure region for all resources | `string` | `centralindia` |
+| `rg_name` | Resource Group name | `string` | `Project_ShopSphere` |
+| `static_resource_rg` | Resource Group for persistent resources (SQL Server, App Service Plan) | `string` | `Practice` |
+| **Storage** | | | |
+| `sa_name` | Storage Account name | `string` | `shopspheresa` |
+| `sa_account_tier` | Storage Account tier | `string` | `Standard` |
+| `sa_replication_type` | Storage Account replication type | `string` | `LRS` |
+| `sa_access_tier` | Storage Account access tier | `string` | `Hot` |
+| `sa_allow_public_access` | Allow public access to blob containers | `bool` | `false` |
+| `code_container` | Blob container name for application code | `string` | `application-code` |
+| `frontend_code` | Filename of the frontend ZIP in blob storage | `string` | `project1_shopsphere_frontend.zip` |
+| `backend_code` | Filename of the backend ZIP in blob storage | `string` | `project1_shopsphere_backend.zip` |
+| **Networking** | | | |
+| `vnet_name` | Virtual Network name | `string` | `ss_main_vnet` |
+| `vnet_cidr` | Virtual Network CIDR range | `string` | `10.0.0.0/16` |
+| `subnet_details` | Map of subnet configs (CIDR, role, NSG rules, VMSS flag) | `map(object)` | — (Required) |
+| `lb_pip_name` | Public IP name for the Load Balancer | `string` | `public-subnet-lb-pip` |
+| `lb_pip_sku` | SKU for the Load Balancer Public IP | `string` | `Standard` |
+| **Compute (VMSS)** | | | |
+| `vm_un` | VM admin username | `string` | — (Required) |
+| `vm_pwd` 🔒 | VM admin password | `string` | — (Sensitive) |
+| `vm_sku` | VM instance size | `string` | `Standard_B2pls_v2` |
+| `vm_os_publisher` | OS image publisher | `string` | `Canonical` |
+| `vm_os_offer` | OS image offer | `string` | `0001-com-ubuntu-server-jammy` |
+| `vm_os_sku` | OS image SKU | `string` | `22_04-lts-arm64` |
+| `vm_os_version` | OS image version | `string` | `latest` |
+| `vmss_min_capacity` | Minimum VMSS instances | `number` | `1` |
+| `vmss_max_capacity` | Maximum VMSS instances | `number` | `3` |
+| `vmss_default_capacity` | Default VMSS instances | `number` | `1` |
+| **Database** | | | |
+| `db_un` | SQL Server admin username | `string` | — (Required) |
+| `db_pwd` 🔒 | SQL Server admin password | `string` | — (Sensitive) |
+| `sql_server_name` | Azure SQL Server name | `string` | `shopsphere-sql-db` |
+| `sql_db_name` | Azure SQL Database name | `string` | `sql-db` |
+| `db_sku_name` | SQL Database SKU | `string` | `Basic` |
+| `db_max_size_gb` | SQL Database max size (GB) | `number` | `2` |
+| **Application** | | | |
+| `app_admin_un` | ShopSphere app admin username | `string` | — (Required) |
+| `app_admin_pwd` 🔒 | ShopSphere app admin password | `string` | — (Sensitive) |
+| **Azure Functions** | | | |
+| `function_app_name` | Azure Function App name | `string` | `azure-ai-function-app` |
+| `func_plan_name` | App Service Plan name for Functions | `string` | — (Required) |
+| `func_python_version` | Python version for the Function App | `string` | `3.12` |
+| **AI Services** | | | |
+| `ai_name` | Azure Cognitive Services account name | `string` | `azure-ai` |
+| `ai_sku` | Cognitive Services SKU | `string` | `S0` |
+| **Monitoring & Alerts** | | | |
+| `la_workspace_name` | Log Analytics Workspace name | `string` | `ss-la-workspace` |
+| `la_sku` | Log Analytics SKU | `string` | `PerGB2018` |
+| `la_retention` | Log Analytics retention (days) | `number` | `30` |
+| `app_insights_name` | Application Insights resource name | `string` | `ss-appinsights` |
+| `alert_action_group_name` | Monitor Action Group name | `string` | `ss-ma-group` |
+| `alert_email` | Email address for alert notifications | `string` | `prajwalprajwal1999@gmail.com` |
+
+<!-- Terraform Cloud Workspace -->
+![Terraform Cloud Workspace](docs/screenshots/terraform_cloud_workspace.png)
+
 ### Compute and Autoscaling
 
 The application runs on two VM Scale Sets. One for the frontend (serves the UI) and one for the backend (handles API requests). Both scale sets run Ubuntu 22.04 LTS and are configured with autoscaling rules based on CPU usage. If CPU goes above 80%, a new instance spins up. If it drops below 30%, an instance gets removed. This keeps costs in check while handling traffic spikes.
 
 Each VM is provisioned using cloud-init scripts that do a lot of heavy lifting—install Python, set up a virtual environment, install the ODBC Driver 18 for SQL Server connectivity, download the zipped application code from Blob Storage using a SAS token, and configure the Flask app as a SystemD service. The app runs under Gunicorn (a production WSGI server) with 4 workers. SystemD handles restarts if the process crashes. All of this happens automatically, no SSH required after deployment.
+
+<!-- VMSS Autoscaling Rules -->
+![VMSS Autoscaling](docs/screenshots/vmss_autoscaling.png)
 
 ### Networking and Load Balancing
 
@@ -147,9 +226,15 @@ Health probes are configured on both load balancers to check if the Flask apps a
 
 The project uses Azure SQL Database. The SQL Server has public network access disabled, so the only way to reach it is through a Private Endpoint. The VMs connect to the database using a private IP address within the VNet, and DNS resolution is handled by a Private DNS Zone. This is a common pattern for securing databases in production.
 
+<!-- Database and Tables -->
+![Database Tables](docs/screenshots/database_tables.png)
+
 ### Storage
 
 An Azure Storage Account is used for two things. First, there's a container called `application-code` that holds the zipped application code (uploaded by the CI/CD pipeline). The VMs download this code during startup using a SAS token. Second, there's a `product-images` container that stores product images uploaded through the app. This container is publicly accessible so images can be displayed on the frontend.
+
+<!-- Blob Storage Containers -->
+![Blob Storage](docs/screenshots/blob_storage.png)
 
 ### Azure Functions and AI Integration
 
@@ -161,9 +246,15 @@ This is where it gets interesting. The project uses Azure Cognitive Services in 
 
 The Azure Function runs on a Linux-based App Service Plan and is integrated into the VNet through VNet Integration. It also connects to Application Insights for logging and monitoring. The function code is deployed separately using Azure CLI during the pipeline run. There's retry logic built in—if the database hasn't been updated with the new product yet (race condition), the function retries automatically.
 
+<!-- Azure Function App and Application Insights -->
+![Azure Function](docs/screenshots/azure_function.png)
+
 ### Monitoring and Alerts
 
 A Log Analytics Workspace collects logs from the various resources. Application Insights is attached to the Function App to track invocations, errors, and performance. There's also an Alert Action Group configured to send email notifications if CPU usage on any VMSS exceeds 70%. This gives visibility into what's happening without needing to constantly check the portal.
+
+<!-- Monitoring Dashboard -->
+![Monitoring](docs/screenshots/monitoring.png)
 
 ### CI/CD Pipeline (Jenkins)
 
@@ -177,6 +268,9 @@ The pipeline uses a Service Principal for Azure authentication. Credentials like
 
 After deployment, a smoke test runs to verify the application is actually responding. If everything looks good, a notification email is sent out.
 
+<!-- Jenkins Pipeline Stages -->
+![Jenkins Pipeline](docs/screenshots/jenkins_pipeline.png)
+
 ## The Web Application — Detailed Description
 
 This section provides a comprehensive breakdown of every page, feature, API, and technical detail of the ShopSphere web application.
@@ -185,7 +279,7 @@ This section provides a comprehensive breakdown of every page, feature, API, and
 
 #### Home Page (`/`)
 
-<!-- Add screenshot here -->
+![Home Page](docs/screenshots/homepage.png)
 
 The main landing page of ShopSphere. It features:
 - **Promotional Carousel** — An auto-rotating banner at the top showcasing promotional ads (Tech Fest Sale, Fashion Week, Kitchen Essentials, Lifestyle Picks, Office Essentials) with gradient backgrounds, badge labels, and category-specific call-to-action buttons.
@@ -196,7 +290,7 @@ The main landing page of ShopSphere. It features:
 
 #### Product Details Page (`/product/<slug>`)
 
-<!-- Add screenshot here -->
+![Product Details Page](docs/screenshots/product_page.png)
 
 A detailed view of an individual product, accessed by clicking any product card. It includes:
 - **Product Image** — A large display area showing the product's image (sourced from Azure Blob Storage in cloud or local static files).
@@ -209,7 +303,7 @@ A detailed view of an individual product, accessed by clicking any product card.
 
 #### About Page (`/about`)
 
-<!-- Add screenshot here -->
+![About Page](docs/screenshots/about_page.png)
 
 A content page that tells the story behind ShopSphere. It displays:
 - A hero section with a title ("Our Story"), subtitle, and a hero banner image.
@@ -218,7 +312,7 @@ A content page that tells the story behind ShopSphere. It displays:
 
 #### Admin Login (`/admin-auth`)
 
-<!-- Add screenshot here -->
+![Admin Login](docs/screenshots/admin_login.png)
 
 A secure entry point for store administrators. It uses HTTP Basic Authentication — when an admin navigates to this URL, the browser prompts for a username and password. Valid credentials (set via environment variables `ADMIN_USERNAME` and `ADMIN_PASSWORD`) grant admin access for the session, enabling product management controls across all pages. Admins can log out via the "Exit as Admin" button visible in the navbar.
 
@@ -227,6 +321,9 @@ A secure entry point for store administrators. It uses HTTP Basic Authentication
 A lightweight endpoint that returns a plain `200 OK` response. This is used by both the Frontend and Backend Azure Load Balancer health probes, as well as the Jenkins pipeline smoke test to verify the application is running after deployment.
 
 ### 2. Admin Portal & Product Management
+
+<!-- Admin Add Product Modal -->
+![Admin Add Product](docs/screenshots/admin_add_product.png)
 
 When logged in as an admin, the application unlocks a full product management interface:
 
@@ -260,8 +357,14 @@ The application integrates two Azure Cognitive Services directly into its data p
 **Automated Image Tagging (Azure Computer Vision + Azure Function):**
 When an admin uploads a product image, it is stored in Azure Blob Storage. This triggers a serverless Azure Function (Blob trigger) that reads the image, sends it to the Azure Computer Vision API, and receives up to 8 descriptive tags (e.g., "electronics", "smartphone", "gadget"). The function writes these tags directly into the `product_tags` table in Azure SQL. These tags are then used for category filtering on the home page, the tag badges on the product details page, and the "You might also like" recommendation engine.
 
+<!-- Image Tagging -->
+![Image Tagging](docs/screenshots/image_tagging.png)
+
 **Review Sentiment Analysis (Azure Text Analytics):**
 Every time a user submits a product review, the backend API instantly sends the review text to Azure Text Analytics for sentiment analysis. The API returns a sentiment label (`Positive`, `Neutral`, or `Negative`) and a confidence score. These are stored alongside the review in the database and displayed as color-coded badges next to each review. An average sentiment score is also calculated and shown at the top of the reviews section.
+
+<!-- Sentiment Analysis Badges on Reviews -->
+![Sentiment Analysis](docs/screenshots/sentiment_analysis.png)
 
 ### 5. Database Schema
 
@@ -396,6 +499,9 @@ The Jenkins pipeline has 4 modes:
 - Email notification with build status and direct app link
 - Workspace cleanup
 
+<!-- Build Notification Email -->
+![Email notification](docs/screenshots/email_notification.png)
+
 ## Azure Resources Created
 
 - Resource Group
@@ -457,6 +563,9 @@ These are injected into VMs via cloud-init and written to `/etc/environment`.
 ### Jenkins Credentials Setup
 Add the following credentials in Jenkins (Manage Jenkins → Credentials):
 
+<!-- Jenkins Credentials Page -->
+![Jenkins Credentials](docs/screenshots/jenkins_credentials.png)
+
 | Credential ID | Type | Description |
 |---------------|------|-------------|
 | `tfc-token` | Secret text | Terraform Cloud API token |
@@ -511,5 +620,6 @@ After deployment:
 ## Author
 
 | **Name** | Prajwal SM |
-| **LinkedIn** | https://www.linkedin.com/in/prajwal-sm/ |
+|---|---|
+| **LinkedIn** | [linkedin.com/in/prajwal-sm](https://www.linkedin.com/in/prajwal-sm/) |
 | **Email** | prajwalprajwal1999@gmail.com |
