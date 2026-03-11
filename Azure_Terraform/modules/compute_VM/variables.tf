@@ -25,11 +25,9 @@ variable "app_admin_pwd" {
   sensitive = true
 }
 variable "subnet_ids" {
-  description = "This holds all the subnet IDs"
   type        = map(string)
 }
 variable "lb_backend_pool_ids" {
-  description = "This holds all the backend pool IDs"
   type        = map(string)
 }
 variable "storage_account" {
