@@ -7,5 +7,5 @@ output "subnet_ids" {
 
 output "vnet_id" {
   description = "This will hold the VNet ID"
-  value = azurerm_virtual_network.vnet.id
+  value       = azurerm_virtual_network.vnet.id
 }

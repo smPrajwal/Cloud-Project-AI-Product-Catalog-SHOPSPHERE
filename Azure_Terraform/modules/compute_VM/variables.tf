@@ -25,10 +25,10 @@ variable "app_admin_pwd" {
   sensitive = true
 }
 variable "subnet_ids" {
-  type        = map(string)
+  type = map(string)
 }
 variable "lb_backend_pool_ids" {
-  type        = map(string)
+  type = map(string)
 }
 variable "storage_account" {
   type = object({

@@ -3,7 +3,7 @@ variable "default_rg" {}
 variable "lb_pip_name" {}
 variable "lb_pip_sku" {}
 variable "subnet_ids" {
-  type        = map(string)
+  type = map(string)
 }
 variable "subnet_details" {
   type = map(object({

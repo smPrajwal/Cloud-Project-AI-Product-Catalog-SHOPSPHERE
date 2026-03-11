@@ -7,5 +7,5 @@ variable "app_insights_name" {}
 variable "alert_action_group_name" {}
 variable "alert_email" {}
 variable "vmss_ids" {
-  type        = map(string)
+  type = map(string)
 }

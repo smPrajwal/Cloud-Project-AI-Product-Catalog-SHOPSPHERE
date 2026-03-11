@@ -10,8 +10,8 @@ variable "db_pwd" {
   sensitive = true
 }
 variable "vnet_id" {
-  type        = string
+  type = string
 }
 variable "subnet_ids" {
-  type        = map(string)
+  type = map(string)
 }
