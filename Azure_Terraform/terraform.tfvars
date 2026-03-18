@@ -32,7 +32,7 @@ app_admin_un = "admin"
 func_plan_name      = "app-service-plan"
 func_python_version = "3.12"
 
-ai_name = "azure-cognitive-ai-ss-app-is"
+ai_name = "azure-cogn-ai-ss-app-is"
 ai_sku  = "S0"
 
 la_workspace_name       = "ss-la-workspace"

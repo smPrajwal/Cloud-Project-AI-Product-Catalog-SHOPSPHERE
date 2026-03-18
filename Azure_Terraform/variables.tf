@@ -18,7 +18,7 @@ variable "static_resource_rg" {
 
 variable "sa_name" {
   description = "This represents the default storage account name"
-  default     = "shopspheresa"
+  default     = "ssappstorageaccforblob"
   type        = string
 }
 
@@ -82,7 +82,7 @@ variable "db_pwd" {
 
 variable "function_app_name" {
   description = "This represents the default Azure Function App name"
-  default     = "azure-ai-function-app"
+  default     = "azure-ai-func-app-image-tag"
   type        = string
 }
 
