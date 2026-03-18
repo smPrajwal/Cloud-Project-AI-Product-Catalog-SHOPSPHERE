@@ -10,9 +10,9 @@ pipeline {
         AZURE_SUBSCRIPTION_ID = credentials('AZURE_SUBSCRIPTION_ID')
         TF_VAR_vm_pwd = credentials('vm_password')
         TF_VAR_db_pwd = credentials('db_password')
-        TF_VAR_sa_name = 'ssapplicationstorageacc'
+        TF_VAR_sa_name = 'ssapplicationstorageaccforblob'
         TF_VAR_code_container = 'application-code'
-        TF_VAR_function_app_name = 'azure-vision-ai-function-app-ss'
+        TF_VAR_function_app_name = 'azure-ai-function-app-image-tag'
         TF_VAR_frontend_code = 'project1_shopsphere_frontend.zip'
         TF_VAR_backend_code = 'project1_shopsphere_backend.zip'
         TF_VAR_default_loc = 'centralindia'
