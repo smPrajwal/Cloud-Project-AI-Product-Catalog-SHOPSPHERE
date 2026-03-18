@@ -22,7 +22,7 @@ vmss_max_capacity     = 2
 vmss_default_capacity = 1
 
 db_un           = "prajwalsm"
-sql_server_name = "ss-sql-db-sql-server"
+sql_server_name = "ss-sql-server"
 sql_db_name     = "sql-db"
 db_sku_name     = "Basic"
 db_max_size_gb  = 2
