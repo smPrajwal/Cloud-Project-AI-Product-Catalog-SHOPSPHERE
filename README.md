@@ -321,9 +321,8 @@ A secure entry point for store administrators. It uses HTTP Basic Authentication
 
 A lightweight endpoint that returns a plain `200 OK` response. This is used by both the Frontend and Backend Azure Load Balancer health probes, as well as the Jenkins pipeline smoke test to verify the application is running after deployment.
 
-### 2. Admin Portal & Product Management
+#### Add Product
 
-<!-- Admin Add Product Modal -->
 ![Admin Add Product](docs/screenshots/admin_add_product.png)
 
 When logged in as an admin, the application unlocks a full product management interface:
@@ -333,7 +332,7 @@ When logged in as an admin, the application unlocks a full product management in
 - **Delete Product** — Each product card on the home page shows a delete button for admins. Deleting a product removes its associated tags, reviews, and the product itself from the database.
 - **Delete Reviews** — On the product details page, admins can delete individual reviews (e.g., offensive or spam content).
 
-### 3. REST APIs (Backend)
+### 2. REST APIs (Backend)
 
 The backend exposes RESTful JSON APIs that power all frontend interactions:
 
@@ -351,7 +350,7 @@ The backend exposes RESTful JSON APIs that power all frontend interactions:
 
 The frontend proxies all `/api/*` requests to the backend through an internal API proxy route, forwarding the admin session header (`X-Admin`) for authentication.
 
-### 4. AI & Cognitive Services Integration
+### 3. AI & Cognitive Services Integration
 
 The application integrates two Azure Cognitive Services directly into its data pipeline:
 
@@ -367,7 +366,7 @@ Every time a user submits a product review, the backend API instantly sends the 
 <!-- Sentiment Analysis Badges on Reviews -->
 ![Sentiment Analysis](docs/screenshots/sentiment_analysis.png)
 
-### 5. Database Schema
+### 4. Database Schema
 
 The application manages 5 tables, created automatically on first startup if they don't exist. Sample data is seeded on first run when tables are empty.
 
@@ -379,7 +378,7 @@ The application manages 5 tables, created automatically on first startup if they
 | `advertisements` | Stores promotional banners for the carousel | `id`, `badge`, `title`, `subtitle`, `button_text`, `category`, `image_url`, `gradient` |
 | `site_settings` | Stores global app configuration (footer text, contact info) | `key`, `value` |
 
-### 6. Frontend Technology
+### 5. Frontend Technology
 
 The frontend is built with:
 - **Jinja2 Templates** — Server-side rendered HTML pages (3 page templates + 2 reusable components: navbar and footer)
@@ -388,7 +387,7 @@ The frontend is built with:
 - **Inter Font** (Google Fonts) — Clean, modern typography across all pages
 - **Indian Currency Formatting** — Prices displayed in ₹ with Indian-style comma grouping (e.g., ₹1,00,000) via a custom Jinja2 filter
 
-### 7. Split-Architecture Design
+### 6. Split-Architecture Design
 
 The application is designed to run as a single codebase that conditionally loads modules based on the deployment context:
 - **Frontend VMSS** — Loads only `routes_ui.py` (UI pages + API proxy). All API calls are forwarded to the backend via the internal load balancer.
