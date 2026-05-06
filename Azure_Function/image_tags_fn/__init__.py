@@ -18,7 +18,6 @@ def main(blob):
     
     if not row:
         db.close()
-
         raise Exception(f"Product not found for blob {blob.name}. Retrying...")
     
     product_id = row[0]
@@ -50,11 +49,9 @@ def main(blob):
                     "INSERT INTO product_tags (product_id, tag_name) VALUES (?, ?)",
                     (product_id, tag.name)
                 )
-            
             db.commit()
 
     except Exception as e:
         print(f"Error processing image: {e}")
-        pass
 
     db.close()
